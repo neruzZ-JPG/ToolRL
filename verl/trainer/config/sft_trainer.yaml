@@ -19,6 +19,14 @@ model:
   external_lib: null
   enable_gradient_checkpointing: False
   trust_remote_code: False
+  # LoRA configuration
+  lora:
+    enable: False  # Enable LoRA training
+    r: 16  # LoRA rank
+    lora_alpha: 32  # LoRA alpha
+    lora_dropout: 0.1  # LoRA dropout
+    target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]  # Target modules for LoRA
+    bias: "none"  # Bias type: "none", "all", or "lora_only"
 optim:
   lr: 1e-5
   betas: [0.9, 0.95]

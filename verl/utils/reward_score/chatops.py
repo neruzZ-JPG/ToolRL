@@ -1,4 +1,5 @@
 import json
+import os
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
@@ -13,6 +14,35 @@ def compute_tool_call_reward(gt, pd, max_possible_reward, min_possible_reward):
     Returns:
         float: Reward for tool call.
     """
+    # step1 : format check
+    format_check_pass = False
+    try:
+        pd_json = json.loads(pd)
+    except:
+        return min_possible_reward
+    if not isinstance(pd_json, dict):
+        return min_possible_reward
+    if "tool_name" not in pd_json.keys():
+        return min_possible_reward
+    if "parameters" not in pd_json.keys() or not isinstance(pd_json["parameters"], list):
+        return min_possible_reward
+
+    # step2 : check tool calling info
+    gt_json = json.loads(gt)
+    if pd_json["tool_name"] != gt_json["tool_name"]:
+        return min_possible_reward
+    total_param_num = len(gt_json["parameters"])
+    params = {}
+    for p in gt_json["parameters"]:
+        params[p["parameter_name"]] = p["parameter_value"]
+    param_cnt = 0
+    for param in pd_json["parameters"]:
+        if param["parameter_name"] in params.keys():
+            if param["parameter_value"] == params[param["parameter_name"]]:
+                param_cnt += 1
+            else:
+                param_cnt += 0.5
+    return min_possible_reward + (param_cnt / total_param_num) * (max_possible_reward - min_possible_reward)
 
 SUCCESS_FLAG = "SUCCESS, "
 FAILURE_FLAG = "FAIL, "
@@ -91,9 +121,16 @@ def compute_score(solution_str, ground_truth, input_str, type):
     Returns:
         float: Reward for the solution.
     """
+    exp_name = str(os.getenv("EXPERIMENT_NAME", ""))
+    if "llama" in exp_name:
+        predict_str = solution_str.split("<|start_header_id|>assistant<|end_header_id|>")[-1].split("<|eot_id|>")[0].strip()
+    elif "qwen" in exp_name:
+        predict_str = solution_str.split("<|im_start|>assistant")[-1].split("<|im_end|>")[0].strip()
+    else:
+        raise NotImplementedError(f"Unknown model name: {exp_name}")
     if type == 'planning':
-        return compute_planning_reward(input_str, ground_truth, solution_str, max_possible_reward, min_possible_reward)
+        return compute_planning_reward(input_str, ground_truth, predict_str, max_possible_reward, min_possible_reward)
     elif type == 'tool_call':
-        return compute_tool_call_reward(ground_truth, solution_str, max_possible_reward, min_possible_reward)
+        return compute_tool_call_reward(ground_truth, predict_str, max_possible_reward, min_possible_reward)
     else:
         raise NotImplementedError

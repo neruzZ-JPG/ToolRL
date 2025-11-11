@@ -33,6 +33,11 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, PreTrainedModel, A
 from verl.utils.torch_functional import get_cosine_schedule_with_warmup
 from tensordict import TensorDict
 from torch.utils.data import DataLoader, DistributedSampler
+from peft import (
+    LoraConfig,
+    get_peft_model,
+    TaskType,
+)
 
 from verl.utils.fsdp_utils import get_fsdp_wrap_policy, init_fn, get_init_weight_context_manager
 from verl.utils.dataset import SFTDataset
@@ -162,6 +167,20 @@ class FSDPSFTTrainer(object):
                                                                                torch_dtype=torch.float32,
                                                                                attn_implementation='flash_attention_2',
                                                                                trust_remote_code=trust_remote_code)
+
+        # Apply LoRA if enabled
+        if self.config.model.lora.enable:
+            lora_config = LoraConfig(
+                r=self.config.model.lora.r,
+                lora_alpha=self.config.model.lora.lora_alpha,
+                target_modules=self.config.model.lora.target_modules,
+                lora_dropout=self.config.model.lora.lora_dropout,
+                bias=self.config.model.lora.bias,
+                task_type=TaskType.CAUSAL_LM,
+            )
+            self.model = get_peft_model(self.model, lora_config)
+            if self.device_mesh.get_rank() == 0:
+                self.model.print_trainable_parameters()
 
         if self.config.model.enable_gradient_checkpointing:
             self.model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={'use_reentrant': False})
@@ -303,7 +322,28 @@ class FSDPSFTTrainer(object):
         # save huggingface model
         if self.device_mesh.get_rank() == 0:
             os.makedirs(path, exist_ok=True)
-            self.model.save_pretrained(path, state_dict=state_dict)
+            
+            # For LoRA training, we need to save the base model and LoRA adapter separately
+            if self.config.model.lora.enable:
+                # Save the base model
+                base_model_path = os.path.join(path, 'base_model')
+                os.makedirs(base_model_path, exist_ok=True)
+                
+                # Extract base model state dict (excluding LoRA parameters)
+                base_state_dict = {}
+                for key, value in state_dict.items():
+                    if 'lora' not in key.lower():
+                        base_state_dict[key] = value
+                
+                # Save base model
+                self.model.base_model.save_pretrained(base_model_path, state_dict=base_state_dict)
+                
+                # Save LoRA adapter
+                self.model.save_pretrained(path, state_dict=state_dict)
+            else:
+                # Save full model for non-LoRA training
+                self.model.save_pretrained(path, state_dict=state_dict)
+            
             self.tokenizer.save_pretrained(path)
             if self.config.trainer.default_hdfs_dir:
                 hdfs_io.makedirs(self.config.trainer.default_hdfs_dir, exist_ok=True)

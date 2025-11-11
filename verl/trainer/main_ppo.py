@@ -82,8 +82,8 @@ class RewardManager():
             data_source = data_item.non_tensor_batch['data_source']
             compute_score_fn = _select_rm_score_fn(data_source)
 
-            # score, fomrat_score, correctness_score, length_score = compute_score_fn(solution_str=sequences_str, ground_truth=ground_truth, step=step)
-            score, fomrat_score, correctness_score, length_score = compute_score_fn(solution_str=sequences_str, ground_truth=ground_truth, input_str=data_item.non_tensor_batch['reward_model']['input_str'])
+            score, fomrat_score, correctness_score, length_score = compute_score_fn(solution_str=sequences_str, ground_truth=ground_truth, step=step)
+            # score, fomrat_score, correctness_score, length_score = compute_score_fn(solution_str=sequences_str, ground_truth=ground_truth, input_str=data_item.non_tensor_batch['reward_model']['input_str'])
             reward_tensor[i, valid_response_length - 1] = score
             format_tensor[i, valid_response_length - 1] = fomrat_score
             correctness_tensor[i, valid_response_length - 1] = correctness_score

@@ -40,6 +40,9 @@ from verl.workers.sharding_manager.fsdp_ulysses import FSDPUlyssesShardingManage
 
 from codetiming import Timer
 
+# Add peft imports for LoRA support
+from peft import LoraConfig, get_peft_model, TaskType
+
 logger = logging.getLogger(__file__)
 logger.setLevel(os.getenv('VERL_PPO_LOGGING_LEVEL', 'WARN'))
 
@@ -177,6 +180,35 @@ class ActorRolloutRefWorker(Worker):
             print_model_size(actor_module)
 
         log_gpu_memory_usage('After init from HF AutoModel', logger=logger)
+
+        # Apply LoRA configuration if enabled
+        lora_config = fsdp_config.get('lora', None)
+        if lora_config and lora_config.get('enable', False):
+            if self.rank == 0:
+                print("Applying LoRA configuration...")
+            
+            # Create LoRA configuration
+            lora_r = lora_config.get('r', 16)
+            lora_alpha = lora_config.get('lora_alpha', 32)
+            lora_dropout = lora_config.get('lora_dropout', 0.1)
+            target_modules = lora_config.get('target_modules', ['q_proj', 'v_proj'])
+            bias = lora_config.get('bias', 'none')
+            
+            peft_config = LoraConfig(
+                task_type=TaskType.CAUSAL_LM,
+                inference_mode=False,
+                r=lora_r,
+                lora_alpha=lora_alpha,
+                lora_dropout=lora_dropout,
+                target_modules=target_modules,
+                bias=bias
+            )
+            
+            # Apply LoRA to the model
+            actor_module = get_peft_model(actor_module, peft_config)
+            
+            if self.rank == 0:
+                actor_module.print_trainable_parameters()
 
         # We wrap FSDP for rollout as well
         mixed_precision_config = fsdp_config.get('mixed_precision', None)
@@ -597,6 +629,31 @@ class CriticWorker(Worker):
 
             if config.model.get('enable_gradient_checkpointing', False):
                 critic_module.gradient_checkpointing_enable(gradient_checkpointing_kwargs={'use_reentrant': False})
+        
+        # Check if LoRA is enabled for critic
+        self.lora_config = config.model.get('lora', None)
+        if self.lora_config and self.lora_config.get('enable', False):
+            if self.rank == 0:
+                print(f"Enabling LoRA for critic with config: {self.lora_config}")
+            
+            # Create LoRA configuration
+            from peft import LoraConfig, get_peft_model, TaskType
+            lora_config = LoraConfig(
+                task_type=TaskType.TOKEN_CLS,
+                inference_mode=False,
+                r=self.lora_config.get('r', 16),
+                lora_alpha=self.lora_config.get('lora_alpha', 32),
+                lora_dropout=self.lora_config.get('lora_dropout', 0.1),
+                target_modules=self.lora_config.get('target_modules', ['q_proj', 'v_proj']),
+                bias=self.lora_config.get('bias', 'none'),
+            )
+            
+            # Apply LoRA to the model
+            critic_module = get_peft_model(critic_module, lora_config)
+            
+            # Print trainable parameters
+            critic_module.print_trainable_parameters()
+        
         if self.rank == 0:
             print_model_size(critic_module)
 
@@ -749,7 +806,32 @@ class CriticWorker(Worker):
         if self.rank == 0:
             print(f'Saving critic checkpoint to {local_path}')
             os.makedirs(local_path, exist_ok=True)
-            self.critic_module._fsdp_wrapped_module.save_pretrained(local_path, state_dict=state_dict)
+            
+            # Check if LoRA is enabled and save accordingly
+            if hasattr(self, 'lora_config') and self.lora_config and self.lora_config.get('enable', False):
+                # Save LoRA adapter separately
+                from peft import get_peft_model_state_dict
+                lora_state_dict = get_peft_model_state_dict(self.critic_module._fsdp_wrapped_module)
+                
+                # Save base model and LoRA adapter separately
+                base_model = self.critic_module._fsdp_wrapped_module.get_base_model()
+                base_model.save_pretrained(local_path, state_dict=state_dict)
+                
+                # Save LoRA adapter
+                lora_adapter_path = os.path.join(local_path, 'lora_adapter')
+                os.makedirs(lora_adapter_path, exist_ok=True)
+                torch.save(lora_state_dict, os.path.join(lora_adapter_path, 'adapter_model.bin'))
+                
+                # Save LoRA config
+                import json
+                with open(os.path.join(lora_adapter_path, 'adapter_config.json'), 'w') as f:
+                    json.dump(self.lora_config, f, indent=2)
+                
+                print(f'LoRA adapter saved to {lora_adapter_path}')
+            else:
+                # Save full model (non-LoRA mode)
+                self.critic_module._fsdp_wrapped_module.save_pretrained(local_path, state_dict=state_dict)
+            
             self.tokenizer.save_pretrained(local_path)
             if hdfs_path is not None:
                 print(f'Uploading critic checkpoint to {hdfs_path}')

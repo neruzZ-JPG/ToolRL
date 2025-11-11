@@ -18,6 +18,14 @@ actor_rollout_ref:
     override_config: { }
     enable_gradient_checkpointing: False
     use_remove_padding: False
+    # LoRA configuration
+    lora:
+      enable: False  # Enable LoRA training
+      r: 16  # LoRA rank
+      lora_alpha: 32  # LoRA alpha
+      lora_dropout: 0.1  # LoRA dropout
+      target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]  # Target modules for LoRA
+      bias: "none"  # Bias type: "none", "all", or "lora_only"
   actor:
     strategy: fsdp  # This is for backward-compatibility
     ppo_mini_batch_size: 256
@@ -98,6 +106,14 @@ critic:
     external_lib: ${actor_rollout_ref.model.external_lib}
     enable_gradient_checkpointing: False
     use_remove_padding: False
+    # LoRA configuration
+    lora:
+      enable: True  # Enable LoRA training
+      r: 16  # LoRA rank
+      lora_alpha: 32  # LoRA alpha
+      lora_dropout: 0.1  # LoRA dropout
+      target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]  # Target modules for LoRA
+      bias: "none"  # Bias type: "none", "all", or "lora_only"
     fsdp_config:
       param_offload: False
       grad_offload: False
