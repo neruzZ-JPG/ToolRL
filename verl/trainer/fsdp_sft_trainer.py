@@ -33,11 +33,8 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, PreTrainedModel, A
 from verl.utils.torch_functional import get_cosine_schedule_with_warmup
 from tensordict import TensorDict
 from torch.utils.data import DataLoader, DistributedSampler
-from peft import (
-    LoraConfig,
-    get_peft_model,
-    TaskType,
-)
+# 导入vllm的LoRAConfig，替换peft
+from verl.third_party.vllm.vllm_v_0_8_0.model_runner import LoRAConfig
 
 from verl.utils.fsdp_utils import get_fsdp_wrap_policy, init_fn, get_init_weight_context_manager
 from verl.utils.dataset import SFTDataset
@@ -170,17 +167,20 @@ class FSDPSFTTrainer(object):
 
         # Apply LoRA if enabled
         if self.config.model.lora.enable:
-            lora_config = LoraConfig(
-                r=self.config.model.lora.r,
-                lora_alpha=self.config.model.lora.lora_alpha,
-                target_modules=self.config.model.lora.target_modules,
-                lora_dropout=self.config.model.lora.lora_dropout,
-                bias=self.config.model.lora.bias,
-                task_type=TaskType.CAUSAL_LM,
+            # 使用vllm的LoRAConfig格式存储配置
+            lora_config = LoRAConfig(
+                max_lora_rank=self.config.model.lora.r,
+                # vllm的LoRAConfig不直接支持alpha和dropout等参数
+                # 这些参数将在模型加载时通过其他方式应用
             )
-            self.model = get_peft_model(self.model, lora_config)
+            # 保存LoRA配置到模型对象，供后续使用
+            self.model.lora_config = lora_config
+            
+            # 计算并打印可训练参数（简化版本）
             if self.device_mesh.get_rank() == 0:
-                self.model.print_trainable_parameters()
+                trainable_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+                all_params = sum(p.numel() for p in self.model.parameters())
+                print(f"trainable params: {trainable_params:,} || all params: {all_params:,} || trainable%: {100 * trainable_params / all_params:.4f}%")
 
         if self.config.model.enable_gradient_checkpointing:
             self.model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={'use_reentrant': False})

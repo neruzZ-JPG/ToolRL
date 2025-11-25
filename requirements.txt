@@ -6,10 +6,11 @@ flash-attn
 hydra-core
 numpy
 pandas
-peft
 pybind11
 ray
 tensordict<0.6
-transformers<4.48
+transformers==4.51.0
 vllm<=0.6.3
 wandb
+
+# verl 0.6.1
