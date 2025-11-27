@@ -23,13 +23,6 @@ from verl.workers.reward_manager import register
 from verl.workers.reward_manager.abstract import AbstractRewardManager
 from verl.utils.reward_score import rlla, chatops
 
-def _select_rm_score_fn(data_source):
-        if "rlla" in data_source:
-            return rlla.compute_score
-        elif "chatops" in data_source:
-            return chatops.compute_score
-        else:
-            raise NotImplementedError
 
 @register("naive")
 class NaiveRewardManager(AbstractRewardManager):
@@ -48,9 +41,8 @@ class NaiveRewardManager(AbstractRewardManager):
         """
         self.tokenizer = tokenizer  # Store the tokenizer for decoding token IDs
         self.num_examine = num_examine  # the number of batches of decoded responses to print to the console
-        # self.compute_score = compute_score or default_compute_score
+        self.compute_score = compute_score or default_compute_score
         self.reward_fn_key = reward_fn_key  # Store the key for accessing the data source
-        #self.compute_score = _select_rm_score_fn(self.reward_fn_key)
     def __call__(self, data: DataProto, return_dict: bool = False) -> torch.Tensor | dict[str, Any]:
         """We will expand this function gradually based on the available datasets"""
 
@@ -93,35 +85,12 @@ class NaiveRewardManager(AbstractRewardManager):
             rollout_reward_scores = data_item.non_tensor_batch.get("reward_scores", {})
             extra_info["num_turns"] = num_turns
             extra_info["rollout_reward_scores"] = rollout_reward_scores
-
-            # score = self.compute_score(
-            #     data_source=data_source,
-            #     solution_str=response_str,
-            #     ground_truth=ground_truth,
-            #     extra_info=extra_info,
-            # )
-            if "rlla" in data_source:
-                if num_turns is None:
-                    step = 1
-                else:
-                    step = int(num_turns)
-                score = rlla.compute_score(
-                    solution_str=response_str, ground_truth=ground_truth, step=step
-                )
-            elif "chatops" in data_source:
-                score = chatops.compute_score(
-                    solution_str=response_str,
-                    ground_truth=ground_truth,
-                    input_str=prompt_str,
-                    extra_info=extra_info,
-                )
-            else:
-                score = default_compute_score(
-                    data_source=data_source,
-                    solution_str=response_str,
-                    ground_truth=ground_truth,
-                    extra_info=extra_info,
-                )
+            score = self.compute_score(
+                data_source=data_source,
+                solution_str=response_str,
+                ground_truth=ground_truth,
+                extra_info=extra_info,
+            )
             if isinstance(score, dict):
                 reward = score["score"]
                 # Store the information including original reward

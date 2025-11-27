@@ -254,7 +254,10 @@ def customize_correctness_reward_tool(completions, answer, step, max_possible_re
     return rewards
 
 
-def compute_score(solution_str, ground_truth, step=0):
+def compute_score(data_source,
+                solution_str,
+                ground_truth,
+                extra_info):
     """The scoring function for GSM8k.
 
     Reference: Trung, Luong, et al. "Reft: Reasoning with reinforced fine-tuning." Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers). 2024.
@@ -291,6 +294,8 @@ def compute_score(solution_str, ground_truth, step=0):
     completions = [[{"role": "assistant", "content": predict_str}]]
     answer = [ground_truth]
     
+    step = 1
+
     fomrat_score = customize_format_reward_func(completions, answer, step, format_max_possible, format_min_possible)[0]
     correctness_score = customize_correctness_reward_tool(completions, answer, step, tool_max_possible, tool_min_possible)[0]
     
