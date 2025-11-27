@@ -111,7 +111,7 @@ def compute_planning_reward(input_str, gt, pd, max_possible_reward, min_possible
         return max_possible_reward
     return score * (max_possible_reward - min_possible_reward) + min_possible_reward
 
-def compute_score(solution_str, ground_truth, input_str, type):
+def compute_score(solution_str, ground_truth, input_str, extra_info):
     """
     Compute the reward for the solution.
     Args:
@@ -128,9 +128,10 @@ def compute_score(solution_str, ground_truth, input_str, type):
         predict_str = solution_str.split("<|im_start|>assistant")[-1].split("<|im_end|>")[0].strip()
     else:
         raise NotImplementedError(f"Unknown model name: {exp_name}")
+    type = extra_info.get("type", None)
     if type == 'planning':
-        return compute_planning_reward(input_str, ground_truth, predict_str, max_possible_reward, min_possible_reward)
+        return compute_planning_reward(input_str, ground_truth, predict_str, 1, 5)
     elif type == 'tool_call':
-        return compute_tool_call_reward(ground_truth, predict_str, max_possible_reward, min_possible_reward)
+        return compute_tool_call_reward(ground_truth, predict_str, 1, 5)
     else:
         raise NotImplementedError

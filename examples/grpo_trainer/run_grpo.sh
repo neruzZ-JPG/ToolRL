@@ -7,7 +7,10 @@ python3 -m verl.trainer.main_ppo \
     data.max_prompt_length=2048 \
     data.max_response_length=1024 \
     actor_rollout_ref.model.path=$BASE_MODEL \
-    actor_rollout_ref.actor.optim.lr=1e-6 \
+    actor_rollout_ref.model.lora_rank=64 \
+    actor_rollout_ref.model.lora_alpha=32 \
+    actor_rollout_ref.rollout.load_format=safetensors \
+    actor_rollout_ref.actor.optim.lr=1e-5 \
     actor_rollout_ref.model.use_remove_padding=False \
     actor_rollout_ref.actor.ppo_mini_batch_size=128 \
     actor_rollout_ref.actor.use_dynamic_bsz=True \

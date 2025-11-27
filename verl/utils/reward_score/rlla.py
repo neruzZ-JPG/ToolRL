@@ -302,5 +302,6 @@ def compute_score(solution_str, ground_truth, step=0):
     
     score = fomrat_score + correctness_score + length_score
     
-    return score, fomrat_score, correctness_score, length_score
+    # return score, fomrat_score, correctness_score, length_score
+    return score
     
