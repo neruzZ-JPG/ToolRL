@@ -1,0 +1,89 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nPlease retrieve all open issues from the repository named 'testRepo' owned by 'chatopsFdse' that are labeled as 'bug' and created after January 1, 2024."
+    },
+    {
+        "Human Message": "Current subtask is:\nOpen the repository chatopsFdse/testRepo on GitHub, go to Issues, and apply the filter is:open label:bug created:>2024-01-01 to see all matching issues."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use github_agent to fetch issues via the REST API for owner 'chatopsFdse' and repo 'testRepo' with stateopen and labelsbug, then filter the results locally to only include issues created after 2024-01-01. Ensure proper pagination if there are many results.\",\n  \"Plan B: Use github_agent to perform a GraphQL search for issues with the query 'repo:chatopsFdse/testRepo is:open label:bug created:>2024-01-01' to retrieve matching issues directly (handling pagination if needed).\",\n  \"Plan C: Validate that github_agent has proper authentication and access to chatopsFdse/testRepo; if access is missing or token is invalid, prompt for token/permissions and retry.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use github_agent to fetch issues via the REST API for owner 'chatopsFdse' and repo 'testRepo' with stateopen and labelsbug, then filter the results locally to only include issues created after 2024-01-01. Ensure proper pagination if there are many results."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_repo_issues\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository. Example: chatopsFdse\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The repository name. Example: testRepo\\\"\\n    },\\n    \\\"state\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Issue state to filter by. Example: open\\\"\\n    },\\n    \\\"labels\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Comma-separated list of label names to filter by. Example: bug\\\"\\n    },\\n    \\\"per_page\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"Number of results per page (max 100). Example: 100\\\"\\n    },\\n    \\\"page\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"Page number for pagination. Starts at 1. Example: 1\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"github_get_repo_issues\",\n  \"parameters\": {\n    \"owner\": \"chatopsFdse\",\n    \"repo\": \"testRepo\",\n    \"state\": \"open\",\n    \"labels\": \"bug\",\n    \"per_page\": 100,\n    \"page\": 1\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 200, 'content': b'[{\\\"url\\\":\\\"https://api.github.com/repos/chatopsFdse/testRepo/issues/9\\\",\\\"repository_url\\\":\\\"https://api.github.com/repos/chatopsFdse/testRepo\\\",\\\"labels_url\\\":\\\"https://api.github.com/repos/chatopsFdse/testRepo/issues/9/labels{/name}\\\",\\\"comments_url\\\":\\\"https://api.github.com/repos/chatopsFdse/testRepo/issues/9/comments\\\",\\\"events_url\\\":\\\"https://api.github.com/repos/chatopsFdse/testRepo/issues/9/events\\\",\\\"html_url\\\":\\\"https://github.com/chatopsFdse/testRepo/issues/9\\\",\\\"id\\\":3521980778,\\\"node_id\\\":\\\"I_kwDOM-MA6s7R7Slq\\\",\\\"number\\\":9,\\\"title\\\":\\\"Login fails under load\\\",\\\"user\\\":{\\\"login\\\":\\\"chatopsFdse\\\",\\\"id\\\":184204030,\\\"node_id\\\":\\\"U_kgDOCvq6_g\\\",\\\"avatar_url\\\":\\\"https://avatars.githubusercontent.com/u/184204030?v4\\\",\\\"gravatar_id\\\":\\\"\\\",\\\"url\\\":\\\"https://api.github.com/users/chatopsFdse\\\",\\\"html_url\\\":\\\"https://github.com/chatopsFdse\\\",\\\"followers_url\\\":\\\"https://api.github.com/users/chatopsFdse/followers\\\",\\\"following_url\\\":\\\"https://api.github.com/users/chatopsFdse/following{/other_user}\\\",\\\"gists_url\\\":\\\"https://api.github.com/users/chatopsFdse/gists{/gist_id}\\\",\\\"starred_url\\\":\\\"https://api.github.com/users/chatopsFdse/starred{/owner}{/repo}\\\",\\\"subscriptions_url\\\":\\\"https://api.github.com/users/chatopsFdse/subscriptions\\\",\\\"organizations_url\\\":\\\"https://api.github.com/users/chatopsFdse/orgs\\\",\\\"repos_url\\\":\\\"https://api.github.com/users/chatopsFdse/repos\\\",\\\"events_url\\\":\\\"https://api.github.com/users/chatopsFdse/events{/privacy}\\\",\\\"received_events_url\\\":\\\"https://api.github.com/users/chatopsFdse/received_events\\\",\\\"type\\\":\\\"User\\\",\\\"user_view_type\\\":\\\"public\\\",\\\"site_admin\\\":false},\\\"labels\\\":[{\\\"id\\\":7584028946,\\\"node_id\\\":\\\"LA_kwDOM-MA6s8AAAABxAsZEg\\\",\\\"url\\\":\\\"https://api.github.com/repos/chatopsFdse/testRepo/labels/bug\\\",\\\"name\\\":\\\"bug\\\",\\\"color\\\":\\\"d73a4a\\\",\\\"default\\\":true,\\\"description\\\":\\\"Something isn\\\\'t working\\\"},{\\\"id\\\":9473668826,\\\"node_id\\\":\\\"LA_kwDOM-MA6s8AAAACNKy22g\\\",\\\"url\\\":\\\"https://api.github.com/repos/chatopsFdse/testRepo/labels/authentication\\\",\\\"name\\\":\\\"authentication\\\",\\\"color\\\":\\\"ededed\\\",\\\"default\\\":false,\\\"description\\\":null}],\\\"state\\\":\\\"open\\\",\\\"locked\\\":false,\\\"assignee\\\":null,\\\"assignees\\\":[],\\\"milestone\\\":null,\\\"comments\\\":0,\\\"created_at\\\":\\\"2025-10-16T13:48:53Z\\\",\\\"updated_at\\\":\\\"2025-10-16T13:48:53Z\\\",\\\"closed_at\\\":null,\\\"author_association\\\":\\\"OWNER\\\",\\\"active_lock_reason\\\":null,\\\"sub_issues_summary\\\":{\\\"total\\\":0,\\\"completed\\\":0,\\\"percent_completed\\\":0},\\\"issue_dependencies_summary\\\":{\\\"blocked_by\\\":0,\\\"total_blocked_by\\\":0,\\\"blocking\\\":0,\\\"total_blocking\\\":0},\\\"body\\\":\\\"Description:\\\\\\\\nThe authentication module fails under load when multiple users attempt to login concurrently.\\\\\\\\n\\\\\\\\nSteps to reproduce:\\\\\\\\n1. Deploy the app in a staging environment.\\\\\\\\n2. Send concurrent login requests (e.g., 100\\\\xe2\\\\x80\\\\x931000 users) to the login endpoint /api/auth/login with valid credentials.\\\\\\\\n3. Observe responses and any error messages.\\\\\\\\n\\\\\\\\nExpected behavior:\\\\\\\\nAll login attempts should succeed and return a valid session token (HTTP 200).\\\\\\\\n\\\\\\\\nActual behavior:\\\\\\\\nA subset of login attempts fail with server errors (e.g., 500 Internal Server Error) or authentication errors, leading to user login failures under load.\\\\\\\\n\\\\\\\\nEnvironment:\\\\\\\\n- Environment: staging\\\\\\\\n- Auth service version: unknown\\\\\\\\n- Database: unknown\\\\\\\\n- Runtime: unknown\\\\\\\\n\\\\\\\\nImpact:\\\\\\\\nUsers cannot login under high concurrency; potential race condition or resource exhaustion in authentication path.\\\\\\\\n\\\\\\\\nProposed investigation:\\\\\\\\n- Check concurrency control around token generation, session creation, and DB writes.\\\\\\\\n- Review connection pool limits, thread pool, and asynchronous workflows in the auth path.\\\\\\\\n- Look for race conditions or shared mutable state.\\\",\\\"closed_by\\\":null,\\\"reactions\\\":{\\\"url\\\":\\\"https://api.github.com/repos/chatopsFdse/testRepo/issues/9/reactions\\\",\\\"total_count\\\":0,\\\"+1\\\":0,\\\"-1\\\":0,\\\"laugh\\\":0,\\\"hooray\\\":0,\\\"confused\\\":0,\\\"heart\\\":0,\\\"rocket\\\":0,\\\"eyes\\\":0},\\\"timeline_url\\\":\\\"https://api.github.com/repos/chatopsFdse/testRepo/issues/9/timeline\\\",\\\"performed_via_github_app\\\":null,\\\"state_reason\\\":null}]'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"8c664b01-5db1-4bab-ae4a-ef8fc0c3665c\", \"tool_call_id\": \"call_FWWIoc6J4ihpbDn7OjzTHwvI\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Continue pagination on the REST API by requesting page2, page3, etc., with per_page100, collecting all issues that match stateopen and labelbug, and then filter locally to those created_after 2024-01-01; return the aggregated list.\",\n  \"Plan B: Use the GitHub GraphQL API with a search query like 'repo:chatopsFdse/testRepo is:open label:bug created:>2024-01-01' to fetch all matching issues in a single request (with pagination if needed), and return the results.\",\n  \"Plan C: Verify authentication/permissions for the chatopsFdse/testRepo; if access issues exist, prompt for a token with appropriate scopes or adjust repository access, then retry.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Continue pagination on the REST API by requesting page2, page3, etc., with per_page100, collecting all issues that match stateopen and labelbug, and then filter locally to those created_after 2024-01-01; return the aggregated list."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Continue REST pagination by requesting page2, page3, etc., with per_page100 for owner 'chatopsFdse' and repo 'testRepo', stateopen and labelbug; aggregate all issues from pages 2..N and then filter locally to only include issues created after 2024-01-01; return the aggregated list.\",\n  \"Plan B: Use GraphQL to fetch matching issues in a single (or fewer) requests with a query like 'repo:chatopsFdse/testRepo is:open label:bug created:>2024-01-01' and handle pagination as needed; return the final list of issues created after 2024-01-01.\",\n  \"Plan C: Verify authentication/permissions for the chatopsFdse/testRepo; if access issues exist, prompt for a token with the correct scopes or adjust repository access, then retry the REST pagination plan.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Continue REST pagination by requesting page2, page3, etc., with per_page100 for owner 'chatopsFdse' and repo 'testRepo', stateopen and labelbug; aggregate all issues from pages 2..N and then filter locally to only include issues created after 2024-01-01; return the aggregated list."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Continue REST pagination by requesting page2, page3, etc., with per_page100 for owner 'chatopsFdse' and repo 'testRepo', stateopen and labelbug; aggregate all issues from pages 2..N and then filter locally to only include issues created after 2024-01-01; return the aggregated list.\",\n  \"Plan B: Use GraphQL to fetch matching issues in a single (or fewer) requests with a query like 'repo:chatopsFdse/testRepo is:open label:bug created:>2024-01-01' and handle pagination as needed; return the final list of issues created after 2024-01-01.\",\n  \"Plan C: Verify authentication/permissions for the chatopsFdse/testRepo; if access issues exist, prompt for a token with the correct scopes or adjust repository access, then retry the REST pagination plan.\"\n]"
+    }
+]

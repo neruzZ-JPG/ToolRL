@@ -71,8 +71,8 @@ class NaiveRewardLoopManager(RewardLoopManagerBase):
                     solution_str=response_str,
                     ground_truth=ground_truth,
                     extra_info=extra_info,
-                    reward_router_address=self.reward_router_address,
-                    reward_model_tokenizer=self.reward_model_tokenizer,
+                    # reward_router_address=self.reward_router_address,
+                    # reward_model_tokenizer=self.reward_model_tokenizer,
                 ),
             )
 

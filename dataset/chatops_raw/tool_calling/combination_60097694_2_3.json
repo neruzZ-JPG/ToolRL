@@ -1,0 +1,107 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nPlease find all merge requests in group 'fdseChatops' that are in the 'merged' state, have the label 'enhancement', and were created between March 15, 2024, and April 1, 2024."
+    },
+    {
+        "Human Message": "Current subtask is:\nEnsure you have a GitLab Personal Access Token (read_api), then get the group ID for \u201cfdseChatops\u201d via GET /api/v4/groups?searchfdseChatops."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_search_in_group\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The ID or URL-encoded path of the group owned by the authenticated user\\\"\\n    },\\n    \\\"scope\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The scope to search in\\\"\\n    },\\n    \\\"search\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The search query\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute gitlab_search_in_group with parameters: search\"fdseChatops\", scope\"all\", private_token\"<GITLAB_PERSONAL_ACCESS_TOKEN>\""
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 400, 'content': b'{\\\"error\\\":\\\"search is missing, scope is missing, scope does not have a valid value\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"0f36ea0a-595a-4b7d-978e-09b0503cf90b\", \"tool_call_id\": \"call_ZE3R68PnHpp9JWIrim1DlWRr\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Validate the GitLab Personal Access Token first by calling GET /api/v4/user with private_token<GITLAB_PERSONAL_ACCESS_TOKEN> to confirm the token is valid and has read_api scope; if valid, proceed to fetch the group.\",\n  \"Call GET /api/v4/groups?searchfdseChatops using the gitlab_agent with parameters search'fdseChatops' and private_token'<GITLAB_PERSONAL_ACCESS_TOKEN>' (omit the 'scope' parameter or ensure it is set to a valid value supported by the agent) and extract the group's id from the JSON response.\",\n  \"If the search endpoint fails, fallback to GET /api/v4/groups with pagination using the gitlab_agent (private_token'<GITLAB_PERSONAL_ACCESS_TOKEN>') and locally filter the returned groups for name or path equal to 'fdseChatops' to obtain the group id.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nValidate the GitLab Personal Access Token first by calling GET /api/v4/user with private_token<GITLAB_PERSONAL_ACCESS_TOKEN> to confirm the token is valid and has read_api scope; if valid, proceed to fetch the group."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_group_invitations\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"The ID of the group to fetch invitations for\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute gitlab_get_current_user with parameters: private_token\"<GITLAB_PERSONAL_ACCESS_TOKEN>\""
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: 1 validation error for Http_request\\nbody\\n  Field required [typemissing, input_value{'url': 'https://gitlab.c...JR4\\\"}', 'method': 'GET'}, input_typedict]\\n    For further information visit https://errors.pydantic.dev/2.9/v/missing\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"da1b556f-8bbd-4a8b-9fe2-295a4e64e26d\", \"tool_call_id\": \"call_dE3Xrqi2yFL1FXD51lArBN7j\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Ask the user to provide the GitLab Personal Access Token and the GitLab base URL (e.g. https://gitlab.com or https://gitlab.mycompany.com). Once provided, call gitlab_agent to GET <base_url>/api/v4/user with header 'Private-Token: <TOKEN>' (or query param private_token<TOKEN>) to validate the token and confirm it has read_api scope; on success proceed to GET <base_url>/api/v4/groups?searchfdseChatops to obtain the group id.\",\n  \"If the user cannot share a token, instruct them how to create one: log into GitLab \u2192 User Settings \u2192 Access Tokens \u2192 create a token with at least 'read_api' scope, then provide that token and base URL so I can validate and continue (same calls as Plan A).\",\n  \"If the user prefers to run commands locally instead of sharing the token, ask them to run the following curl commands and paste the responses: 1) curl --header 'Private-Token: <TOKEN>' '<base_url>/api/v4/user' to validate the token; 2) curl --header 'Private-Token: <TOKEN>' '<base_url>/api/v4/groups?searchfdseChatops' to get the group id. I will use the pasted outputs to continue.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nAsk the user to provide the GitLab Personal Access Token and the GitLab base URL (e.g. https://gitlab.com or https://gitlab.mycompany.com). Once provided, call gitlab_agent to GET <base_url>/api/v4/user with header 'Private-Token: <TOKEN>' (or query param private_token<TOKEN>) to validate the token and confirm it has read_api scope; on success proceed to GET <base_url>/api/v4/groups?searchfdseChatops to obtain the group id."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"Please provide your GitLab Personal Access Token and the GitLab base URL (e.g., https://gitlab.com or your company's GitLab instance).\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute gitlab_get_current_user with parameters: base_url\"<GITLAB_BASE_URL>\", private_token\"<GITLAB_PERSONAL_ACCESS_TOKEN>\""
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: 1 validation error for Http_request\\nheaders\\n  Input should be a valid string [typestring_type, input_value{'PRIVATE-TOKEN': '<GITLA...PERSONAL_ACCESS_TOKEN>'}, input_typedict]\\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"25de8857-08bc-48f5-9920-97840a169e47\", \"tool_call_id\": \"call_p8W65Gn1HxgbOOenBvQApOGP\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Provide your GitLab base URL and a GitLab Personal Access Token (with read_api scope). I will call GET <base_url>/api/v4/user with header 'Private-Token: <TOKEN>' to validate the token; if valid I will then call GET <base_url>/api/v4/groups?searchfdseChatops to obtain the group id and continue.\",\n  \"If you cannot share the token, run these two commands locally and paste the full JSON responses here: 1) curl --header \\\"Private-Token: <TOKEN>\\\" \\\"<base_url>/api/v4/user\\\"  2) curl --header \\\"Private-Token: <TOKEN>\\\" \\\"<base_url>/api/v4/groups?searchfdseChatops\\\". I will extract the group id from your pasted output and continue.\",\n  \"If you do not yet have a Personal Access Token, create one in GitLab: User Settings \u2192 Access Tokens \u2192 give it a name, expiry (optional), and select at least the 'read_api' scope. Then provide the new token and base URL so I can validate and fetch the group id.\",\n  \"If you already know the numeric group ID or the exact URL-encoded group path for fdseChatops, provide that value instead of the token; I will skip validation and proceed directly to search merge requests in that group for the requested criteria.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nProvide your GitLab base URL and a GitLab Personal Access Token (with read_api scope). I will call GET <base_url>/api/v4/user with header 'Private-Token: <TOKEN>' to validate the token; if valid I will then call GET <base_url>/api/v4/groups?searchfdseChatops to obtain the group id and continue."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"none\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"none\",\n    \"parameters\": []\n}"
+    }
+]

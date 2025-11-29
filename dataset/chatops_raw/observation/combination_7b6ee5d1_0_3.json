@@ -1,0 +1,89 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nRetrieve the list of available images on the server to identify the latest version for deploying a new containerized application."
+    },
+    {
+        "Human Message": "Current subtask is:\nStart by identifying the command or method to list images on our container registry or server. Think about whether it's a local command, API call, or dashboard tool, and the specific command syntax or options needed to retrieve the list of images."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Query the local Docker daemon on the server by listing images (docker images --format '{{.Repository}}:{{.Tag}}'). Parse the output to identify the latest tag for each repository, then report the list with the recommended latest version.\",\n  \"Plan B: If your images are stored in a private/container registry, use the registry API (GET /v2/_catalog to list repositories and GET /v2/<repository>/tags/list to list tags) to gather available images, then determine the latest version per repository using semantic version comparison.\",\n  \"Plan C: Run a combined discovery by first listing local Docker images and then, if the registry is the source of truth, fetching registry tags for relevant repositories and merging results to present a unified view of latest versions for deploying the application.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Query the local Docker daemon on the server by listing images (docker images --format '{{.Repository}}:{{.Tag}}'). Parse the output to identify the latest tag for each repository, then report the list with the recommended latest version."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use docker_agent to run 'docker images --format \\\"{{.Repository}}:{{.Tag}}\\\"' on the local server, parse the output to extract repositories and tags, compute the latest tag per repository using semantic version comparison, and report the list with recommended latest versions.\",\n  \"Plan B: If the local Docker daemon cannot be queried or misses images, use the container registry API (GET /v2/_catalog and GET /v2/<repository>/tags/list) to collect tags for each repository, compute the latest version per repository, and report the results.\",\n  \"Plan C: Perform a combined discovery by first listing local images and then querying the registry for the same repositories, merge the results by repository, prefer the highest semantic version, and present a unified view of latest versions for deployment.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use docker_agent to run 'docker images --format \"{{.Repository}}:{{.Tag}}\"' on the local server, parse the output to extract repositories and tags, compute the latest tag per repository using semantic version comparison, and report the list with recommended latest versions."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Execute the docker_images command on the local server via docker_agent and parse the output to determine the latest tag per repository, then report the results.\",\n  \"Plan B: If querying the local daemon is not possible or incomplete, use the container registry API to list repositories and tags, determine the latest semantic version per repository, and report.\",\n  \"Plan C: Combine local images and registry data by listing local images and then fetching registry tags for the same repositories, merge and select the highest semantic version per repository to present a unified latest-version view.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Execute the docker_images command on the local server via docker_agent and parse the output to determine the latest tag per repository, then report the results."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"list_images\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"list_images\",\n  \"parameters\": {}\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 200, 'content': b'[{\\\"Containers\\\":-1,\\\"Created\\\":1759871206,\\\"Id\\\":\\\"sha256:07ccdb7838758e758a4d52a9761636c385125a327355c0c94a6acff9babff938\\\",\\\"Labels\\\":{\\\"maintainer\\\":\\\"NGINX Docker Maintainers <docker-maint@nginx.com>\\\"},\\\"ParentId\\\":\\\"\\\",\\\"RepoDigests\\\":[\\\"nginx@sha256:3b7732505933ca591ce4a6d860cb713ad96a3176b82f7979a8dfa9973486a0d6\\\"],\\\"RepoTags\\\":[\\\"nginx:latest\\\"],\\\"SharedSize\\\":-1,\\\"Size\\\":159974475},{\\\"Containers\\\":-1,\\\"Created\\\":1759302310,\\\"Id\\\":\\\"sha256:392fa14dddd09da29a5c3d26948ff81c494424035b755d01b84ab12d92127433\\\",\\\"Labels\\\":{\\\"org.opencontainers.image.ref.name\\\":\\\"ubuntu\\\",\\\"org.opencontainers.image.version\\\":\\\"22.04\\\"},\\\"ParentId\\\":\\\"\\\",\\\"RepoDigests\\\":[\\\"ubuntu@sha256:09506232a8004baa32c47d68f1e5c307d648fdd59f5e7eaa42aaf87914100db3\\\"],\\\"RepoTags\\\":[\\\"ubuntu:22.04\\\"],\\\"SharedSize\\\":-1,\\\"Size\\\":77871956},{\\\"Containers\\\":-1,\\\"Created\\\":1744122713,\\\"Id\\\":\\\"sha256:eb8fcafb6c8526ba989b8769f289ce3ccda717e5c28966b7176a344c7cb3a18a\\\",\\\"Labels\\\":{\\\"org.opencontainers.image.description\\\":\\\"The Jenkins Continuous Integration and Delivery server\\\",\\\"org.opencontainers.image.licenses\\\":\\\"MIT\\\",\\\"org.opencontainers.image.revision\\\":\\\"ae79f4234fac7ff1f4f28c220d2b3eaf9fec6fd2\\\",\\\"org.opencontainers.image.source\\\":\\\"https://github.com/jenkinsci/docker\\\",\\\"org.opencontainers.image.title\\\":\\\"Official Jenkins Docker image\\\",\\\"org.opencontainers.image.url\\\":\\\"https://www.jenkins.io/\\\",\\\"org.opencontainers.image.vendor\\\":\\\"Jenkins project\\\",\\\"org.opencontainers.image.version\\\":\\\"2.505\\\"},\\\"ParentId\\\":\\\"\\\",\\\"RepoDigests\\\":[\\\"jenkins/jenkins@sha256:d4074a7394ec3114063e84369f148ea4fe040577183b48f344233565dbcc6931\\\"],\\\"RepoTags\\\":[\\\"jenkins/jenkins:2.505\\\"],\\\"SharedSize\\\":-1,\\\"Size\\\":464600382},{\\\"Containers\\\":-1,\\\"Created\\\":1744108968,\\\"Id\\\":\\\"sha256:b7bab04fd9aa0c771e5720bf0cc7cbf993fd6946645983d9096126e5af45d713\\\",\\\"Labels\\\":{\\\"org.opencontainers.image.ref.name\\\":\\\"ubuntu\\\",\\\"org.opencontainers.image.version\\\":\\\"20.04\\\"},\\\"ParentId\\\":\\\"\\\",\\\"RepoDigests\\\":[\\\"ubuntu@sha256:8feb4d8ca5354def3d8fce243717141ce31e2c428701f6682bd2fafe15388214\\\"],\\\"RepoTags\\\":[\\\"ubuntu:20.04\\\"],\\\"SharedSize\\\":-1,\\\"Size\\\":72813617},{\\\"Containers\\\":-1,\\\"Created\\\":1738790836,\\\"Id\\\":\\\"sha256:64e5ac93d424ecf2fcdb60e508278d86d5e544d5a07ec0983fac0b2dc3c65ddf\\\",\\\"Labels\\\":{\\\"maintainer\\\":\\\"NGINX Docker Maintainers <docker-maint@nginx.com>\\\"},\\\"ParentId\\\":\\\"\\\",\\\"RepoDigests\\\":[\\\"nginx@sha256:41b194461e4bae16f9b25d68b0976ed4735b89ca625c89aad88e1c1c3b7e8860\\\"],\\\"RepoTags\\\":[\\\"nginx:1.26\\\"],\\\"SharedSize\\\":-1,\\\"Size\\\":191974935}]\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"a4b4ad89-e90c-4877-bb73-839cc65665c8\", \"tool_call_id\": \"call_ojvkdZUcPSwjcNJrw344N978\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "SUCCESS, Retrieved image list. Latest tags per repository: nginx:latest, ubuntu:22.04, jenkins/jenkins:2.505"
+    }
+]

@@ -1,0 +1,134 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI need to stop the running container with the ID 'container12345' to free up system resources before deploying a new application."
+    },
+    {
+        "Human Message": "Current subtask is:\nFirst, verify the container exists and is running on the correct host: run\ndocker ps --filter idcontainer12345\nand confirm it appears in the list."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"get_container_details\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": \\\"container12345\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "[\n  \"Execute get_container_details via docker_agent with parameters {\\\"id\\\": \\\"container12345\\\"}. If the container appears in docker ps and STATUS shows it is running (Up), then stop it: execute stop_container via docker_agent with {\\\"id\\\": \\\"container12345\\\"}, verify it stopped with docker ps --filter idcontainer12345, then proceed with deployment.\",\n  \"Execute get_container_details via docker_agent with parameters {\\\"id\\\": \\\"container12345\\\"}. If the container exists but is not running (does not appear in docker ps), no stop is required; optionally remove it with remove_container via docker_agent {\\\"id\\\": \\\"container12345\\\"} or proceed to deployment.\",\n  \"Execute get_container_details via docker_agent with parameters {\\\"id\\\": \\\"container12345\\\"}. If the container is not found on this host, investigate: confirm the container ID and host with the user, or search other hosts (run docker ps -a on relevant hosts) before attempting to stop or proceed.\"\n]"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"No such container: container12345\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"158c040f-0ffb-443e-b7cf-8b807b2bcbc7\", \"tool_call_id\": \"call_Y2KK0h0Ca94RFDzfGrynR0v9\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Container 'container12345' was not found on this host (docker returned 404). Plan A: Ask the user to confirm the container ID and the intended host. If they provide a different host, run get_container_details via docker_agent against that host with parameters {\\\"id\\\":\\\"container12345\\\",\\\"host\\\":\\\"<host>\\\"}.\",\n  \"Plan B: Check if the container exists but is stopped on this host: run get_container_details via docker_agent using docker ps -a --filter idcontainer12345 to detect an exited/stopped container. If found, either remove it (remove_container via docker_agent {\\\"id\\\":\\\"container12345\\\"}) or leave it and proceed per user instruction.\",\n  \"Plan C: If the container may be on another node in the cluster, request the list of hosts/credentials from the user and perform a cluster-wide scan (docker ps -a on each host) to locate the container; then stop it on the host where it is running.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nContainer 'container12345' was not found on this host (docker returned 404). Plan A: Ask the user to confirm the container ID and the intended host. If they provide a different host, run get_container_details via docker_agent against that host with parameters {\"id\":\"container12345\",\"host\":\"<host>\"}."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"get_container_details\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The container ID, e.g., 'container12345'.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute get_container_details via docker_agent with parameters {\"id\": \"container12345\"}."
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"No such container: container12345\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"eb43ad62-1e50-44b0-bd26-36f54f7bc391\", \"tool_call_id\": \"call_hVKmCxDZJsjUzpvbCFeAwExt\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Ask the user to confirm the container ID and specify the host where container12345 should be. After receiving the target host, execute get_container_details via docker_agent with parameters {\\\"id\\\":\\\"container12345\\\",\\\"host\\\":\\\"<host>\\\"} to verify presence and running state.\",\n  \"Plan B: Check this host for stopped/exited instances of the container by executing get_container_details via docker_agent with parameters {\\\"id\\\":\\\"container12345\\\",\\\"all\\\":true} (equivalent to docker ps -a --filter idcontainer12345). If found and exited, offer to remove it (remove_container via docker_agent {\\\"id\\\":\\\"container12345\\\"}) or proceed as instructed.\",\n  \"Plan C: If the container may be on another node, request the list of candidate hosts/SSH credentials from the user, then perform a cluster-wide scan: run get_container_details via docker_agent on each host with {\\\"id\\\":\\\"container12345\\\"} until located; if running on a host, stop it there (stop_container via docker_agent {\\\"id\\\":\\\"container12345\\\",\\\"host\\\":\\\"<found-host>\\\"}).\",\n  \"Plan D: If the workload is managed by an orchestration platform, ask the user whether the container is part of Kubernetes or another orchestrator. If Kubernetes, use kubernetes_agent to search for pods/containers matching container12345 (e.g., kubectl get pods --all-namespaces -o json | grep container12345) and stop/delete the pod if appropriate.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Ask the user to confirm the container ID and specify the host where container12345 should be. After receiving the target host, execute get_container_details via docker_agent with parameters {\"id\":\"container12345\",\"host\":\"<host>\"} to verify presence and running state."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"get_container_details\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The ID of the container\\\"\\n    },\\n    \\\"host\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The host where the container is located\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute get_container_details via docker_agent with parameters {\"id\": \"container12345\", \"host\": \"<host_or_IP_of_target_machine>\"} (replace <host_or_IP_of_target_machine> with the actual host; provide it if you want me to run this)."
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"No such container: container12345\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"1fdca061-769f-4a31-a0a2-f542b12b16a5\", \"tool_call_id\": \"call_tGorvHKPfbOStRPADxm5JBGr\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Ask the user to confirm the exact container ID and provide the target host (hostname or IP) plus how to connect (SSH credentials or Docker API endpoint). Once provided, run get_container_details via docker_agent with parameters {\\\"id\\\":\\\"container12345\\\",\\\"host\\\":\\\"<host>\\\"} to verify and then stop if running.\",\n  \"Plan B: If the user cannot identify the host, request a list of candidate hosts and credentials; perform a cluster scan by running get_container_details via docker_agent on each host with {\\\"id\\\":\\\"container12345\\\"} until located. If found and status is Up, stop it with stop_container via docker_agent {\\\"id\\\":\\\"container12345\\\",\\\"host\\\":\\\"<found-host>\\\"}.\",\n  \"Plan C: Check the current host for exited/stopped instances: run get_container_details via docker_agent with parameters {\\\"id\\\":\\\"container12345\\\",\\\"all\\\":true} (docker ps -a --filter idcontainer12345). If found and exited, offer to remove it with remove_container via docker_agent {\\\"id\\\":\\\"container12345\\\"}.\",\n  \"Plan D: If the workload might be managed by an orchestrator, ask the user which one (Kubernetes, Swarm, etc.). If Kubernetes, use kubernetes_agent to search for pods/containers matching container12345 and delete the pod if appropriate (e.g., kubectl get pods --all-namespaces -o json | grep container12345; kubectl delete pod <pod> -n <ns>).\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Ask the user to confirm the exact container ID and provide the target host (hostname or IP) plus how to connect (SSH credentials or Docker API endpoint). Once provided, run get_container_details via docker_agent with parameters {\"id\":\"container12345\",\"host\":\"<host>\"} to verify and then stop if running."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute get_container_details via docker_agent with parameters {\"id\":\"container12345\", \"host\":\"<target_host_or_IP>\", \"connection\": {\"method\":\"ssh_or_docker_socket\", \"ssh_user\":\"<ssh_username>\", \"ssh_port\":22, \"ssh_key\":\"<ssh_private_key_or_path>\", \"docker_socket\":\"<unix_socket_or_tcp_endpoint>\"} } (replace placeholders with actual host and connection credentials)."
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: 1 validation error for Http_request\\nbody\\n  Input should be a valid string [typestring_type, input_value{}, input_typedict]\\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"fb16c6a5-ad87-4839-9aec-e43e4740c0e0\", \"tool_call_id\": \"call_vCyClCDq8Eary43bxUYbYViX\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Ask the user to confirm the exact container ID and provide the target host (hostname or IP) plus connection details (SSH username, SSH port, path to private key or Docker TCP/socket endpoint). Once provided, run get_container_details via docker_agent with {\\\"id\\\":\\\"container12345\\\",\\\"host\\\":\\\"<host>\\\",\\\"connection\\\":{...}} to verify and stop if running.\",\n  \"Plan B: If the user cannot or will not share credentials, provide the exact commands for them to run on the target host to verify and stop the container (e.g., docker ps --filter idcontainer12345; docker stop container12345; docker ps --filter idcontainer12345; optionally docker rm container12345) and offer to validate their output.\",\n  \"Plan C: If the user has multiple candidate hosts, ask them to supply a list of host IPs/hostnames and credentials; then perform a cluster scan by running get_container_details via docker_agent on each host until the container is found, and stop it on the host where it's running.\",\n  \"Plan D: If the container may be managed by an orchestrator, ask which one (Kubernetes, Docker Swarm, ECS, etc.). If Kubernetes, use kubernetes_agent to search for pods/containers (e.g., kubectl get pods --all-namespaces -o wide | grep container12345) and delete the corresponding pod if appropriate.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Ask the user to confirm the exact container ID and provide the target host (hostname or IP) plus connection details (SSH username, SSH port, path to private key or Docker TCP/socket endpoint). Once provided, run get_container_details via docker_agent with {\"id\":\"container12345\",\"host\":\"<host>\",\"connection\":{...}} to verify and stop if running."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"get_container_details\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The exact container ID\\\"\\n    },\\n    \\\"host\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Target host's hostname or IP address\\\"\\n    },\\n    \\\"connection\\\": {\\n      \\\"type\\\": \\\"object\\\",\\n      \\\"description\\\": \\\"Connection details such as SSH username, port, private key path, or Docker endpoint\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"get_container_details\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"id\",\n      \"parameter_value\": \"container12345\"\n    },\n    {\n      \"parameter_name\": \"host\",\n      \"parameter_value\": \"<target_host_or_IP>\"\n    },\n    {\n      \"parameter_name\": \"connection\",\n      \"parameter_value\": \"{\\\"method\\\":\\\"ssh\\\",\\\"ssh_user\\\":\\\"<ssh_username>\\\",\\\"ssh_port\\\":22,\\\"ssh_key\\\":\\\"<ssh_private_key_or_path>\\\"}\"\n    }\n  ]\n}"
+    }
+]

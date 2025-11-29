@@ -1,0 +1,80 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nPlease review all open issues assigned to me within the repository named 'customer-portal' owned by 'acme-corp' to prioritize upcoming feature requests and bug fixes for the upcoming release."
+    },
+    {
+        "Human Message": "Current subtask is:\nFirst, open the acme-corp/customer-portal repository\u2019s Issues page, filter by Assignee  you and Status  Open, then skim titles and labels to identify high-priority bugs and feature requests for the upcoming release."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_repo_issues\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository. For this task: 'acme-corp'.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The repository name. For this task: 'customer-portal'.\\\"\\n    },\\n    \\\"state\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Filter issues by state. Use 'open' to include only open issues.\\\"\\n    },\\n    \\\"assignee\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Filter issues assigned to the specified user. Use the authenticated user's GitHub username to filter for issues assigned to you.\\\"\\n    },\\n    \\\"per_page\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"Number of results per page (max 100). Optional.\\\"\\n    },\\n    \\\"page\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"Page number of the results to fetch. Optional.\\\"\\n    },\\n    \\\"sort\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Sort field. Optional. Allowed values: created, updated, comments.\\\"\\n    },\\n    \\\"since\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Only issues updated since this ISO-8601 timestamp. Optional.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"github_get_repo_issues\",\n  \"parameters\": {\n    \"owner\": \"acme-corp\",\n    \"repo\": \"customer-portal\",\n    \"state\": \"open\",\n    \"assignee\": \"me\",\n    \"per_page\": 100,\n    \"page\": 1,\n    \"sort\": \"created\"\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/issues/issues#list-repository-issues\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"6cf76599-0111-46f7-bfad-36f6d0c7c63f\", \"tool_call_id\": \"call_DKvekfqhwRDc3cLnBmEEbAHa\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Authenticate to GitHub to obtain your actual username, then re-run a query for issues with owner 'acme-corp', repo 'customer-portal', state 'open', assignee '<your_username>' (per_page 100, page 1, sort by created).\",\n  \"Plan B: If you cannot fetch the username, retrieve all open issues for acme-corp/customer-portal and filter locally for issues where the assignee matches your GitHub username once known.\",\n  \"Plan C: Verify repository accessibility and existence; confirm the repo is named 'customer-portal' under 'acme-corp' and ensure your token has repo scope; if 404 persists, escalate to admin to confirm access or correct owner/repo.\",\n  \"Plan D: Retry with a concrete assignee username (once you have it) instead of 'me', for example assignee 'your-username', then fetch issues again with state 'open', per_page 100, page 1, sort by created.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Authenticate to GitHub to obtain your actual username, then re-run a query for issues with owner 'acme-corp', repo 'customer-portal', state 'open', assignee '<your_username>' (per_page 100, page 1, sort by created)."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_the_authencated_user\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"github_the_authencated_user\",\n  \"parameters\": {}\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 200, 'content': b'{\\\"login\\\":\\\"chatopsFdse\\\",\\\"id\\\":184204030,\\\"node_id\\\":\\\"U_kgDOCvq6_g\\\",\\\"avatar_url\\\":\\\"https://avatars.githubusercontent.com/u/184204030?v4\\\",\\\"gravatar_id\\\":\\\"\\\",\\\"url\\\":\\\"https://api.github.com/users/chatopsFdse\\\",\\\"html_url\\\":\\\"https://github.com/chatopsFdse\\\",\\\"followers_url\\\":\\\"https://api.github.com/users/chatopsFdse/followers\\\",\\\"following_url\\\":\\\"https://api.github.com/users/chatopsFdse/following{/other_user}\\\",\\\"gists_url\\\":\\\"https://api.github.com/users/chatopsFdse/gists{/gist_id}\\\",\\\"starred_url\\\":\\\"https://api.github.com/users/chatopsFdse/starred{/owner}{/repo}\\\",\\\"subscriptions_url\\\":\\\"https://api.github.com/users/chatopsFdse/subscriptions\\\",\\\"organizations_url\\\":\\\"https://api.github.com/users/chatopsFdse/orgs\\\",\\\"repos_url\\\":\\\"https://api.github.com/users/chatopsFdse/repos\\\",\\\"events_url\\\":\\\"https://api.github.com/users/chatopsFdse/events{/privacy}\\\",\\\"received_events_url\\\":\\\"https://api.github.com/users/chatopsFdse/received_events\\\",\\\"type\\\":\\\"User\\\",\\\"user_view_type\\\":\\\"public\\\",\\\"site_admin\\\":false,\\\"name\\\":null,\\\"company\\\":null,\\\"blog\\\":\\\"harry.com\\\",\\\"location\\\":null,\\\"email\\\":null,\\\"hireable\\\":null,\\\"bio\\\":\\\"\\\\xe6\\\\x88\\\\x91\\\\xe6\\\\x98\\\\xaf\\\\xe5\\\\xa4\\\\x8d\\\\xe6\\\\x97\\\\xa6\\\\xe5\\\\xa4\\\\xa7\\\\xe5\\\\xad\\\\xa6chatops\\\\xe7\\\\xa0\\\\x94\\\\xe7\\\\xa9\\\\xb6\\\\xe4\\\\xbd\\\\xbf\\\\xe7\\\\x94\\\\xa8\\\\xe7\\\\x9a\\\\x84githhub\\\\xe8\\\\xb4\\\\xa6\\\\xe5\\\\x8f\\\\xb7\\\",\\\"twitter_username\\\":null,\\\"notification_email\\\":null,\\\"public_repos\\\":6,\\\"public_gists\\\":0,\\\"followers\\\":0,\\\"following\\\":6,\\\"created_at\\\":\\\"2024-10-08T07:20:16Z\\\",\\\"updated_at\\\":\\\"2025-09-05T14:47:00Z\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"267111da-4651-43f2-a818-99f13700f4d2\", \"tool_call_id\": \"call_PKNXOd6J7dHpRpuEo3KGtcFB\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use github_agent to fetch issues with owner 'acme-corp', repo 'customer-portal', state 'open', assignee 'chatopsFdse', per_page 100, page 1, sort by created.\",\n  \"Plan B: If Plan A returns an empty set or errors, fetch all open issues for acme-corp/customer-portal and filter locally for assignee 'chatopsFdse' once known, then retry.\",\n  \"Plan C: Verify repository accessibility and token scope; if 404/403 persists, escalate to admin to confirm access or correct owner/repo.\",\n  \"Plan D: Once issues are retrieved, summarize and prioritize: first high-priority bugs, then feature requests, to prepare for the upcoming release.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use github_agent to fetch issues with owner 'acme-corp', repo 'customer-portal', state 'open', assignee 'chatopsFdse', per_page 100, page 1, sort by created."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_repo_issues\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository. The name is not case sensitive.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The repository name without the .git extension. The name is not case sensitive.\\\"\\n    },\\n    \\\"state\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Filter issues by state. Allowed values: 'open', 'closed', 'all'.\\\"\\n    },\\n    \\\"assignee\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Filter issues assigned to this username. Use 'none' to fetch unassigned issues.\\\"\\n    },\\n    \\\"per_page\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"Number of results per page (maximum 100).\\\"\\n    },\\n    \\\"page\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"Page number of the results to fetch.\\\"\\n    },\\n    \\\"sort\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Sort field. One of 'created', 'updated', or 'comments'.\\\"\\n    },\\n    \\\"direction\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Sort direction. Either 'asc' or 'desc'.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"github_get_repo_issues\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"owner\",\n            \"parameter_value\": \"acme-corp\"\n        },\n        {\n            \"parameter_name\": \"repo\",\n            \"parameter_value\": \"customer-portal\"\n        },\n        {\n            \"parameter_name\": \"state\",\n            \"parameter_value\": \"open\"\n        },\n        {\n            \"parameter_name\": \"assignee\",\n            \"parameter_value\": \"chatopsFdse\"\n        },\n        {\n            \"parameter_name\": \"per_page\",\n            \"parameter_value\": \"100\"\n        },\n        {\n            \"parameter_name\": \"page\",\n            \"parameter_value\": \"1\"\n        },\n        {\n            \"parameter_name\": \"sort\",\n            \"parameter_value\": \"created\"\n        },\n        {\n            \"parameter_name\": \"direction\",\n            \"parameter_value\": \"desc\"\n        }\n    ]\n}"
+    }
+]

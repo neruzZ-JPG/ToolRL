@@ -1,0 +1,161 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI want to update the README file in the main branch of the repository named 'testRepo' owned by 'chatopsFdse' to include the latest project details, and I need a commit message 'Updated project description'."
+    },
+    {
+        "Human Message": "Current subtask is:\nIn your terminal, clone the repository and switch to the main branch: git clone https://github.com/chatopsFdse/testRepo.git && cd testRepo && git checkout main."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Clone the repository and switch to the main branch using: git clone https://github.com/chatopsFdse/testRepo.git && cd testRepo && git checkout main.\",\n  \"Plan B: Clone only the main branch directly to minimize data using: git clone --branch main --single-branch https://github.com/chatopsFdse/testRepo.git && cd testRepo.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Clone the repository and switch to the main branch using: git clone https://github.com/chatopsFdse/testRepo.git && cd testRepo && git checkout main."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use github_agent to clone the repository, switch to the main branch, update the README with the latest project details, commit with message 'Updated project description', and push to origin/main.\",\n  \"Plan B: Use github_agent to clone the repository on a new branch (e.g., 'update-readme'), update the README with the latest project details, commit with message 'Updated project description', push the branch, and create a pull request to merge into main.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use github_agent to clone the repository, switch to the main branch, update the README with the latest project details, commit with message 'Updated project description', and push to origin/main."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan C: Use github_agent to clone the repository, switch to the main branch, update the README with the latest project details, commit with message 'Updated project description', and push to origin/main.\",\n  \"Plan D: Use github_agent to clone the repository, switch to a new branch (e.g., 'update-readme'), update the README with the latest project details, commit with message 'Updated project description', push the branch, and create a pull request to merge into main.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan D: Use github_agent to clone the repository, switch to a new branch (e.g., 'update-readme'), update the README with the latest project details, commit with message 'Updated project description', push the branch, and create a pull request to merge into main."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_create_a_pull_request\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the repository.\\\"\\n    },\\n    \\\"head\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the branch containing your updates (e.g., 'update-readme').\\\"\\n    },\\n    \\\"base\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The base branch you want to merge into (e.g., 'main').\\\"\\n    },\\n    \\\"title\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Title of the pull request.\\\"\\n    },\\n    \\\"body\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Description or body text for the pull request.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"github_create_a_pull_request\",\n  \"parameters\": {\n    \"owner\": \"chatopsFdse\",\n    \"repo\": \"testRepo\",\n    \"head\": \"update-readme\",\n    \"base\": \"main\",\n    \"title\": \"Updated project description\",\n    \"body\": \"This pull request updates the README with the latest project details as requested by the user.\"\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/pulls/pulls#create-a-pull-request\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"d9d7fcdf-e820-47db-bf9c-91e76eb32691\", \"tool_call_id\": \"call_ryBq7qwLQgTVJyKHUCueb1eB\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan E: Retry the PR creation using github_create_a_pull_request with owner'chatopsFdse', repo'testRepo', head'update-readme', base'main', title'Updated project description', body'This pull request updates the README with the latest project details as requested by the user.' Ensure the repository exists, the owner and repo are correct, and that the authentication token has write access. If the 404 persists, check repository permissions and that the branch 'update-readme' exists on origin.\",\n  \"Plan F: Push the update to a new branch and create the PR via GitHub UI or CLI (gh pr create) using the same parameters. This avoids API-only failure and leverages the UI for PR creation.\",\n  \"Plan G: If immediate PR is not possible, update README directly on main (only if you have write access and it's acceptable) and communicate to the user about the direct update; then open a follow-up PR to reflect the change if needed.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan E: Retry the PR creation using github_create_a_pull_request with owner'chatopsFdse', repo'testRepo', head'update-readme', base'main', title'Updated project description', body'This pull request updates the README with the latest project details as requested by the user.' Ensure the repository exists, the owner and repo are correct, and that the authentication token has write access. If the 404 persists, check repository permissions and that the branch 'update-readme' exists on origin."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_create_a_pull_request\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository. Example: chatopsFdse\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The repository name. Example: testRepo\\\"\\n    },\\n    \\\"head\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the branch (or a commit SHA) to use as the head of the pull request. Example: update-readme\\\"\\n    },\\n    \\\"base\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the base branch you want the changes merged into. Example: main\\\"\\n    },\\n    \\\"title\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The title of the pull request. Example: Updated project description\\\"\\n    },\\n    \\\"body\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The body/description of the pull request. Example: This pull request updates the README with the latest project details as requested by the user.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"github_create_a_pull_request\",\n  \"parameters\": {\n    \"owner\": \"chatopsFdse\",\n    \"repo\": \"testRepo\",\n    \"head\": \"update-readme\",\n    \"base\": \"main\",\n    \"title\": \"Updated project description\",\n    \"body\": \"This pull request updates the README with the latest project details as requested by the user.\"\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 422, 'content': b'{\\\"message\\\":\\\"Validation Failed\\\",\\\"errors\\\":[{\\\"resource\\\":\\\"PullRequest\\\",\\\"field\\\":\\\"head\\\",\\\"code\\\":\\\"invalid\\\"}],\\\"documentation_url\\\":\\\"https://docs.github.com/rest/pulls/pulls#create-a-pull-request\\\",\\\"status\\\":\\\"422\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"1dab3e6d-2ed8-471c-a25b-d94ff16bd2ce\", \"tool_call_id\": \"call_4DW3XXDIpU0VkkzrFPffZMw8\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan H: Ensure the head branch 'update-readme' exists on origin. If it does not, create it from main locally and push to origin, then retry the PR with head'update-readme' and base'main'.\",\n  \"Plan I: Create a new temporary branch (e.g., 'update-readme-temp'), update the README on that branch, push to origin, and open a PR from 'update-readme-temp' to 'main' as an alternative path.\",\n  \"Plan J: As a last resort, perform the update directly on the main branch (if allowed by repository policies), then open a follow-up PR to reflect the README changes.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan H: Ensure the head branch 'update-readme' exists on origin. If it does not, create it from main locally and push to origin, then retry the PR with head'update-readme' and base'main'."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_create_a_pull_request\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository. The name is not case sensitive.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The repository name without the `.git` extension. The name is not case sensitive.\\\"\\n    },\\n    \\\"title\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The title of the pull request.\\\"\\n    },\\n    \\\"head\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The head branch name for the pull request. In this plan, set to 'update-readme'.\\\"\\n    },\\n    \\\"base\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The base branch name for the pull request. In this plan, set to 'main'.\\\"\\n    },\\n    \\\"body\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Optional PR description body.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"github_create_a_pull_request\",\n  \"parameters\": {\n    \"owner\": \"chatopsFdse\",\n    \"repo\": \"testRepo\",\n    \"head\": \"update-readme\",\n    \"base\": \"main\",\n    \"title\": \"Updated project description\",\n    \"body\": \"This pull request updates the README with the latest project details as requested by the user.\"\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 422, 'content': b'{\\\"message\\\":\\\"Validation Failed\\\",\\\"errors\\\":[{\\\"resource\\\":\\\"PullRequest\\\",\\\"field\\\":\\\"head\\\",\\\"code\\\":\\\"invalid\\\"}],\\\"documentation_url\\\":\\\"https://docs.github.com/rest/pulls/pulls#create-a-pull-request\\\",\\\"status\\\":\\\"422\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"d4c74bff-8a42-4336-926d-3445c9d5991a\", \"tool_call_id\": \"call_coS4lDCMidB6Jt7HdxY8UXSG\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan H: Ensure the head branch 'update-readme' exists on origin. If it does not, create it from main locally (git fetch origin && git checkout -b update-readme origin/main || git checkout -b update-readme main), push to origin, and retry the PR with head'update-readme' and base'main'.\",\n  \"Plan I: Create a new temporary branch (e.g., 'update-readme-temp'), update the README on that branch, push to origin, and open a PR from 'update-readme-temp' to 'main' as an alternative path.\",\n  \"Plan J: If immediate PR is not possible due to policy or permissions, perform the README update directly on main (if allowed), and then open a follow-up PR to reflect the change. Communicate policy constraint to user.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan H: Ensure the head branch 'update-readme' exists on origin. If it does not, create it from main locally (git fetch origin && git checkout -b update-readme origin/main || git checkout -b update-readme main), push to origin, and retry the PR with head'update-readme' and base'main'."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_create_a_pull_request\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository. The name is not case sensitive.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The repository name without the `.git` extension. The name is not case sensitive.\\\"\\n    },\\n    \\\"title\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The title for the pull request.\\\"\\n    },\\n    \\\"head\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The head branch name for the pull request, e.g., 'update-readme'.\\\"\\n    },\\n    \\\"base\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The base branch name to merge into, e.g., 'main'.\\\"\\n    },\\n    \\\"body\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Optional description/body for the pull request.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"github_create_a_pull_request\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"owner\",\n            \"parameter_value\": \"chatopsFdse\"\n        },\n        {\n            \"parameter_name\": \"repo\",\n            \"parameter_value\": \"testRepo\"\n        },\n        {\n            \"parameter_name\": \"head\",\n            \"parameter_value\": \"update-readme\"\n        },\n        {\n            \"parameter_name\": \"base\",\n            \"parameter_value\": \"main\"\n        },\n        {\n            \"parameter_name\": \"title\",\n            \"parameter_value\": \"Updated project description\"\n        },\n        {\n            \"parameter_name\": \"body\",\n            \"parameter_value\": \"This pull request updates the README with the latest project details as requested by the user.\"\n        }\n    ]\n}"
+    }
+]

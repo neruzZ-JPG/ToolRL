@@ -1,0 +1,134 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"{\"toolname\" : \"query_dog_info\", \"parameters\" : [{\"parameter_name\" : \"dog_species\", \"parameter_value\" : \"beagle\"}]}\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nPlease find all containers that were created within the last 24 hours and are using the 'nginx:latest' image, so I can monitor recent deployments."
+    },
+    {
+        "Human Message": "Current subtask is:\nIdentify the runtime and scope: confirm whether 'nginx:latest' containers run in Docker or Kubernetes and which hosts/namespaces to search, ensuring you have access to those systems before querying."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"To identify whether 'nginx:latest' containers run in Docker or Kubernetes, I need to check the container runtime and relevant namespaces or hosts. \\n\\nPlease specify the namespace or host details if you want to narrow the search, or confirm access to the default namespace for initial checking.\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n  \"toolname\": \"identify_runtime_and_scope\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"image_name\",\n      \"parameter_value\": \"nginx:latest\"\n    },\n    {\n      \"parameter_name\": \"namespace\",\n      \"parameter_value\": \"default\"\n    },\n    {\n      \"parameter_name\": \"confirm_access\",\n      \"parameter_value\": \"true\"\n    },\n    {\n      \"parameter_name\": \"scan_all_namespaces\",\n      \"parameter_value\": \"false\"\n    }\n  ]\n}"
+    },
+    {
+        "Ai Message": "\"failed to parse tool parameters\""
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Retry the Kubernetes query with corrected tool payload: call kubernetes_agent using tool_name 'identify_runtime_and_scope' and parameters [{parameter_name: 'image_name', parameter_value: 'nginx:latest'}, {parameter_name: 'namespace', parameter_value: 'default'}, {parameter_name: 'confirm_access', parameter_value: 'true'}, {parameter_name: 'scan_all_namespaces', parameter_value: 'false'}].\",\n  \"Scan all Kubernetes namespaces: call kubernetes_agent with tool_name 'identify_runtime_and_scope' and parameters [{parameter_name: 'image_name', parameter_value: 'nginx:latest'}, {parameter_name: 'scan_all_namespaces', parameter_value: 'true'}, {parameter_name: 'confirm_access', parameter_value: 'true'}] to discover any nginx:latest pods across the cluster.\",\n  \"Check Docker runtime instead: call docker_agent with tool_name 'identify_runtime_on_docker' and parameters [{parameter_name: 'image_name', parameter_value: 'nginx:latest'}, {parameter_name: 'hosts', parameter_value: 'local_or_provide_list'}, {parameter_name: 'confirm_access', parameter_value: 'true'}] (if multiple Docker hosts exist, request the host list from the user before executing).\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nRetry the Kubernetes query with corrected tool payload: call kubernetes_agent using tool_name 'identify_runtime_and_scope' and parameters [{parameter_name: 'image_name', parameter_value: 'nginx:latest'}, {parameter_name: 'namespace', parameter_value: 'default'}, {parameter_name: 'confirm_access', parameter_value: 'true'}, {parameter_name: 'scan_all_namespaces', parameter_value: 'false'}]."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"kubernetes_agent\\\",\\n  \\\"parameters\\\": {\\n    \\\"tool_name\\\": \\\"identify_runtime_and_scope\\\",\\n    \\\"parameters\\\": {\\n      \\\"image_name\\\": {\\n        \\\"type\\\": \\\"str\\\",\\n        \\\"description\\\": \\\"Name of the container image to identify runtime and scope\\\"\\n      },\\n      \\\"namespace\\\": {\\n        \\\"type\\\": \\\"str\\\",\\n        \\\"description\\\": \\\"Kubernetes namespace\\\"\\n      },\\n      \\\"confirm_access\\\": {\\n        \\\"type\\\": \\\"str\\\",\\n        \\\"description\\\": \\\"Confirmation to access the resource\\\"\\n      },\\n      \\\"scan_all_namespaces\\\": {\\n        \\\"type\\\": \\\"str\\\",\\n        \\\"description\\\": \\\"Whether to scan all namespaces\\\"\\n      }\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n  \"toolname\": \"identify_runtime_and_scope\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"image_name\",\n      \"parameter_value\": \"nginx:latest\"\n    },\n    {\n      \"parameter_name\": \"namespace\",\n      \"parameter_value\": \"default\"\n    },\n    {\n      \"parameter_name\": \"confirm_access\",\n      \"parameter_value\": \"true\"\n    },\n    {\n      \"parameter_name\": \"scan_all_namespaces\",\n      \"parameter_value\": \"false\"\n    }\n  ]\n}"
+    },
+    {
+        "Ai Message": "\"failed to parse tool parameters\""
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Call kubernetes_agent with payload: {\\\"tool_name\\\":\\\"kubernetes_agent\\\",\\\"parameters\\\":{\\\"tool_name\\\":\\\"identify_runtime_and_scope\\\",\\\"parameters\\\":{\\\"image_name\\\":\\\"nginx:latest\\\",\\\"namespace\\\":\\\"default\\\",\\\"confirm_access\\\":\\\"true\\\",\\\"scan_all_namespaces\\\":\\\"false\\\"}}} to retry identifying runtime in the default namespace.\",\n  \"Call kubernetes_agent with payload: {\\\"tool_name\\\":\\\"kubernetes_agent\\\",\\\"parameters\\\":{\\\"tool_name\\\":\\\"identify_runtime_and_scope\\\",\\\"parameters\\\":{\\\"image_name\\\":\\\"nginx:latest\\\",\\\"scan_all_namespaces\\\":\\\"true\\\",\\\"confirm_access\\\":\\\"true\\\"}}} to scan all namespaces for nginx:latest across the cluster.\",\n  \"Request kubeconfig or confirmation of cluster access and a list of target namespaces/hosts from the user; once provided, retry the appropriate kubernetes_agent call (either scoped to provided namespaces or scanning all namespaces).\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nCall kubernetes_agent with payload: {\"tool_name\":\"kubernetes_agent\",\"parameters\":{\"tool_name\":\"identify_runtime_and_scope\",\"parameters\":{\"image_name\":\"nginx:latest\",\"namespace\":\"default\",\"confirm_access\":\"true\",\"scan_all_namespaces\":\"false\"}}} to retry identifying runtime in the default namespace."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"kubectl_describe\\\",\\n  \\\"parameters\\\": {\\n    \\\"resourceType\\\": \\\"pod\\\",\\n    \\\"name\\\": \\\"nginx\\\",\\n    \\\"namespace\\\": \\\"default\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n  \"toolname\": \"kubectl_describe\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"resourceType\",\n      \"parameter_value\": \"pod\"\n    },\n    {\n      \"parameter_name\": \"name\",\n      \"parameter_value\": \"nginx\"\n    },\n    {\n      \"parameter_name\": \"namespace\",\n      \"parameter_value\": \"default\"\n    }\n  ]\n}"
+    },
+    {
+        "Ai Message": "\"[TextContent(type'text', text'{\\\\n  \\\"error\\\": \\\"Resource pod/nginx not found\\\",\\\\n  \\\"status\\\": \\\"not_found\\\"\\\\n}', annotationsNone)]\""
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Scan all Kubernetes namespaces for pods running image 'nginx:latest' created within the last 24 hours: call kubernetes_agent with tool_name 'identify_runtime_and_scope' and parameters [{parameter_name:'image_name',parameter_value:'nginx:latest'},{parameter_name:'scan_all_namespaces',parameter_value:'true'},{parameter_name:'confirm_access',parameter_value:'true'}].\",\n  \"List all pods in the 'default' namespace and filter by image and creationTimestamp locally: call kubernetes_agent with tool_name 'kubectl_get_pods' and parameters [{parameter_name:'namespace',parameter_value:'default'},{parameter_name:'output',parameter_value:'json'}] then filter results for image 'nginx:latest' and creationTime within 24h.\",\n  \"Query cluster controllers across all namespaces (Deployments/ReplicaSets/DaemonSets/StatefulSets) for any that reference image 'nginx:latest' and check their recent rollout timestamps: call kubernetes_agent with tool_name 'kubectl_get_controllers' and parameters [{parameter_name:'scan_all_namespaces',parameter_value:'true'},{parameter_name:'image_name',parameter_value:'nginx:latest'}].\",\n  \"If Kubernetes returns no matches, check Docker hosts for recent containers: request the list of Docker hosts or confirmation to scan the local host from the user, then call docker_agent with tool_name 'list_containers' and parameters [{parameter_name:'image_name',parameter_value:'nginx:latest'},{parameter_name:'since_hours',parameter_value:'24'},{parameter_name:'hosts',parameter_value:'<to_be_provided>'}].\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nScan all Kubernetes namespaces for pods running image 'nginx:latest' created within the last 24 hours: call kubernetes_agent with tool_name 'identify_runtime_and_scope' and parameters [{parameter_name:'image_name',parameter_value:'nginx:latest'},{parameter_name:'scan_all_namespaces',parameter_value:'true'},{parameter_name:'confirm_access',parameter_value:'true'}]."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"kubectl_get\\\",\\n  \\\"parameters\\\": {\\n    \\\"resourceType\\\": \\\"pods\\\",\\n    \\\"labelSelector\\\": \\\"\\\",\\n    \\\"fieldSelector\\\": \\\"spec.containers.imagenginx:latest\\\",\\n    \\\"namespace\\\": \\\"\\\",\\n    \\\"output\\\": \\\"json\\\",\\n    \\\"allNamespaces\\\": true\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n  \"toolname\": \"kubectl_get\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"resourceType\",\n      \"parameter_value\": \"pods\"\n    },\n    {\n      \"parameter_name\": \"labelSelector\",\n      \"parameter_value\": \"\"\n    },\n    {\n      \"parameter_name\": \"fieldSelector\",\n      \"parameter_value\": \"spec.containers.imagenginx:latest\"\n    },\n    {\n      \"parameter_name\": \"namespace\",\n      \"parameter_value\": \"\"\n    },\n    {\n      \"parameter_name\": \"output\",\n      \"parameter_value\": \"json\"\n    },\n    {\n      \"parameter_name\": \"allNamespaces\",\n      \"parameter_value\": \"true\"\n    }\n  ]\n}"
+    },
+    {
+        "Ai Message": "null"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Get all pods JSON across all namespaces and filter client-side for image and age: call kubernetes_agent with tool_name 'kubectl_get' and parameters {resourceType: 'pods', allNamespaces: true, output: 'json'}; then filter results for any pod where any container.image  'nginx:latest' and metadata.creationTimestamp is within the last 24 hours.\",\n  \"Query higher-level controllers to find recent deployments referencing nginx:latest: call kubernetes_agent with tool_name 'kubectl_get' and parameters {resourceType: 'deployments,replicasets,daemonsets,statefulsets', allNamespaces: true, output: 'json'}; inspect podTemplate.spec.containers images for 'nginx:latest' and check rollout/creation timestamps to identify recent deployments.\",\n  \"Verify cluster access and RBAC is not preventing results: call kubernetes_agent with tool_name 'kubectl_auth_check' and parameters {check: 'get pods --all-namespaces'} (or request kubeconfig/context from the user) and, if denied, request credentials or elevated permissions before retrying searches.\",\n  \"Fallback to scanning Docker hosts if Kubernetes yields no matches: ask the user to provide the list of Docker hosts or confirm scanning the local host, then call docker_agent with tool_name 'list_containers' and parameters {image_name: 'nginx:latest', since_hours: 24, hosts: '<to_be_provided>'}.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nGet all pods JSON across all namespaces and filter client-side for image and age: call kubernetes_agent with tool_name 'kubectl_get' and parameters {resourceType: 'pods', allNamespaces: true, output: 'json'}; then filter results for any pod where any container.image  'nginx:latest' and metadata.creationTimestamp is within the last 24 hours."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"kubectl_get\\\",\\n  \\\"parameters\\\": {\\n    \\\"resourceType\\\": \\\"pods\\\",\\n    \\\"allNamespaces\\\": true,\\n    \\\"output\\\": \\\"json\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n  \"toolname\": \"kubectl_get\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"resourceType\",\n      \"parameter_value\": \"pods\"\n    },\n    {\n      \"parameter_name\": \"allNamespaces\",\n      \"parameter_value\": \"true\"\n    },\n    {\n      \"parameter_name\": \"output\",\n      \"parameter_value\": \"json\"\n    }\n  ]\n}"
+    }
+]

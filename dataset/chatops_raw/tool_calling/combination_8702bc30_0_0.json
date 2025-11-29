@@ -1,0 +1,152 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI need to list all API resources available in the cluster to understand the current Kubernetes setup."
+    },
+    {
+        "Human Message": "Current subtask is:\nStart by identifying the command-line tool you'll use, typically `kubectl`. Think about how to list resources and find commands that can show API resources. Consider exploring commands related to resource discovery in Kubernetes."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use kubectl api-resources to list all API resources available in the cluster, including their API groups, versions, resource names, and whether they are namespaced. If needed, refine with kubectl api-resources --verbslist --namespaced to see capabilities.\",\n  \"Plan B: Use Kubernetes API discovery endpoints via kubectl get --raw. First run kubectl get --raw /apis to discover API groups/versions, then kubectl get --raw /api for core APIs. Enumerate resources for each group/version (e.g., /apis/<group>/<version>) or script the process to collect all resources.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use kubectl api-resources to list all API resources available in the cluster, including their API groups, versions, resource names, and whether they are namespaced. If needed, refine with kubectl api-resources --verbslist --namespaced to see capabilities."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan C: Use kubectl api-resources to list all API resources available in the cluster, including their API groups, versions, resource names, and whether they are namespaced, executed via kubernetes_agent.\",\n  \"Plan D: If needed, refine with kubectl api-resources --verbslist --namespaced to see capabilities for each resource, via kubernetes_agent.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan C: Use kubectl api-resources to list all API resources available in the cluster, including their API groups, versions, resource names, and whether they are namespaced, executed via kubernetes_agent."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan E: Use kubectl api-resources to list all API resources available in the cluster, including their API groups, versions, resource names, and whether they are namespaced, via kubernetes_agent.\",\n  \"Plan F: If needed, refine with kubectl api-resources --verbslist --namespaced to reveal capabilities for each resource, via kubernetes_agent.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan E: Use kubectl api-resources to list all API resources available in the cluster, including their API groups, versions, resource names, and whether they are namespaced, via kubernetes_agent."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan G: Retry the kubectl api-resources execution through kubernetes_agent when it becomes available, to complete Plan E and return the full list of resources.\",\n  \"Plan H: If kubernetes_agent remains unavailable, perform API discovery directly against the Kubernetes API server: run kubectl get --raw /apis and kubectl get --raw /api, then enumerate resources in each group/version (e.g., /apis/<group>/<version>), optionally scripting this to produce a consolidated list.\",\n  \"Plan I: Provide a self-contained manual walkthrough and exact commands for the user to run locally to obtain the same information, including kubectl api-resources, and the corresponding --verbs and --namespaced variations.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan G: Retry the kubectl api-resources execution through kubernetes_agent when it becomes available, to complete Plan E and return the full list of resources."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan J: Retry the kubectl api-resources execution through kubernetes_agent when it becomes available, to complete Plan E and return the full list of resources.\",\n  \"Plan K: Access the Kubernetes API discovery endpoints directly (kubectl get --raw /apis and kubectl get --raw /api) to enumerate all API groups/versions and their resources, then compile a consolidated list.\",\n  \"Plan L: Provide a ready-to-run local script and commands for the user to execute (kubectl api-resources, optionally with --verbslist --namespaced), plus a small snippet to assemble a complete resource list independent of agent availability.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan J: Retry the kubectl api-resources execution through kubernetes_agent when it becomes available, to complete Plan E and return the full list of resources."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan M: If kubernetes_agent remains unavailable, run kubectl api-resources locally (and optionally with --verbslist --namespaced) to generate the complete API resource list, then provide the consolidated output to the user.\",\n  \"Plan N: Provide a portable script that queries kubectl api-resources across all groups/versions and outputs a structured JSON catalog of resources with fields: group, version, resource, namespaced, kind, verbs.\",\n  \"Plan O: Guide the user to use raw Kubernetes API discovery endpoints via kubectl get --raw /apis and /api to enumerate groups/versions and resources, then assemble the final list.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan M: If kubernetes_agent remains unavailable, run kubectl api-resources locally (and optionally with --verbslist --namespaced) to generate the complete API resource list, then provide the consolidated output to the user."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan P: Attempt to run kubectl api-resources locally by provisioning a docker container with kubectl installed (e.g., a kubectl-enabled image), executing 'kubectl api-resources' and returning the consolidated list.\",\n  \"Plan Q: Provide the user with exact commands to run on their machine to list API resources (kubectl api-resources --verbslist --namespaced), and an optional JSON formatting step to output a structured catalog.\",\n  \"Plan R: Fall back to API discovery endpoints directly: run 'kubectl get --raw /apis' and 'kubectl get --raw /api' to enumerate API groups and resources, then script aggregation to a complete catalog.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan P: Attempt to run kubectl api-resources locally by provisioning a docker container with kubectl installed (e.g., a kubectl-enabled image), executing 'kubectl api-resources' and returning the consolidated list."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"create_a_container\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Optional container name to assign.\\\"\\n    },\\n    \\\"platform\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Platform for image lookup, e.g., linux/amd64. Optional.\\\"\\n    },\\n    \\\"body\\\": {\\n      \\\"type\\\": \\\"object\\\",\\n      \\\"description\\\": \\\"Container configuration payload. Must include at least: Image and Cmd. Use an image that has kubectl installed, e.g. 'lachlanevenson/k8s-kubectl' or 'bitnami/kubectl'. The Cmd should run 'kubectl api-resources'. Example: {\\\\\\\"Image\\\\\\\": \\\\\\\"lachlanevenson/k8s-kubectl\\\\\\\", \\\\\\\"Cmd\\\\\\\": [\\\\\\\"kubectl\\\\\\\", \\\\\\\"api-resources\\\\\\\"]}\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"create_a_container\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"name\",\n      \"parameter_value\": \"kubectl-api-resources\"\n    },\n    {\n      \"parameter_name\": \"platform\",\n      \"parameter_value\": \"linux/amd64\"\n    },\n    {\n      \"parameter_name\": \"body\",\n      \"parameter_value\": \"{\\\"Image\\\": \\\"lachlanevenson/k8s-kubectl\\\", \\\"Cmd\\\": [\\\"kubectl\\\", \\\"api-resources\\\"]}\"\n    }\n  ]\n}"
+    }
+]

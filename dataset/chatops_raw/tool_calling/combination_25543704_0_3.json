@@ -1,0 +1,161 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI want to follow the user with the handle 'developerJane' to stay updated on their activities."
+    },
+    {
+        "Human Message": "Current subtask is:\nIdentify the platform where 'developerJane' is active (e.g., Twitter, GitHub, LinkedIn) and confirm the exact handle on that platform."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use the GitHub agent to search for a user with the handle 'developerJane' on GitHub and confirm if they are active there, capturing the exact profile handle (e.g., github.com/DeveloperJane or @DeveloperJane).\",\n  \"Plan B: If Plan A yields no GitHub profile, broaden the search to other public platforms (Twitter, LinkedIn) for the handle 'developerJane' and confirm the exact handles on those platforms if found (note: this requires additional agents or search capabilities not currently available).\",\n  \"Plan C: Request additional input from the user to disambiguate (e.g., confirm which platforms to prioritize or provide any known links/identifiers) to proceed with a targeted verification plan.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use the GitHub agent to search for a user with the handle 'developerJane' on GitHub and confirm if they are active there, capturing the exact profile handle (e.g., github.com/DeveloperJane or @DeveloperJane)."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_a_user\\\",\\n  \\\"parameters\\\": {\\n    \\\"username\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The GitHub username to retrieve (e.g., 'developerJane').\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"github_get_a_user\",\n  \"parameters\": {\n    \"username\": \"developerJane\"\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"9f34e335-26f1-4516-bb52-efab53939772\", \"tool_call_id\": \"call_sDBPjlNIVWETXTXNSkT7EoT4\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Retry GitHub search for 'developerJane' with minor variations (e.g., 'DeveloperJane', 'developer_jane', 'developer-jane') to confirm whether a GitHub profile exists and capture the exact URL/handle if found.\",\n  \"Plan B: Search additional platforms (Twitter/X and LinkedIn) for the handle 'developerJane' and confirm exact handles if found, with URLs.\",\n  \"Plan C: Request clarifying information from the user about which platforms to prioritize or any known links to the correct profile to proceed efficiently.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Retry GitHub search for 'developerJane' with minor variations (e.g., 'DeveloperJane', 'developer_jane', 'developer-jane') to confirm whether a GitHub profile exists and capture the exact URL/handle if found."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_a_user\\\",\\n  \\\"parameters\\\": {\\n    \\\"username\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The GitHub username to fetch information for (e.g., 'developerJane').\\\"\\n    }\\n    }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"github_get_a_user\",\n  \"parameters\": {\n    \"username\": \"DeveloperJane\"\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"4b5a9b76-98aa-4e5a-acda-34b36159e520\", \"tool_call_id\": \"call_WlNIzlDrIiCcrhjpNJCZ6bXR\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Retry the GitHub search for the handle 'developerJane' using the variations 'DeveloperJane', 'developer_jane', 'developer-jane' to confirm a GitHub profile exists and capture the exact URL if found.\",\n  \"Plan B: Check GitLab for a user with the handle 'developerJane' (and common variants) using the GitLab agent to confirm activity and capture the profile URL if found.\",\n  \"Plan C: Request clarifying information from the user about preferred platforms or provide any known links to disambiguate and proceed efficiently.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Retry the GitHub search for the handle 'developerJane' using the variations 'DeveloperJane', 'developer_jane', 'developer-jane' to confirm a GitHub profile exists and capture the exact URL if found."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_a_user\\\",\\n  \\\"parameters\\\": {\\n    \\\"username\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The GitHub username to fetch. Initial attempt: 'developerJane'.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"github_get_a_user\",\n  \"parameters\": {\n    \"username\": \"developer_jane\"\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"45ffcc37-3a03-4350-a8c0-00fc7576b409\", \"tool_call_id\": \"call_lqyu1KBbm3n6hoCKjJHQH4Dk\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use the GitLab agent to search for the handle 'developerJane' and common variants on GitLab to confirm activity and capture profile URLs if found.\",\n  \"Plan B: Attempt to locate 'developerJane' on other public platforms (e.g., Twitter/X, LinkedIn) using available search capabilities, noting that this would require additional tools or agents not currently in place.\",\n  \"Plan C: Request clarifying information from the user about preferred platforms or provide any known links to the correct profile to proceed efficiently.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use the GitLab agent to search for the handle 'developerJane' and common variants on GitLab to confirm activity and capture profile URLs if found."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "No suitable work_agent."
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Wait for a GitLab agent to become available and then search GitLab for 'developerJane' and variants ('DeveloperJane', 'developerJane', 'developer_jane', 'developer-jane'), capturing exact profile URLs if found.\",\n  \"Plan B: If GitLab remains unavailable, use alternative public platforms (GitHub, Twitter/X, LinkedIn) to search for the handle 'developerJane' with common variants and confirm the exact profile handles and URLs on any platform where activity is detected.\",\n  \"Plan C: Request clarifying input from the user about preferred platforms or provide any known links to disambiguate and proceed efficiently.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Wait for a GitLab agent to become available and then search GitLab for 'developerJane' and variants ('DeveloperJane', 'developerJane', 'developer_jane', 'developer-jane'), capturing exact profile URLs if found."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Wait for a GitLab agent to become available and then search GitLab for 'developerJane' and variants ('DeveloperJane', 'developerJane', 'developer_jane', 'developer-jane'), capturing exact profile URLs if found.\",\n  \"Plan B: If GitLab remains unavailable, perform a focused search on GitHub for 'developerJane' variants and capture any matching profiles/handles.\",\n  \"Plan C: Request clarifying input from the user about preferred platforms or provide any known links to disambiguate and proceed efficiently.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Wait for a GitLab agent to become available and then search GitLab for 'developerJane' and variants ('DeveloperJane', 'developerJane', 'developer_jane', 'developer-jane'), capturing exact profile URLs if found."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_search_globally\\\",\\n  \\\"parameters\\\": {\\n    \\\"scope\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The scope to search in. Use 'users' to search for user profiles.\\\"\\n    },\\n    \\\"search\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The search query. Use the candidate usernames (e.g., 'developerJane').\\\"\\n    },\\n    \\\"state\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Optional filter by state. Applicable to certain scopes; may be ignored for user search.\\\"\\n    },\\n    \\\"confidential\\\": {\\n      \\\"type\\\": \\\"bool\\\",\\n      \\\"description\\\": \\\"Optional filter by confidentiality. Applicable to certain scopes; may be ignored for user search.\\\"\\n    },\\n    \\\"order_by\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Optional field to order results by (e.g., 'id', 'name').\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"gitlab_search_globally\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"scope\",\n      \"parameter_value\": \"users\"\n    },\n    {\n      \"parameter_name\": \"search\",\n      \"parameter_value\": \"developerJane OR DeveloperJane OR developer_jane OR developer-jane\"\n    },\n    {\n      \"parameter_name\": \"state\",\n      \"parameter_value\": \"\"\n    },\n    {\n      \"parameter_name\": \"confidential\",\n      \"parameter_value\": \"false\"\n    },\n    {\n      \"parameter_name\": \"order_by\",\n      \"parameter_value\": \"name\"\n    }\n  ]\n}"
+    }
+]

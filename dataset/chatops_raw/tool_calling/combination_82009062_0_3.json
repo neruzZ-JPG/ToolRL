@@ -1,0 +1,197 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI need to create a new Docker image based on Ubuntu 20.04 with a custom security patch, then push it to my container registry for deployment."
+    },
+    {
+        "Human Message": "Current subtask is:\nStart by researching how to create a Dockerfile based on Ubuntu 20.04 and incorporate your custom security patch. Think about the base image you'll use and how to layer your modifications. What's the best way to ensure your patch is securely applied within the image?"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use docker_agent to create a Dockerfile based on ubuntu:20.04, copy in a custom patch file (patch.diff), install patch utility (e.g., apt-get install -y patch), apply the patch with patch -p0 < /patch.diff in a RUN step, run a basic verification test, then build and push the image to your container registry.\",\n  \"Plan B: Implement a secure, multi-stage Dockerfile: first stage uses ubuntu:20.04 to apply and verify the patch (including optionally verifying a patch signature with gpg), then copy the patched artifacts to a slim final image (ubuntu:20.04-slim) to minimize size, and finally build and push the image to your registry.\",\n  \"Plan C: Bake in automated security validation: base on ubuntu:20.04, apply the patch as in Plan A but add an integrated vulnerability scan (e.g., Trivy) in CI, and sign the final image (e.g., using cosign) before pushing to the registry to ensure patch integrity and provenance.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use docker_agent to create a Dockerfile based on ubuntu:20.04, copy in a custom patch file (patch.diff), install patch utility (e.g., apt-get install -y patch), apply the patch with patch -p0 < /patch.diff in a RUN step, run a basic verification test, then build and push the image to your container registry."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use docker_agent to create a Dockerfile based on ubuntu:20.04, copy in a patch.diff file, install patch utility (apt-get update && apt-get install -y patch), apply the patch with patch -p0 < /patch.diff in a RUN step, run a basic verification test, then build and push the image to your container registry.\",\n  \"Plan B: Implement a secure, multi-stage Dockerfile: Stage 1 uses ubuntu:20.04 to apply and verify the patch (optionally verifying a patch signature with gpg), then Stage 2 uses ubuntu:20.04-slim as the final image to minimize size, copying the patched artifacts, then build and push to your registry.\",\n  \"Plan C: Bake in automated security validation: base on ubuntu:20.04, apply the patch as in Plan A but add an integrated vulnerability scan (e.g., Trivy) in CI, and sign the final image (e.g., using cosign) before pushing to the registry to ensure patch integrity and provenance.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use docker_agent to create a Dockerfile based on ubuntu:20.04, copy in a patch.diff file, install patch utility (apt-get update && apt-get install -y patch), apply the patch with patch -p0 < /patch.diff in a RUN step, run a basic verification test, then build and push the image to your container registry."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use docker_agent to create a Dockerfile based on ubuntu:20.04, copy in a patch.diff file, install patch utility (apt-get update && apt-get install -y patch), apply the patch with patch -p0 < /patch.diff in a RUN step, run a basic verification test, then build and push the image to your container registry.\",\n  \"Plan B: Implement a secure, multi-stage Dockerfile: Stage 1 uses ubuntu:20.04 to apply and verify the patch (optionally verifying a patch signature with gpg), then Stage 2 uses ubuntu:20.04-slim as the final image to minimize size, copying the patched artifacts, then build and push to your registry.\",\n  \"Plan C: Bake in automated security validation: base on ubuntu:20.04, apply the patch as in Plan A but add an integrated vulnerability scan (e.g., Trivy) in CI, and sign the final image (e.g., using cosign) before pushing to the registry to ensure patch integrity and provenance.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use docker_agent to create a Dockerfile based on ubuntu:20.04, copy in a patch.diff file, install patch utility (apt-get update && apt-get install -y patch), apply the patch with patch -p0 < /patch.diff in a RUN step, run a basic verification test, then build and push the image to your container registry."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan D: Use docker_agent to implement Plan A by creating a Dockerfile based on ubuntu:20.04, copy patch.diff, install patch (apt-get update && apt-get install -y patch), apply the patch with patch -p0 < /patch.diff in a RUN step, run a basic verification test, then build and push the image to your container registry.\",\n  \"Plan E: Implement a secure multi-stage Dockerfile (Plan B): Stage 1 applies and verifies the patch on ubuntu:20.04, Stage 2 uses ubuntu:20.04-slim as the final image to minimize size, copying patched artifacts, then build and push to your registry.\",\n  \"Plan F: Bake in automated security validation (Plan C): base on ubuntu:20.04, apply the patch as in Plan A but add an integrated vulnerability scan (e.g., Trivy) in CI, and sign the final image (e.g., using cosign) before pushing to the registry to ensure patch integrity and provenance.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan D: Use docker_agent to implement Plan A by creating a Dockerfile based on ubuntu:20.04, copy patch.diff, install patch (apt-get update && apt-get install -y patch), apply the patch with patch -p0 < /patch.diff in a RUN step, run a basic verification test, then build and push the image to your container registry."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"build_an_image\\\",\\n  \\\"parameters\\\": {\\n    \\\"inputStream\\\": {\\n      \\\"type\\\": \\\"string\\\",\\n      \\\"description\\\": \\\"A tarball containing the build context. Include a Dockerfile that starts FROM ubuntu:20.04, copies patch.diff into the image, installs patch via apt-get update && apt-get install -y patch, applies the patch with RUN patch -p0 < /patch.diff, and performs a basic verification test. The tar may be compressed (gzip, bzip2, or xz) as needed.\\\"\\n    },\\n    \\\"dockerfile\\\": {\\n      \\\"type\\\": \\\"string\\\",\\n      \\\"description\\\": \\\"Path within the build context to the Dockerfile (default: Dockerfile).\\\"\\n    },\\n    \\\"t\\\": {\\n      \\\"type\\\": \\\"string\\\",\\n      \\\"description\\\": \\\"Name and optional tag to apply to the built image, in the format name:tag (e.g., myregistry.example.com/planD:latest).\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"build_an_image\",\n  \"parameters\": {\n    \"inputStream\": \"<base64_tarball_of_build_context_containing_Dockerfile_and_patch.diff>\",\n    \"dockerfile\": \"Dockerfile\",\n    \"t\": \"myregistry.example.com/planD:latest\"\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: JSONDecodeError('Expecting property name enclosed in double quotes: line 1 column 2 (char 1)')\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"1bee38f0-b2ce-4060-a550-350acc96e3be\", \"tool_call_id\": \"call_mHUTZmfHfn2sMi2yBrGpx3ip\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan G: Retry the docker_agent execution by sending a correctly formatted base64-encoded build context tarball (including Dockerfile and patch.diff) to the build_an_image tool, with dockerfile set to Dockerfile and t set to the desired image tag. Ensure the JSON payload is valid and properly escaped, then build and push to the registry upon success.\",\n  \"Plan H: Fall back to a direct Dockerfile approach: create a Dockerfile FROM ubuntu:20.04, COPY patch.diff /patch.diff, RUN apt-get update && apt-get install -y patch, RUN patch -p0 < /patch.diff, RUN some basic verification test, and then docker build -t myregistry.example.com/planD:latest . and docker push myregistry.example.com/planD:latest.\",\n  \"Plan I: Implement a secure, multi-stage build: Stage 1 applies and verifies the patch on ubuntu:20.04, Stage 2 uses ubuntu:20.04-slim as the final image to minimize size, perform a basic verification, optionally run a vulnerability scan (e.g., Trivy), and sign the final image before pushing to the registry.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan G: Retry the docker_agent execution by sending a correctly formatted base64-encoded build context tarball (including Dockerfile and patch.diff) to the build_an_image tool, with dockerfile set to Dockerfile and t set to the desired image tag. Ensure the JSON payload is valid and properly escaped, then build and push to the registry upon success."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan G-1: Retry docker_agent with a correctly formatted base64-encoded tarball containing Dockerfile and patch.diff, ensure the JSON payload is valid and escaped, and specify dockerfile as Dockerfile and t as the desired image tag; on success, push to registry.\",\n  \"Plan H: Fall back to a direct Dockerfile approach (no build_agent): implement a Dockerfile FROM ubuntu:20.04, COPY patch.diff /patch.diff, RUN apt-get update && apt-get install -y patch, RUN patch -p0 < /patch.diff, RUN a basic verification test, then docker build -t myregistry.example.com/planD:latest . and docker push myregistry.example.com/planD:latest.\",\n  \"Plan I: Implement a secure multi-stage build (Plan I): Stage 1 applies patch on ubuntu:20.04, Stage 2 uses ubuntu:20.04-slim, run tests, optionally run vulnerability scan (Trivy) and sign final image.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan G-1: Retry docker_agent with a correctly formatted base64-encoded tarball containing Dockerfile and patch.diff, ensure the JSON payload is valid and escaped, and specify dockerfile as Dockerfile and t as the desired image tag; on success, push to registry."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"build_an_image\\\",\\n  \\\"parameters\\\": {\\n    \\\"inputStream\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Base64-encoded tar archive (optionally gzipped) containing Dockerfile and patch.diff as the build context.\\\"\\n    },\\n    \\\"dockerfile\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Path within the build context to the Dockerfile. Default: Dockerfile\\\"\\n    },\\n    \\\"t\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Tag for the built image in the name:tag format (e.g., myrepo/myimage:latest)\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"build_an_image\",\n  \"parameters\": {\n    \"inputStream\": \"<base64_tarball_of_build_context_containing_Dockerfile_and_patch.diff>\",\n    \"dockerfile\": \"Dockerfile\",\n    \"t\": \"myregistry.example.com/planG:latest\"\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 500, 'content': b'{\\\"message\\\":\\\"invalid reference format: repository name (planG) must be lowercase\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"1bc91f2e-bde4-404f-8654-f8fd800d091a\", \"tool_call_id\": \"call_eyc5EyOPU3ood3VNsxaaDWcq\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan J: Retry docker_agent with a correctly formatted base64-encoded tarball containing Dockerfile and patch.diff, ensure the JSON payload is valid and escaped, and correct the image tag to lowercase (e.g., myregistry.example.com/plang:latest). On success, push to registry.\",\n  \"Plan K: Fall back to a direct Dockerfile approach (no build_agent): implement a Dockerfile FROM ubuntu:20.04, COPY patch.diff /patch.diff, RUN apt-get update && apt-get install -y patch, RUN patch -p0 < /patch.diff, RUN a basic verification test, then docker build -t myregistry.example.com/plang:latest . and docker push myregistry.example.com/plang:latest.\",\n  \"Plan L: Implement a secure multi-stage build (Plan L): Stage 1 applies and verifies patch on ubuntu:20.04, Stage 2 uses ubuntu:20.04-slim as final image, copy patched artifacts, run tests, optionally run vulnerability scanning, and sign final image before pushing to registry; ensure image tag is lowercase.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan J: Retry docker_agent with a correctly formatted base64-encoded tarball containing Dockerfile and patch.diff, ensure the JSON payload is valid and escaped, and correct the image tag to lowercase (e.g., myregistry.example.com/plang:latest). On success, push to registry."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"build_an_image\\\",\\n  \\\"parameters\\\": {\\n    \\\"inputStream\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Base64-encoded tar archive containing Dockerfile and patch.diff. The tar may be gzip/bzip2/xz compressed or uncompressed.\\\"\\n    },\\n    \\\"t\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Image tag to assign to the built image, in the form repository:tag. Use lowercase. Example: myregistry.example.com/plang:latest\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"build_an_image\",\n  \"parameters\": {\n    \"inputStream\": \"<base64_tarball_of_build_context_containing_Dockerfile_and_patch.diff>\",\n    \"t\": \"myregistry.example.com/plang:latest\"\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 500, 'content': b'{\\\"message\\\":\\\"unexpected EOF\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"b75a13ce-0e8c-4058-8926-9cdc3463ceb7\", \"tool_call_id\": \"call_LipgkmSgNr5OxcQnMZ6NAcXT\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan M: Retry docker_agent with a properly formatted base64-encoded tarball, ensuring the tarball contains Dockerfile and patch.diff, and the payload uses a lowercase registry/tag; include an explicit lowercased t value like myregistry.example.com/plang:latest; verify the HTTP response and push to registry on success.\",\n  \"Plan N: Fall back to a direct Dockerfile approach (no build_agent): Create a Dockerfile FROM ubuntu:20.04, COPY patch.diff /patch.diff, RUN apt-get update && apt-get install -y patch, RUN patch -p0 < /patch.diff, RUN a basic verification test, then docker build -t myregistry.example.com/plang:latest . and docker push myregistry.example.com/plang:latest.\",\n  \"Plan O: Implement a secure, multi-stage build (Plan O): Stage 1 applies and verifies patch on ubuntu:20.04, Stage 2 uses ubuntu:20.04-slim as the final image, copy patched artifacts, run tests, optionally run vulnerability scanning, and sign final image before pushing to registry; ensure lowercase tag.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan M: Retry docker_agent with a properly formatted base64-encoded tarball, ensuring the tarball contains Dockerfile and patch.diff, and the payload uses a lowercase registry/tag; include an explicit lowercased t value like myregistry.example.com/plang:latest; verify the HTTP response and push to registry on success."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"build_an_image\\\",\\n  \\\"parameters\\\": {\\n    \\\"inputStream\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Base64-encoded tarball containing Dockerfile and patch.diff (build context). The tarball should be decoded by the server from the base64 string and streamed as the build input.\\\"\\n    },\\n    \\\"dockerfile\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Path within the build context to the Dockerfile. Defaults to Dockerfile if not provided.\\\"\\n    },\\n    \\\"t\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Tag to apply to the built image in the form repository:tag. Example: myregistry.example.com/plang:latest (must be lowercase).\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"build_an_image\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"inputStream\",\n      \"parameter_value\": \"<base64_tarball_of_build_context_containing_Dockerfile_and_patch.diff>\"\n    },\n    {\n      \"parameter_name\": \"dockerfile\",\n      \"parameter_value\": \"Dockerfile\"\n    },\n    {\n      \"parameter_name\": \"t\",\n      \"parameter_value\": \"myregistry.example.com/plang:latest\"\n    }\n  ]\n}"
+    }
+]

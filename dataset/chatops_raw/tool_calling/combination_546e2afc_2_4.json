@@ -1,0 +1,134 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nList all merge requests in group 'frontend-team' (group ID 97683359) that are pending approval, specifically those created by username 'alice123' and updated after 2024-02-15, to prepare for the quarterly code review session."
+    },
+    {
+        "Human Message": "Current subtask is:\nFirst step: Confirm GitLab API access. Obtain a PAT (read_api), then test GET /groups/97683359/merge_requests?author_usernamealice123&updated_after2024-02-15 to ensure you can list MRs before handling pending-approval filtering."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_group_merge_requests_list\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": \\\"97683359\\\",\\n    \\\"approved_by_ids\\\": {\\n      \\\"type\\\": \\\"null\\\",\\n      \\\"description\\\": \\\"No approval filter needed for testing, so this can be omitted or set to null.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute gitlab_get_group_merge_requests_list with parameters: id97683359, author_usernamealice123, updated_after2024-02-15, access_token<GITLAB_PAT_with_read_api_scope>"
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: 1 validation error for Http_request\\nbody\\n  Field required [typemissing, input_value{'url': 'https://gitlab.c...JR4\\\"}', 'method': 'GET'}, input_typedict]\\n    For further information visit https://errors.pydantic.dev/2.9/v/missing\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"9311d965-178f-43b8-9e75-8228bd9fbbeb\", \"tool_call_id\": \"call_PavULf2zbV2IgmPP3jTP2Rmv\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Retry the API call via gitlab_agent: execute gitlab_get_group_merge_requests_list with parameters id97683359, author_usernamealice123, updated_after2024-02-15 and access_token<GITLAB_PAT_with_read_api_scope>. Ensure the underlying http_request payload includes 'url', 'method''GET', 'headers' containing Authorization: Bearer <PAT>, and no 'body' field (or bodynull).\", \"If you cannot share a PAT here, I can guide you to create one: in GitLab go to Profile \u2192 Settings \u2192 Access Tokens, create a token with name, optional expiry, and scope read_api. Then either paste the token here for me to run the request, or run the provided curl command locally and share the results.\", \"Run the request locally yourself (no token sharing): from a terminal run: curl -s --header \\\"Authorization: Bearer <GITLAB_PAT_with_read_api_scope>\\\" \\\"<GITLAB_BASE_URL>/api/v4/groups/97683359/merge_requests?author_usernamealice123&updated_after2024-02-15\\\" and paste the JSON output here so I can continue with filtering pending-approval MRs.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nRetry the API call via gitlab_agent: execute gitlab_get_group_merge_requests_list with parameters id97683359, author_usernamealice123, updated_after2024-02-15 and access_token<GITLAB_PAT_with_read_api_scope>. Ensure the underlying http_request payload includes 'url', 'method''GET', 'headers' containing Authorization: Bearer <PAT>, and no 'body' field (or bodynull)."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_group_merge_requests_list\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"The ID of the group, here 97683359\\\"\\n    },\\n    \\\"author_username\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Username of the author, here 'alice123'\\\"\\n    },\\n    \\\"updated_after\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Filter merge requests updated after this date, here '2024-02-15'\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute gitlab_get_group_merge_requests_list with parameters: id97683359, author_usernamealice123, updated_after2024-02-15, access_token<GITLAB_PAT_with_read_api_scope>. Ensure the underlying HTTP request uses methodGET, includes header \"Authorization: Bearer <GITLAB_PAT_with_read_api_scope>\" and contains no body."
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 401, 'content': b'{\\\"message\\\":\\\"401 Unauthorized\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"98119971-0ee7-4f9a-9117-a14bdaaef638\", \"tool_call_id\": \"call_NbIMLrnZ92bJNp6btRa3fsSg\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Received 401 Unauthorized \u2014 the MR listing check failed, so the request is not yet complete. Plan A: Provide GitLab base URL and a valid PAT with read_api scope (paste the token here). I will re-run GET /api/v4/groups/97683359/merge_requests?author_usernamealice123&updated_after2024-02-15 with header Authorization: Bearer <PAT> and no body, then continue to filter pending-approval MRs.\", \"Plan B: Run the request locally and paste the JSON output (no token sharing). Run: curl -s --header \\\"Authorization: Bearer <GITLAB_PAT_with_read_api_scope>\\\" \\\"https://<GITLAB_BASE_URL>/api/v4/groups/97683359/merge_requests?author_usernamealice123&updated_after2024-02-15\\\" \u2014 paste the full JSON response here and I will extract MRs pending approval.\", \"Plan C: If you don't have a working PAT, create one and confirm its scopes. Steps: GitLab \u2192 Profile \u2192 Settings \u2192 Access Tokens (or Profile \u2192 Access Tokens), name it, optionally set expiry, grant scope read_api, create and copy the token. Then either (1) paste it here for me to retry (Plan A) or (2) run the curl in Plan B and paste results.\", \"Plan D: If your GitLab is self-managed or uses SSO/OAuth, tell me the base URL and auth method; I will provide tailored troubleshooting (check token validity/expiry, ensure the token's user has permission to view group MRs, verify any IP allowlists) and the exact request to run.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nReceived 401 Unauthorized \u2014 the MR listing check failed, so the request is not yet complete. Plan A: Provide GitLab base URL and a valid PAT with read_api scope (paste the token here). I will re-run GET /api/v4/groups/97683359/merge_requests?author_usernamealice123&updated_after2024-02-15 with header Authorization: Bearer <PAT> and no body, then continue to filter pending-approval MRs."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute gitlab_get_group_merge_requests_list with parameters: id97683359, author_usernamealice123, updated_after2024-02-15, access_token<GITLAB_PAT_with_read_api_scope>, base_url<GITLAB_BASE_URL>. Ensure the HTTP request uses methodGET, includes header \"Authorization: Bearer <GITLAB_PAT_with_read_api_scope>\", and has no body."
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: MissingSchema(\\\"Invalid URL '<GITLAB_BASE_URL>/api/v4/groups/97683359/merge_requests?author_usernamealice123&updated_after2024-02-15': No scheme supplied. Perhaps you meant https://<GITLAB_BASE_URL>/api/v4/groups/97683359/merge_requests?author_usernamealice123&updated_after2024-02-15?\\\")\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"cb666d67-8f2a-41c6-9c4d-bae02846eb3a\", \"tool_call_id\": \"call_C816VGbAM9CsBU8owb5cioqH\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Plan A: Provide your GitLab base URL (including https://) and a valid PAT with scope read_api by pasting them here (e.g. base_urlhttps://gitlab.example.com, tokenglpat_...). I will re-run GET /api/v4/groups/97683359/merge_requests?author_usernamealice123&updated_after2024-02-15 with header Authorization: Bearer <PAT> and no body, then filter for pending approvals.\", \"Plan B: Run the request locally and paste the raw JSON response here (no token sharing). Use: curl -s --header \\\"Authorization: Bearer <GITLAB_PAT_with_read_api_scope>\\\" \\\"https://<GITLAB_BASE_URL>/api/v4/groups/97683359/merge_requests?author_usernamealice123&updated_after2024-02-15\\\" \u2014 paste the full output and I will extract MRs pending approval.\", \"Plan C: If you received 401, check and (if needed) regenerate a PAT with read_api and confirm the token owner has permission to view the group MRs. Steps: Profile \u2192 Settings \u2192 Access Tokens \u2192 create token with scope read_api \u2192 copy token. Then either (1) paste token+base_url here (Plan A) or (2) run the curl in Plan B and share results.\", \"Plan D: If you cannot share tokens or run commands, provide: (1) your GitLab base URL, (2) whether it's GitLab.com or self-managed, and (3) whether SSO/IP allowlists or restricted group visibility are in use. I will give targeted troubleshooting steps and the exact request headers/params so your admin can run it and share results.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Provide your GitLab base URL (including https://) and a valid PAT with scope read_api by pasting them here (e.g. base_urlhttps://gitlab.example.com, tokenglpat_...). I will re-run GET /api/v4/groups/97683359/merge_requests?author_usernamealice123&updated_after2024-02-15 with header Authorization: Bearer <PAT> and no body, then filter for pending approvals."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_search_in_group\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The ID or URL-encoded path of the group owned by the authenticated user\\\"\\n    },\\n    \\\"scope\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The scope to search in\\\"\\n    },\\n    \\\"search\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The search query\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute gitlab_search_in_group with parameters: id97683359, scopemerge_requests, search\"author_username:alice123 updated_after:2024-02-15\", access_token<GITLAB_PAT_with_read_api_scope>, base_urlhttps://<GITLAB_BASE_URL>. Ensure the HTTP request includes header \"Authorization: Bearer <GITLAB_PAT_with_read_api_scope>\" and uses methodGET."
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 401, 'content': b'{\\\"message\\\":\\\"401 Unauthorized\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"9db8795e-c201-4f1d-aab1-84e46ed0af5a\", \"tool_call_id\": \"call_LentK4p6TctHEDnoB5y50klV\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Plan A: Paste your GitLab base URL (including https://) and a valid PAT with scope read_api here (e.g. base_urlhttps://gitlab.example.com, tokenglpat_...). I will re-run GET /api/v4/groups/97683359/merge_requests?author_usernamealice123&updated_after2024-02-15 with header Authorization: Bearer <PAT> and no body and return the MR list.\", \"Plan B: Run the request locally (no token sharing) and paste the raw JSON response here. Use: curl -s --header \\\"Authorization: Bearer <GITLAB_PAT_with_read_api_scope>\\\" \\\"https://<GITLAB_BASE_URL>/api/v4/groups/97683359/merge_requests?author_usernamealice123&updated_after2024-02-15\\\" \u2014 I will extract MRs pending approval from that output.\", \"Plan C: If you get 401, regenerate a PAT with scope read_api and confirm the token owner is a member (or has reporter+) of group 97683359. To validate a token, run: curl -s --header \\\"Authorization: Bearer <TOKEN>\\\" \\\"https://<GITLAB_BASE_URL>/api/v4/user\\\" \u2014 a valid token returns your user JSON. After validation, either paste the token (Plan A) or run the curl in Plan B and share results.\", \"Plan D: If your GitLab uses SSO, IP allowlists, or is self-managed and you cannot share tokens, tell me: (1) whether it is gitlab.com or self-managed and the base URL, and (2) whether SSO/IP restrictions exist. I will provide targeted troubleshooting steps (check token expiry, SSO session requirements, IP allowlist, group visibility and membership) and the exact commands for your admin to run and share the output.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Paste your GitLab base URL (including https://) and a valid PAT with scope read_api here (e.g. base_urlhttps://gitlab.example.com, tokenglpat_...). I will re-run GET /api/v4/groups/97683359/merge_requests?author_usernamealice123&updated_after2024-02-15 with header Authorization: Bearer <PAT> and no body and return the MR list."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_group_merge_requests_list\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The ID or URL-encoded path of the group.\\\"\\n    },\\n    \\\"approved_by_ids\\\": {\\n      \\\"type\\\": \\\"array\\\",\\n      \\\"description\\\": \\\"Optional. Integer array. Returns the merge requests approved by all the users with the given id, up to 5 users.\\\"\\n    },\\n    \\\"approver_ids\\\": {\\n      \\\"type\\\": \\\"array\\\",\\n      \\\"description\\\": \\\"Optional. Integer array. Returns merge requests which have specified all the users with the given id as individual approvers.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\" : \"gitlab_get_group_merge_requests_list\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"id\",\n            \"parameter_value\" : \"97683359\"\n        },\n        {\n            \"parameter_name\" : \"author_username\",\n            \"parameter_value\" : \"alice123\"\n        },\n        {\n            \"parameter_name\" : \"updated_after\",\n            \"parameter_value\" : \"2024-02-15\"\n        },\n        {\n            \"parameter_name\" : \"access_token\",\n            \"parameter_value\" : \"<GITLAB_PAT_with_read_api_scope>\"\n        },\n        {\n            \"parameter_name\" : \"base_url\",\n            \"parameter_value\" : \"https://<GITLAB_BASE_URL>\"\n        }\n    ]\n}"
+    }
+]

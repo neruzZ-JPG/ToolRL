@@ -1,0 +1,170 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nPlease review the commit history for the pull request numbered 42 in the repository named 'testRepo' owned by 'chatopsFdse' to identify recent changes and updates."
+    },
+    {
+        "Human Message": "Current subtask is:\nFirst step: In GitHub, go to chatopsFdse/testRepo, open pull request #42, and start with the Commits tab to see each commit message and author\u2014use that to identify recent changes."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use github_agent to fetch PR #42 commits via REST API (GET /repos/chatopsFdse/testRepo/pulls/42/commits) and extract commit messages and authors to identify recent changes.\",\n  \"Plan B: Use github_agent to fetch PR #42 commits via GraphQL API to obtain commit messages, authors, and timestamps for recent changes.\",\n  \"Plan C: If commits data is insufficient, fetch PR #42 files changed (GET /repos/chatopsFdse/testRepo/pulls/42/files) and analyze the changed files and patches to infer recent updates.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use github_agent to fetch PR #42 commits via REST API (GET /repos/chatopsFdse/testRepo/pulls/42/commits) and extract commit messages and authors to identify recent changes."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_pull_request_commits\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository. The name is not case sensitive.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the repository without the .git extension. The name is not case sensitive.\\\"\\n    },\\n    \\\"pull_number\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"The pull request number.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"github_get_pull_request_commits\",\n  \"parameters\": {\n    \"owner\": \"chatopsFdse\",\n    \"repo\": \"testRepo\",\n    \"pull_number\": 42\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/pulls/pulls#list-commits-on-a-pull-request\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"cc114270-fbb2-43f2-813f-a5b5798c42da\", \"tool_call_id\": \"call_x389pLGt4UeO3KyBhD8QHE6z\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Check the PR exists and is accessible by requesting the pull itself (GET /repos/chatopsFdse/testRepo/pulls/42) to confirm the PR number and access privileges; if it exists, retry fetching commits with authentication on REST endpoint /repos/chatopsFdse/testRepo/pulls/42/commits.\",\n  \"Plan B: Use GraphQL API to retrieve commits for PR #42 (e.g., pullRequest(number: 42) { commits(first: 100) { nodes { commit { message, author { name }, committedDate } } } }), which may bypass some REST limitations.\",\n  \"Plan C: If commits data remains unavailable, fetch the list of files changed in PR #42 (GET /repos/chatopsFdse/testRepo/pulls/42/files) and analyze the changed file paths and patch data to infer recent updates.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan B: Use GraphQL API to retrieve commits for PR #42 (e.g., pullRequest(number: 42) { commits(first: 100) { nodes { commit { message, author { name }, committedDate } } } }), which may bypass some REST limitations."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use github_agent with GraphQL API to fetch commits for PR #42: repository(owner: \\\"chatopsFdse\\\", name: \\\"testRepo\\\") { pullRequest(number: 42) { commits(first: 100) { nodes { commit { message, author { name }, committedDate } } } } } to identify recent changes and authors.\",\n  \"Plan B: Validate that PR #42 exists and is accessible via GraphQL (or REST) before iterating; if the PR is missing or access is restricted, report back and retry with appropriate credentials or a different PR.\",\n  \"Plan C: If GraphQL commits data remains unavailable, fall back to REST by listing commits for PR #42 (GET /repos/chatopsFdse/testRepo/pulls/42/commits) and/or fetch the files changed (GET /repos/chatopsFdse/testRepo/pulls/42/files) to infer recent updates.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use github_agent with GraphQL API to fetch commits for PR #42: repository(owner: \"chatopsFdse\", name: \"testRepo\") { pullRequest(number: 42) { commits(first: 100) { nodes { commit { message, author { name }, committedDate } } } } } to identify recent changes and authors."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_pull_request_commits\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository. Example: 'chatopsFdse'.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The repository name. Example: 'testRepo'.\\\"\\n    },\\n    \\\"pull_number\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"The pull request number. Example: 42.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"github_get_pull_request_commits\",\n  \"parameters\": {\n    \"owner\": \"chatopsFdse\",\n    \"repo\": \"testRepo\",\n    \"pull_number\": 42\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/pulls/pulls#list-commits-on-a-pull-request\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"8ee38196-5e0d-4876-ac3e-f08dfe01cef8\", \"tool_call_id\": \"call_2L29U7tH30mjC24oYtscShN0\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Verify PR #42 exists using GraphQL: repository(owner: \\\"chatopsFdse\\\", name: \\\"testRepo\\\") { pullRequest(number: 42) { id, title, author { login } } }. If it exists, retry fetching commits with GraphQL as in the previous plan to identify recent changes and authors.\",\n  \"Plan B: Check repository and PR accessibility via REST by attempting GET /repos/chatopsFdse/testRepo/pulls/42 with authentication; if PR not found, report and request correct PR number or access rights.\",\n  \"Plan C: If commits remain unavailable, fetch the list of files changed in PR #42 (GET /repos/chatopsFdse/testRepo/pulls/42/files) and analyze the changed file paths and patches to infer updates, then optionally correlate with any available commit messages.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Verify PR #42 exists using GraphQL: repository(owner: \"chatopsFdse\", name: \"testRepo\") { pullRequest(number: 42) { id, title, author { login } } }. If it exists, retry fetching commits with GraphQL as in the previous plan to identify recent changes and authors."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_one_pull_request\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository. The name is not case sensitive.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the repository without the .git extension. The name is not case sensitive.\\\"\\n    },\\n    \\\"pull_number\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"The number of the pull request to retrieve.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"github_get_one_pull_request\",\n  \"parameters\": {\n    \"owner\": \"chatopsFdse\",\n    \"repo\": \"testRepo\",\n    \"pull_number\": 42\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/pulls/pulls#get-a-pull-request\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"1d6a848c-0676-4f90-9f32-d4023b53ce0b\", \"tool_call_id\": \"call_rZc5RXrWflFDEUtMejeHh2j2\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Verify PR #42 exists and is accessible via GraphQL by querying repository(owner: \\\"chatopsFdse\\\", name: \\\"testRepo\\\") { pullRequest(number: 42) { id, title, author { login } } }. If the PR cannot be found (null or error), report back with the correct PR details or request clarification.\",\n  \"Plan B: Validate repository and PR accessibility via REST by attempting GET /repos/chatopsFdse/testRepo/pulls/42; if 404, report and request correct PR number or access rights.\",\n  \"Plan C: If PR data remains unavailable, fetch PR files changed (GET /repos/chatopsFdse/testRepo/pulls/42/files) and/or commits (REST or GraphQL) to infer recent updates, then request confirmation to proceed with the best available data.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan B: Validate repository and PR accessibility via REST by attempting GET /repos/chatopsFdse/testRepo/pulls/42; if 404, report and request correct PR number or access rights."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_one_pull_request\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository. Example: chatopsFdse\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The repository name. Example: testRepo\\\"\\n    },\\n    \\\"pull_number\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"The number identifying the pull request. Example: 42\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"github_get_one_pull_request\",\n  \"parameters\": {\n    \"owner\": \"chatopsFdse\",\n    \"repo\": \"testRepo\",\n    \"pull_number\": 42\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/pulls/pulls#get-a-pull-request\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"89d40199-fe7b-4d41-94f3-b5982d3314f6\", \"tool_call_id\": \"call_FnqtwU4eXxbLYGh7wVXZrK32\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use GraphQL to verify that PR #42 exists: repository(owner: \\\"chatopsFdse\\\", name: \\\"testRepo\\\") { pullRequest(number: 42) { id, title, author { login } } }. If it exists, fetch commits with GraphQL to identify recent changes and authors.\",\n  \"Plan B: Since the REST GET for PR 42 returned 404, report back that PR 42 is not accessible or does not exist in the repository; request clarification or a correct PR number or access rights.\",\n  \"Plan C: If needed, search for the intended PR by title or branch to locate the correct PR, then proceed with retrieving commits via GraphQL or REST once located.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan B: Since the REST GET for PR 42 returned 404, report back that PR 42 is not accessible or does not exist in the repository; request clarification or a correct PR number or access rights."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "SUCCESS, PR 42 is not accessible in chatopsFdse/testRepo (HTTP 404). Please provide a correct PR number or the necessary access rights."
+    }
+]

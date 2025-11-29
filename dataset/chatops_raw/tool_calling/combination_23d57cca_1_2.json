@@ -1,0 +1,80 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nPatch the deployment 'frontend-app' in the 'staging' namespace to update the image version to 'v2.3.1', and afterwards, clean up all resources that are no longer needed."
+    },
+    {
+        "Human Message": "Current subtask is:\nFirst, verify you\u2019re on the right cluster and identify the container name and current image for frontend-app: kubectl config current-context && kubectl -n staging get deploy frontend-app -o jsonpath'{.spec.template.spec.containers[*].name} {.spec.template.spec.containers[*].image}'"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"kubectl_describe\\\",\\n  \\\"parameters\\\": {\\n    \\\"resourceType\\\": \\\"deployments\\\",\\n    \\\"name\\\": \\\"frontend-app\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Execute kubectl_describe via kubernetes_agent with parameters {\\\"resourceType\\\":\\\"deployments\\\",\\\"name\\\":\\\"frontend-app\\\",\\\"namespace\\\":\\\"staging\\\"} to obtain the container name(s) and current image(s); then patch the deployment to update the image to 'v2.3.1' (e.g. kubectl -n staging set image deployment/frontend-app <container_name><image_repo>:v2.3.1), verify rollout status, and finally remove any orphaned/unused resources (e.g. old ReplicaSets, unused ConfigMaps/Secrets) as appropriate.\",\n  \"Plan B: Run direct kubectl commands locally: first confirm context with `kubectl config current-context`, then run `kubectl -n staging get deploy frontend-app -o jsonpath'{.spec.template.spec.containers[*].name} {.spec.template.spec.containers[*].image}'` to get the container name(s) and current image(s); then patch with `kubectl -n staging set image deployment/frontend-app <container_name><image_repo>:v2.3.1`, verify rollout status, and perform cleanup of unneeded resources (remove old ReplicaSets, stale ConfigMaps/Secrets) as needed.\"\n]"
+    },
+    {
+        "Ai Message": "\"[TextContent(type'text', text'{\\\\n  \\\"error\\\": \\\"Resource deployments/frontend-app not found\\\",\\\\n  \\\"status\\\": \\\"not_found\\\"\\\\n}', annotationsNone)]\""
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Confirm current kubecontext and re-run the deployment query. Use kubernetes_agent to run `kubectl config current-context` to verify the cluster, then (if context is correct) run `kubectl -n staging get deploy frontend-app -o jsonpath'{.spec.template.spec.containers[*].name} {.spec.template.spec.containers[*].image}'` to obtain container name(s) and image(s). If the context is incorrect, report the current context and ask the user whether to switch contexts or proceed on the current cluster.\",\n  \"Plan B: Search for the deployment under similar names or in other namespaces. Use kubernetes_agent to run `kubectl -n staging get deployments` to list deployments in staging and `kubectl get deployments --all-namespaces | grep frontend-app || true` to find any matching deployments across namespaces; if a matching deployment is found elsewhere or with a slightly different name, identify the correct resource and then query its container name(s) and image(s).\",\n  \"Plan C: If the deployment truly does not exist and should be created or restored, ask the user for intent and required details. Propose either (1) restore/create the deployment named 'frontend-app' in namespace 'staging' using image '<image_repo>:v2.3.1' (require the image repository or manifest), or (2) abort and let the user handle restoration. If user approves creation, run kubernetes_agent to apply a provided manifest or run `kubectl -n staging create deployment frontend-app --image<image_repo>:v2.3.1` and then proceed with rollout verification and cleanup.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Confirm current kubecontext and re-run the deployment query. Use kubernetes_agent to run `kubectl config current-context` to verify the cluster, then (if context is correct) run `kubectl -n staging get deploy frontend-app -o jsonpath'{.spec.template.spec.containers[*].name} {.spec.template.spec.containers[*].image}'` to obtain container name(s) and image(s). If the context is incorrect, report the current context and ask the user whether to switch contexts or proceed on the current cluster."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"To confirm the current kubecontext, I will use the `kubectl_context` tool with the operation `get current`. Then, I will verify if the context is correct before proceeding with the deployment query.\\n\\nParameters needed:\\n- For confirming context: operation: \\\"get\\\"\\n- For deployment query: resourceType: \\\"deployment\\\", name: \\\"frontend-app\\\", namespace: \\\"staging\\\", outputFormat: \\\"jsonpath\\\", args: [\\\"{.spec.template.spec.containers[*].name} {.spec.template.spec.containers[*].image}\\\"]\\n\\nI will first get the current context.\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "kubernetes_agent: {\"tool_name\":\"kubectl_context\",\"parameters\":{\"operation\":\"get\",\"target\":\"current\"}}"
+    },
+    {
+        "Ai Message": "\"[TextContent(type'text', text'{\\\\n  \\\"currentContext\\\": \\\"default\\\"\\\\n}', annotationsNone)]\""
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Proceed on the current kubecontext 'default'. Use kubernetes_agent to run `kubectl -n staging get deploy frontend-app -o jsonpath'{.spec.template.spec.containers[*].name} {.spec.template.spec.containers[*].image}'` to fetch the container name(s) and current image(s). If found, return the names/images so I can patch the image to v2.3.1 and verify rollout.\",\n  \"Plan B: The current context 'default' may be incorrect. Ask the user to confirm the intended kubecontext (provide the context name). If the user supplies a different context, use kubernetes_agent to run `kubectl config use-context <context>` (tool: kubectl_context operation: set target: <context>) and then run the Plan A deployment query in that context.\",\n  \"Plan C: If deployment 'frontend-app' is not present in namespace 'staging', search for it elsewhere before creating anything. Use kubernetes_agent to run `kubectl get deployments -n staging` and `kubectl get deployments --all-namespaces` (or equivalent tools) to locate similarly named deployments; if a match is found in another namespace or with a slight name difference, report the correct resource to the user and then run the Plan A query against that resource.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Proceed on the current kubecontext 'default'. Use kubernetes_agent to run `kubectl -n staging get deploy frontend-app -o jsonpath'{.spec.template.spec.containers[*].name} {.spec.template.spec.containers[*].image}'` to fetch the container name(s) and current image(s). If found, return the names/images so I can patch the image to v2.3.1 and verify rollout."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"To retrieve the container name(s) and image(s) for the deployment `frontend-app` in the `staging` namespace, I will use the `kubectl_generic` tool with the specified command. \\n\\nParameters needed:\\n- command: `\\\"get\\\"`\\n- resourceType: `\\\"deployment\\\"`\\n- name: `\\\"frontend-app\\\"`\\n- namespace: `\\\"staging\\\"`\\n- outputFormat: `\\\"json\\\"`\\n- args: `[\\\"-o\\\", \\\"jsonpath'{.spec.template.spec.containers[*].name} {.spec.template.spec.containers[*].image}'\\\"]`\\n\\nI will now make the call.\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\" : \"kubectl_generic\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"command\",\n            \"parameter_value\" : \"get\"\n        },\n        {\n            \"parameter_name\" : \"resourceType\",\n            \"parameter_value\" : \"deployment\"\n        },\n        {\n            \"parameter_name\" : \"name\",\n            \"parameter_value\" : \"frontend-app\"\n        },\n        {\n            \"parameter_name\" : \"namespace\",\n            \"parameter_value\" : \"staging\"\n        },\n        {\n            \"parameter_name\" : \"outputFormat\",\n            \"parameter_value\" : \"json\"\n        },\n        {\n            \"parameter_name\" : \"args\",\n            \"parameter_value\" : \"[\\\"-o\\\",\\\"jsonpath'{.spec.template.spec.containers[*].name} {.spec.template.spec.containers[*].image}'\\\"]\"\n        }\n    ]\n}"
+    }
+]

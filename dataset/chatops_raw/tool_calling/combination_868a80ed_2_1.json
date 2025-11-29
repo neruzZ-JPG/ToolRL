@@ -1,0 +1,53 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nGet the logs from the job called 'data-backup-2024-04-20' in the 'default' namespace, following the logs in real-time to monitor ongoing process."
+    },
+    {
+        "Human Message": "Current subtask is:\nList the pod(s) created by the job to identify the pod name:\nkubectl get pods -n default -l job-namedata-backup-2024-04-20"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"To list the pods created by the job with label 'job-namedata-backup-2024-04-20' in the default namespace, I will use the `kubectl_get` tool with appropriate label selector and namespace parameters.\\n\\nParameters needed:\\n- resourceType: 'pods'\\n- labelSelector: 'job-namedata-backup-2024-04-20'\\n- namespace: 'default'\\n- output: 'json' (to get detailed information including pod names)\\n\\nI will proceed with these parameters.\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "[\"Execute kubectl_get to list pods: tool'kubectl_get', resourceType'pods', labelSelector'job-namedata-backup-2024-04-20', namespace'default', output'json' \u2014 then extract pod name(s) from the result and run 'kubectl logs -n default -f <pod-name>' (add '-c <container>' if multiple containers).\", \"If the job created multiple pods and you want to follow all pods' logs in real time, use a multi-pod log follower: e.g. 'stern -n default \\\"job-namedata-backup-2024-04-20\\\"' or 'kubectl logs -l job-namedata-backup-2024-04-20 -n default -f --all-containers' to stream logs from all matching pods.\", \"If pods have already terminated, retrieve previous logs or check job status: 'kubectl logs -n default -p <pod-name>' for previous logs, and 'kubectl describe job data-backup-2024-04-20 -n default' to inspect job completion/failure details.\"]"
+    },
+    {
+        "Ai Message": "\"[TextContent(type'text', text'{\\\\n  \\\"items\\\": []\\\\n}', annotationsNone)]\""
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Describe the Job to get pod-template labels and status: kubectl get job data-backup-2024-04-20 -n default -o json && kubectl describe job data-backup-2024-04-20 -n default. If you find pod template labels (e.g. app...), list pods with that label: kubectl get pods -n default -l <label><value> -o json and then follow logs: kubectl logs -n default -f <pod-name> (add -c <container> if needed).\", \"Find pods by ownerReference name (search pods that reference the Job): kubectl get pods -n default -o json | jq -r '.items[] | select(.metadata.ownerReferences[]?.name\\\"data-backup-2024-04-20\\\") | .metadata.name' to get pod names, then kubectl logs -n default -f <pod-name>.\", \"Search recent pods in the namespace for names/labels related to the job: kubectl get pods -n default --sort-by.metadata.creationTimestamp | grep -i data-backup or kubectl get pods -n default --show-labels and inspect for related labels; once you identify pod(s) run kubectl logs -n default -f <pod-name>. Also check related events: kubectl get events -n default --field-selector involvedObject.namedata-backup-2024-04-20.\", \"If no pods exist because they completed and were garbage-collected, inspect Job TTL/completion and consider re-running or retaining pods: kubectl describe job data-backup-2024-04-20 -n default and check .spec.ttlSecondsAfterFinished and .spec.successfulJobsHistoryLimit. If pods were deleted and you need historical logs, fetch them from your cluster log aggregator (ELK/Fluentd/Cloud logs) if available; otherwise re-run the Job to produce pods and stream logs live.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nFind pods by ownerReference name (search pods that reference the Job): kubectl get pods -n default -o json | jq -r '.items[] | select(.metadata.ownerReferences[]?.name\"data-backup-2024-04-20\") | .metadata.name' to get pod names, then kubectl logs -n default -f <pod-name>."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"To find pods by ownerReference name, I need to list the pods in the default namespace and filter by ownerReference. Then, I will retrieve logs for the identified pods.\\n\\nFirst, list pods in the default namespace to identify the relevant pods. \\n\\nParameters needed: resourceType'pod', namespace'default', output'json'.\\n\\nLet's proceed.\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"kubectl_get\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"resourceType\",\n            \"parameter_value\": \"pods\"\n        },\n        {\n            \"parameter_name\": \"namespace\",\n            \"parameter_value\": \"default\"\n        },\n        {\n            \"parameter_name\": \"output\",\n            \"parameter_value\": \"json\"\n        },\n        {\n            \"parameter_name\": \"ownerReferenceName\",\n            \"parameter_value\": \"data-backup-2024-04-20\"\n        },\n        {\n            \"parameter_name\": \"jq_filter\",\n            \"parameter_value\": \".items[] | select(.metadata.ownerReferences[]?.name==\\\"data-backup-2024-04-20\\\") | .metadata.name\"\n        },\n        {\n            \"parameter_name\": \"post_command\",\n            \"parameter_value\": \"kubectl logs -n default -f <pod-name>\"\n        }\n    ]\n}"
+    }
+]

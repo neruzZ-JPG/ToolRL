@@ -1,0 +1,134 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI need to set up a new internal network named 'ProjectAlphaNet' for container clustering, ensuring it is attachable and restricted from external access, and I want to specify a subnet of 192.168.100.0/24 with a gateway at 192.168.100.1."
+    },
+    {
+        "Human Message": "Current subtask is:\nStart by researching the container orchestration platform you're using (e.g., Docker, Kubernetes). Think about how to create a network with custom subnet, gateway, and access restrictions. What commands or configurations are used to define private, attachable networks with specified subnets?"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Create an attachable internal Docker overlay network in Swarm: docker network create --driver overlay --attachable --internal --subnet 192.168.100.0/24 --gateway 192.168.100.1 ProjectAlphaNet\",\n  \"Plan B: If using Kubernetes, provision an overlay network via the cluster's CNI (e.g., Calico or Multus). Define an IP pool of 192.168.100.0/24 and apply a NetworkPolicy to restrict external egress; attach pods to this network through a NetworkAttachmentDefinition named ProjectAlphaNet.\",\n  \"Plan C: For local development without Swarm, attempt a bridge network (note: this will not satisfy the attachable requirement). Create a network ProjectAlphaNet with subnet 192.168.100.0/24 and gateway 192.168.100.1 using docker network create --driver bridge --subnet 192.168.100.0/24 --gateway 192.168.100.1 ProjectAlphaNet and connect containers to it; external access will need additional firewall or policy controls.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Create an attachable internal Docker overlay network in Swarm: docker network create --driver overlay --attachable --internal --subnet 192.168.100.0/24 --gateway 192.168.100.1 ProjectAlphaNet"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Execute the Docker Swarm command to create the ProjectAlphaNet overlay network as specified using docker_agent: docker network create --driver overlay --attachable --internal --subnet 192.168.100.0/24 --gateway 192.168.100.1 ProjectAlphaNet\",\n  \"Plan B: Ensure Docker Swarm is initialized on the host, then run Plan A; if Swarm is not initialized, first run 'docker swarm init' and retry the Plan A command\",\n  \"Plan C: After creation, verify the network with 'docker network ls' and 'docker network inspect ProjectAlphaNet' to confirm it is internal, attachable, and has the correct subnet and gateway; report the result to the user\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Execute the Docker Swarm command to create the ProjectAlphaNet overlay network as specified using docker_agent: docker network create --driver overlay --attachable --internal --subnet 192.168.100.0/24 --gateway 192.168.100.1 ProjectAlphaNet"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"create_a_network\\\",\\n  \\\"parameters\\\": {\\n    \\\"body\\\": {\\n      \\\"type\\\": \\\"object\\\",\\n      \\\"description\\\": \\\"Network creation payload to create an overlay network named ProjectAlphaNet with Attachable and Internal flags and IPAM config. The JSON body should be: {\\\\\\\"Name\\\\\\\":\\\\\\\"ProjectAlphaNet\\\\\\\",\\\\\\\"Driver\\\\\\\":\\\\\\\"overlay\\\\\\\",\\\\\\\"Attachable\\\\\\\":true,\\\\\\\"Internal\\\\\\\":true,\\\\\\\"IPAM\\\\\\\":{\\\\\\\"Config\\\\\\\":[{\\\\\\\"Subnet\\\\\\\":\\\\\\\"192.168.100.0/24\\\\\\\",\\\\\\\"Gateway\\\\\\\":\\\\\\\"192.168.100.1\\\\\\\"}]}}\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"create_a_network\",\n  \"parameters\": {\n    \"body\": {\n      \"Name\": \"ProjectAlphaNet\",\n      \"Driver\": \"overlay\",\n      \"Attachable\": true,\n      \"Internal\": true,\n      \"IPAM\": {\n        \"Config\": [\n          {\n            \"Subnet\": \"192.168.100.0/24\",\n            \"Gateway\": \"192.168.100.1\"\n          }\n        ]\n      }\n    }\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 403, 'content': b'{\\\"message\\\":\\\"This node is not a swarm manager. Use \\\\\\\\\\\"docker swarm init\\\\\\\\\\\" or \\\\\\\\\\\"docker swarm join\\\\\\\\\\\" to connect this node to swarm and try again.\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"b5916735-3ccb-4834-9784-debba6d780f7\", \"tool_call_id\": \"call_LMCJ4eWXnPg28sT6LuD3dHoJ\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Initialize Docker Swarm on this node (docker swarm init) to promote it to a manager, then execute: docker network create --driver overlay --attachable --internal --subnet 192.168.100.0/24 --gateway 192.168.100.1 ProjectAlphaNet\",\n  \"Plan B: If a Swarm manager exists on another node, join this node to that Swarm as a manager (docker swarm join --token <manager_token> <manager_ip:2377>) and run the network creation from the manager node: docker network create --driver overlay --attachable --internal --subnet 192.168.100.0/24 --gateway 192.168.100.1 ProjectAlphaNet\",\n  \"Plan C: If Swarm cannot be used in this environment, consider a non-overlay approach (e.g., Docker bridge) which would not meet the attachable overlay requirement; alternatively, switch to Kubernetes with a suitable CNI (Calico/Multus) to achieve a private, attachable network per the subnet/gateway spec\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Initialize Docker Swarm on this node (docker swarm init) to promote it to a manager, then execute: docker network create --driver overlay --attachable --internal --subnet 192.168.100.0/24 --gateway 192.168.100.1 ProjectAlphaNet"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Initialize Docker Swarm on this node (docker swarm init) to promote it to a manager, then execute: docker network create --driver overlay --attachable --internal --subnet 192.168.100.0/24 --gateway 192.168.100.1 ProjectAlphaNet\",\n  \"Plan B: If this node is part of an existing Swarm, join as a manager using docker swarm join --token <manager_token> <manager_ip>:2377 and perform the network creation from a Swarm manager: docker network create --driver overlay --attachable --internal --subnet 192.168.100.0/24 --gateway 192.168.100.1 ProjectAlphaNet\",\n  \"Plan C: If Swarm cannot be used in this environment, consider a non-overlay network (e.g., Docker bridge) or Kubernetes with a suitable CNI to achieve a private, attachable network with the specified subnet and gateway, noting this may not satisfy the overlay/attachable requirements\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Initialize Docker Swarm on this node (docker swarm init) to promote it to a manager, then execute: docker network create --driver overlay --attachable --internal --subnet 192.168.100.0/24 --gateway 192.168.100.1 ProjectAlphaNet"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"create_a_network\\\",\\n  \\\"parameters\\\": {\\n    \\\"body\\\": {\\n      \\\"type\\\": \\\"object\\\",\\n      \\\"description\\\": \\\"Network creation payload to create an overlay network with: Name: 'ProjectAlphaNet', Driver: 'overlay', Internal: true, Attachable: true, IPAM: { Config: [{ Subnet: '192.168.100.0/24', Gateway: '192.168.100.1' }] }\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"create_a_network\",\n  \"parameters\": {\n    \"body\": {\n      \"Name\": \"ProjectAlphaNet\",\n      \"Driver\": \"overlay\",\n      \"Attachable\": true,\n      \"Internal\": true,\n      \"IPAM\": {\n        \"Config\": [\n          {\n            \"Subnet\": \"192.168.100.0/24\",\n            \"Gateway\": \"192.168.100.1\"\n          }\n        ]\n      }\n    }\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 403, 'content': b'{\\\"message\\\":\\\"This node is not a swarm manager. Use \\\\\\\\\\\"docker swarm init\\\\\\\\\\\" or \\\\\\\\\\\"docker swarm join\\\\\\\\\\\" to connect this node to swarm and try again.\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"cb2b021a-0905-47d0-acb0-1bf094e0d8ea\", \"tool_call_id\": \"call_bAXzgtDiHbY5RQWv7XMWZ63I\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Initialize Docker Swarm on this node using 'docker swarm init', then execute 'docker network create --driver overlay --attachable --internal --subnet 192.168.100.0/24 --gateway 192.168.100.1 ProjectAlphaNet'\",\n  \"Plan B: If this node is already part of a Swarm managed by another manager, join the Swarm as a manager with 'docker swarm join --token <manager_token> <manager_ip>:2377' and perform the network creation on the manager\",\n  \"Plan C: If Swarm cannot be used in this environment, consider a Kubernetes-based approach with a suitable CNI to achieve a private, attachable network with the specified subnet and gateway, noting this would not be a Docker Swarm overlay\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Initialize Docker Swarm on this node using 'docker swarm init', then execute 'docker network create --driver overlay --attachable --internal --subnet 192.168.100.0/24 --gateway 192.168.100.1 ProjectAlphaNet'"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"create_a_network\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Name of the network to create (e.g., ProjectAlphaNet)\\\"\\n    },\\n    \\\"driver\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Network driver to use (e.g., overlay)\\\"\\n    },\\n    \\\"internal\\\": {\\n      \\\"type\\\": \\\"bool\\\",\\n      \\\"description\\\": \\\"Whether the network is internal\\\"\\n    },\\n    \\\"attachable\\\": {\\n      \\\"type\\\": \\\"bool\\\",\\n      \\\"description\\\": \\\"Whether containers can attach to this network\\\"\\n    },\\n    \\\"subnet\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"IPAM subnet in CIDR notation (e.g., 192.168.100.0/24)\\\"\\n    },\\n    \\\"gateway\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Gateway IP for the subnet (e.g., 192.168.100.1)\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"create_a_network\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"Name\",\n            \"parameter_value\": \"ProjectAlphaNet\"\n        },\n        {\n            \"parameter_name\": \"Driver\",\n            \"parameter_value\": \"overlay\"\n        },\n        {\n            \"parameter_name\": \"Attachable\",\n            \"parameter_value\": \"true\"\n        },\n        {\n            \"parameter_name\": \"Internal\",\n            \"parameter_value\": \"true\"\n        },\n        {\n            \"parameter_name\": \"Subnet\",\n            \"parameter_value\": \"192.168.100.0/24\"\n        },\n        {\n            \"parameter_name\": \"Gateway\",\n            \"parameter_value\": \"192.168.100.1\"\n        }\n    ]\n}"
+    }
+]

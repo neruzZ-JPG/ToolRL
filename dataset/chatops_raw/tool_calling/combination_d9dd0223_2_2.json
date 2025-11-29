@@ -1,0 +1,80 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nUpdate the configuration file 'settings.yml' in the project 'testRepo' hosted on GitHub by replacing its content with the latest deployment parameters, on a branch named 'update-config', with the commit message 'Refresh deployment settings.'"
+    },
+    {
+        "Human Message": "Current subtask is:\nClone testRepo locally and check out (or create) the update-config branch from the default branch."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_one_branch\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The owner of the repository.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the repository.\\\"\\n    },\\n    \\\"branch\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The branch name to get, which is 'default' in this case.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Invoke github_get_one_branch with parameters:\n- owner: <GITHUB_OWNER> (please provide the repository owner or organization)\n- repo: \"testRepo\"\n- branch: \"default\""
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/branches/branches#get-a-branch\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"853970ab-1e4b-4627-b171-0ea52c9f01eb\", \"tool_call_id\": \"call_J3DnioBHWnbWZ3jG9j7DcBB8\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Provide the repository owner (or full GitHub repo URL) and optionally a GitHub PAT with repo access so I can retry: I will call github_get_one_branch(owner, repo'testRepo', branch'<default>') to determine the default branch, then clone with 'git clone https://github.com/{owner}/testRepo.git', cd testRepo, and run 'git checkout -b update-config {default_branch}' (or 'git checkout --track origin/{default_branch}; git checkout -b update-config').\",\n  \"If you want me to create the branch remotely via the GitHub API (no local clone): provide the owner and a GitHub PAT. I will (1) call github_get_repo(owner, 'testRepo') to get default_branch, (2) call github_get_one_branch(owner, 'testRepo', default_branch) to get the commit SHA, and (3) call github_create_ref(owner, 'testRepo', ref'refs/heads/update-config', sha<sha>) to create update-config from the default branch.\",\n  \"If you will perform this locally yourself, I will provide exact commands to run: (1) git clone https://github.com/{owner}/testRepo.git, (2) cd testRepo, (3) git fetch origin, (4) git checkout {default_branch} (or git checkout --track origin/{default_branch}), (5) git checkout -b update-config, plus optional push command: git push -u origin update-config. Tell me if you need the default branch name or authentication guidance.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nProvide the repository owner (or full GitHub repo URL) and optionally a GitHub PAT with repo access so I can retry: I will call github_get_one_branch(owner, repo'testRepo', branch'<default>') to determine the default branch, then clone with 'git clone https://github.com/{owner}/testRepo.git', cd testRepo, and run 'git checkout -b update-config {default_branch}' (or 'git checkout --track origin/{default_branch}; git checkout -b update-config')."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_one_branch\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the repository.\\\"\\n    },\\n    \\\"branch\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The branch name, use '<default>' to refer to the default branch.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Invoke github_get_one_branch with parameters:\n- owner: <GITHUB_OWNER> (please provide the repository owner or organization, or full repo URL)\n- repo: \"testRepo\"\n- branch: \"<default>\"\n- (optional) github_token: <GITHUB_PAT> (required if the repo is private or rate-limited)"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/branches/branches#get-a-branch\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"60274c77-c967-4e2e-b19e-72f1ea2da6f8\", \"tool_call_id\": \"call_PriFe4cxGdLUOSewLfPG2nYH\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Provide the repository owner (or the full GitHub repo URL) and optionally a GitHub PAT with repo access: I will call github_get_repo(owner, 'testRepo') to get default_branch, then call github_get_one_branch(owner, 'testRepo', default_branch) to confirm the commit SHA. After that I will give you the exact local commands to clone and create the branch: 'git clone https://github.com/{owner}/testRepo.git && cd testRepo && git fetch origin && git checkout {default_branch} || git checkout --track origin/{default_branch} && git checkout -b update-config && git push -u origin update-config'.\",\n  \"You run it locally yourself (no token or owner needed from me): I will provide step-by-step commands you can run on your machine to find the default branch if unknown and create the branch locally and push it. Example commands: 'git clone https://github.com/<owner-or-URL>/testRepo.git', 'cd testRepo', 'git fetch origin', 'git remote show origin' (to see default branch), 'git checkout <default_branch> || git checkout --track origin/<default_branch>', 'git checkout -b update-config', 'git push -u origin update-config'. Tell me if you need help with authentication (HTTPS PAT vs SSH key).\",\n  \"Create the branch remotely via GitHub API (no local clone): provide the repository owner and a GitHub PAT with repo scope. I will (1) call github_get_repo(owner,'testRepo') to get default_branch, (2) call github_get_one_branch(owner,'testRepo', default_branch) to retrieve the commit SHA, and (3) call github_create_ref(owner,'testRepo', ref'refs/heads/update-config', sha<sha>) to create the update-config branch on GitHub, then report back.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nProvide the repository owner (or the full GitHub repo URL) and optionally a GitHub PAT with repo access: I will call github_get_repo(owner, 'testRepo') to get default_branch, then call github_get_one_branch(owner, 'testRepo', default_branch) to confirm the commit SHA. After that I will give you the exact local commands to clone and create the branch: 'git clone https://github.com/{owner}/testRepo.git && cd testRepo && git fetch origin && git checkout {default_branch} || git checkout --track origin/{default_branch} && git checkout -b update-config && git push -u origin update-config'."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_repo_branches\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the repository.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\" : \"github_get_repo_branches\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\",\n            \"parameter_value\" : \"<GITHUB_OWNER>\"\n        },\n        {\n            \"parameter_name\" : \"repo\",\n            \"parameter_value\" : \"testRepo\"\n        },\n        {\n            \"parameter_name\" : \"github_token\",\n            \"parameter_value\" : \"<GITHUB_PAT>\"\n        }\n    ]\n}"
+    }
+]

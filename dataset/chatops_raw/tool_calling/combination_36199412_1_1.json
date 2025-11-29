@@ -1,0 +1,53 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nUsing the group ID 97683359, fetch merge requests assigned to the user with ID 68456825 in GitLab that are labeled 'urgent' and were created after March 1, 2024, to prioritize upcoming merges."
+    },
+    {
+        "Human Message": "Current subtask is:\nObtain and verify a GitLab Personal Access Token with api scope that can read group 97683359; export it securely (e.g., GITLAB_TOKEN env var) and confirm the correct base URL (gitlab.com vs self-managed) for subsequent API requests."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{ }\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Obtain and verify GitLab PAT using obtain_and_verify_pat with parameters: group_id97683359, required_scopeapi, export_env_varGITLAB_TOKEN, verify_group_accesstrue, confirm_base_urltrue."
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: 1 validation error for Http_request\\nheaders\\n  Input should be a valid string [typestring_type, input_value{'PRIVATE-TOKEN': 'glpat-vJAFLGxPt6rtWwHdbJR4'}, input_typedict]\\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"3ba33fc9-4815-4012-aef7-60d87b9bccc7\", \"tool_call_id\": \"call_NMFhiPH2xxZLYAV90lqnP2kF\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Plan A: You provide the GitLab Personal Access Token (PAT) value and optionally confirm the base URL (default: https://gitlab.com). I will call gitlab_agent.obtain_and_verify_pat with parameters: group_id97683359, required_scopeapi, export_env_varGITLAB_TOKEN, verify_group_accesstrue, confirm_base_urltrue, and pass headers as a single string header like \\\"Private-Token: <PAT>\\\" (fixes previous header format error). This will verify group access and return success/failure.\", \n \"Plan B: If you cannot share the PAT, follow these local steps and share the curl output so I can interpret it: (1) Create a PAT in GitLab with api scope. (2) Export it locally: export GITLAB_TOKENglpat-xxxxxxxxxx. (3) Verify group access locally: curl --header \\\"Private-Token: $GITLAB_TOKEN\\\" https://gitlab.com/api/v4/groups/97683359 -i. Paste the HTTP status and body here and I will confirm whether the token has the needed access and whether the base URL is correct.\", \n \"Plan C: If you are on a self-managed GitLab instance, confirm the instance base URL (for example https://git.company.com). If you prefer, I can attempt an autodetect attempt (try gitlab.com first, then prompt if 404/403), but I will still need a PAT to verify access. Provide either the PAT or the exact base URL and which approach (autodetect vs explicit URL) you want me to use.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: You provide the GitLab Personal Access Token (PAT) value and optionally confirm the base URL (default: https://gitlab.com). I will call gitlab_agent.obtain_and_verify_pat with parameters: group_id97683359, required_scopeapi, export_env_varGITLAB_TOKEN, verify_group_accesstrue, confirm_base_urltrue, and pass headers as a single string header like \"Private-Token: <PAT>\" (fixes previous header format error). This will verify group access and return success/failure."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_agent.obtain_and_verify_pat\\\",\\n  \\\"parameters\\\": {\\n    \\\"group_id\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"The ID of the group to verify access for\\\"\\n    },\\n    \\\"required_scope\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The required scope for the PAT, e.g., 'api'\\\"\\n    },\\n    \\\"export_env_var\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Environment variable name to export the PAT\\\"\\n    },\\n    \\\"verify_group_access\\\": {\\n      \\\"type\\\": \\\"bool\\\",\\n      \\\"description\\\": \\\"Whether to verify access to the group\\\"\\n    },\\n    \\\"confirm_base_url\\\": {\\n      \\\"type\\\": \\\"bool\\\",\\n      \\\"description\\\": \\\"Whether to confirm the base URL\\\"\\n    },\\n    \\\"headers\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Headers string including the PAT, e.g., 'Private-Token: <PAT>'\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\" : \"gitlab_agent.obtain_and_verify_pat\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"group_id\",\n            \"parameter_value\" : \"97683359\"\n        },\n        {\n            \"parameter_name\" : \"required_scope\",\n            \"parameter_value\" : \"api\"\n        },\n        {\n            \"parameter_name\" : \"export_env_var\",\n            \"parameter_value\" : \"GITLAB_TOKEN\"\n        },\n        {\n            \"parameter_name\" : \"verify_group_access\",\n            \"parameter_value\" : \"true\"\n        },\n        {\n            \"parameter_name\" : \"confirm_base_url\",\n            \"parameter_value\" : \"true\"\n        },\n        {\n            \"parameter_name\" : \"headers\",\n            \"parameter_value\" : \"Private-Token: <YOUR_GITLAB_PAT>\"\n        }\n    ]\n}"
+    }
+]

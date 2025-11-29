@@ -1,0 +1,107 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI need to stop the Docker container with ID 'abc123' after completing the deployment process."
+    },
+    {
+        "Human Message": "Current subtask is:\nFirst, confirm the container exists and is the correct target: run docker ps and ensure abc123 uniquely matches the container you intend to stop post-deploy."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"none\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "[\"Run on docker_agent using tool 'run_command' with parameters {\\\"command\\\": \\\"docker ps --no-trunc --format '{{.ID}} {{.Image}} {{.Names}} {{.Status}}' | grep -E '^abc123' || true\\\"}; if this returns exactly one line (a unique container whose ID starts with abc123), proceed to stop that container after deployment using 'docker stop <full_container_id>'.\", \"If the command returns multiple matching lines (ambiguous match), run 'docker ps --no-trunc --format \\\"{{.ID}} {{.Image}} {{.Names}} {{.Status}}\\\"' to list candidates and ask the user to confirm the full container ID or choose which container to stop; then run 'docker stop <chosen_full_id>'.\", \"If the command returns no matches, run on docker_agent: 'docker ps -a --no-trunc --format \\\"{{.ID}} {{.Image}} {{.Names}} {{.Status}}\\\"' to check for stopped containers or ask the user to verify the target host and provide the full container ID so we can identify the correct container to stop.\"]"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 200, 'content': b'[]\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"3e78b00e-6744-48ac-b2ab-af03328e12d8\", \"tool_call_id\": \"call_n4Ab1c5LXfbtWgUhRk7ZnBOX\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Run on docker_agent: execute `docker ps -a --no-trunc --format \\\"{{.ID}} {{.Image}} {{.Names}} {{.Status}}\\\" | grep abc123 || true`. If this returns exactly one line, record the full container ID and proceed to stop that container after deployment. If it returns multiple lines, present the candidates to the user and ask them to confirm which full container ID to stop.\", \"Run on docker_agent: execute `docker ps --no-trunc --format \\\"{{.ID}} {{.Image}} {{.Names}} {{.Status}}\\\"` to list all running containers with full IDs, present the list to the user, and ask them to identify the intended container (by full ID or name) so we can confirm and stop it after deployment.\", \"Ask the user to confirm the target host/context (local Docker, remote host, or Kubernetes). If the container might be on a different host or in Kubernetes, switch to that environment (or use kubernetes_agent if in k8s) and re-run the appropriate listing command; if the user can provide the full container ID (not a prefix), use that to directly verify and stop the container.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nRun on docker_agent: execute `docker ps -a --no-trunc --format \"{{.ID}} {{.Image}} {{.Names}} {{.Status}}\" | grep abc123 || true`. If this returns exactly one line, record the full container ID and proceed to stop that container after deployment. If it returns multiple lines, present the candidates to the user and ask them to confirm which full container ID to stop."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"list_containers\\\",\\n  \\\"parameters\\\": {\\n    \\\"all\\\": {\\n      \\\"type\\\": \\\"bool\\\",\\n      \\\"description\\\": \\\"Return all containers, including non-running ones.\\\"\\n    },\\n    \\\"limit\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"Return the number of most recently created containers.\\\"\\n    },\\n    \\\"size\\\": {\\n      \\\"type\\\": \\\"bool\\\",\\n      \\\"description\\\": \\\"Return size details of containers.\\\"\\n    },\\n    \\\"filters\\\": {\\n      \\\"type\\\": \\\"map[string][]string\\\",\\n      \\\"description\\\": \\\"Filters to process on the container list.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Run on docker_agent using tool 'list_containers' with parameters {\"all\": true, \"size\": false, \"limit\": 0, \"filters\": {}} and then return the full container list; from that list, identify any entries whose ID begins with \"abc123\" (match prefix)."
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 200, 'content': b'[]\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"204fa9ec-5659-47a6-825e-f081922c39c0\", \"tool_call_id\": \"call_AuIejJPKBXvFwllK2aWmwC86\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Plan A: Verify the Docker host/context we queried. Run on docker_agent: `docker info` to show the Docker server details and then re-run `docker ps -a --no-trunc --format \\\"{{.ID}} {{.Image}} {{.Names}} {{.Status}}\\\"` to confirm no containers exist; if the host is correct and a single container with ID prefix abc123 appears, record its full ID and stop it after deployment.\", \"Plan B: The container may be on a different host or Docker context. Ask the user to provide the target host or Docker context (or SSH credentials). Once provided, switch context or connect to that host and run `docker ps -a --no-trunc --format \\\"{{.ID}} {{.Image}} {{.Names}} {{.Status}}\\\"` to find containers with ID prefix abc123; if found, confirm full ID with the user before stopping.\", \"Plan C: The target might be running in Kubernetes rather than plain Docker. Ask the user if the workload is in k8s; if yes, run on kubernetes_agent: `kubectl get pods --all-namespaces -o wide | grep abc123 || true` (or use label/name search) to locate the pod, then map the pod to the container to stop or delete as appropriate.\", \"Plan D: Ask the user to provide the full container ID or container name. With the full ID/name we can directly verify existence with `docker ps -a --no-trunc --filter \\\"id<full_id>\\\" --format \\\"{{.ID}} {{.Image}} {{.Names}} {{.Status}}\\\"` and then stop it after deployment.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Verify the Docker host/context we queried. Run on docker_agent: `docker info` to show the Docker server details and then re-run `docker ps -a --no-trunc --format \"{{.ID}} {{.Image}} {{.Names}} {{.Status}}\"` to confirm no containers exist; if the host is correct and a single container with ID prefix abc123 appears, record its full ID and stop it after deployment."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"create_a_container\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Assign a name to the container, if needed.\\\"\\n    },\\n    \\\"platform\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Platform in the format `os[/arch[/variant]]`.\\\"\\n    },\\n    \\\"body\\\": {\\n      \\\"type\\\": \\\"object\\\",\\n      \\\"description\\\": \\\"Container configuration details.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Run on docker_agent using tool 'run_command' with parameters {\"command\": \"docker info && docker ps -a --no-trunc --format \\\"{{.ID}} {{.Image}} {{.Names}} {{.Status}}\\\" | grep -E '^abc123' || true\"}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"No such container: abc123\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"5b7a965c-aabc-4711-a205-d2393a82c750\", \"tool_call_id\": \"call_JJMnnA9HRPNhSI4zw4tkztrc\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Plan A: On the same Docker host/context we already queried, run on docker_agent: `docker ps -a --no-trunc --format \\\"{{.ID}} {{.Image}} {{.Names}} {{.Status}}\\\"` (no grep). If any container IDs begin with \\\"abc123\\\" record the full ID; if exactly one match is found confirm and then stop it after deployment. If no matches, report that the container does not exist on this host.\", \"Plan B: The container may be on a different Docker host or Docker context. Ask the user to confirm the target host or Docker context (or provide SSH/credentials). Once provided, switch to that host/context and run on docker_agent there: `docker ps -a --no-trunc --format \\\"{{.ID}} {{.Image}} {{.Names}} {{.Status}}\\\"` to search for IDs starting with \\\"abc123\\\"; if found, confirm full ID with the user and stop it after deployment.\", \"Plan C: The workload might be running in Kubernetes instead of standalone Docker. Ask the user if it could be in k8s; if yes, run on kubernetes_agent: `kubectl get pods --all-namespaces -o wide | grep abc123 || true` (or use label/name filters) to locate any pod/container with that identifier and then map/delete the pod or container as appropriate.\", \"Plan D: Ask the user to provide the full container ID or the container name. With the full ID/name, run on docker_agent: `docker ps -a --no-trunc --filter \\\"id<full_id_or_name>\\\" --format \\\"{{.ID}} {{.Image}} {{.Names}} {{.Status}}\\\"` to verify existence; if verified, proceed to stop it after deployment.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: On the same Docker host/context we already queried, run on docker_agent: `docker ps -a --no-trunc --format \"{{.ID}} {{.Image}} {{.Names}} {{.Status}}\"` (no grep). If any container IDs begin with \"abc123\" record the full ID; if exactly one match is found confirm and then stop it after deployment. If no matches, report that the container does not exist on this host."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"list_containers\\\",\\n  \\\"parameters\\\": {\\n    \\\"all\\\": {\\n      \\\"type\\\": \\\"bool\\\",\\n      \\\"description\\\": \\\"Return all containers, including stopped ones.\\\"\\n    },\\n    \\\"size\\\": {\\n      \\\"type\\\": \\\"bool\\\",\\n      \\\"description\\\": \\\"Return the size of container as fields `SizeRw` and `SizeRootFs`.\\\"\\n    },\\n    \\\"filters\\\": {\\n      \\\"type\\\": \\\"json\\\",\\n      \\\"description\\\": \\\"Filters to process on the container list, encoded as JSON. For this task, filter by name to find containers starting with 'abc123'.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"list_containers\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"all\",\n            \"parameter_value\": \"true\"\n        },\n        {\n            \"parameter_name\": \"size\",\n            \"parameter_value\": \"false\"\n        },\n        {\n            \"parameter_name\": \"filters\",\n            \"parameter_value\": \"{\\\"name\\\":[\\\"abc123*\\\"]}\"\n        }\n    ]\n}"
+    }
+]

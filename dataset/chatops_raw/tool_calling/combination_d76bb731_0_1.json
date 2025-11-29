@@ -1,0 +1,71 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI need to set up a new network named 'OfficeVPN' with a subnet of 192.168.10.0/24, and ensure it's attachable and accessible only within the local scope."
+    },
+    {
+        "Human Message": "Current subtask is:\nStart by identifying which network infrastructure or platform you'll use (e.g., cloud provider, local router). Think about how to create and isolate the network\u2014what are the initial configuration steps needed to define the 'OfficeVPN' subnet and scope?"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Docker attachable network implementation. Steps: 1) Create a docker bridge network named OfficeVPN with subnet 192.168.10.0/24 and attachable mode: docker network create --driver bridge --subnet 192.168.10.0/24 --gateway 192.168.10.1 --attachable OfficeVPN. 2) Deploy sample containers or services connected to OfficeVPN to verify connectivity within the local scope. 3) Enforce local scope by configuring host firewall rules to prevent traffic to external networks; validate that only devices on the local subnet can reach the OfficeVPN network.\",\n  \"Plan B: Kubernetes-based isolation for OfficeVPN. Steps: 1) Create a Namespace named officevpn. 2) Configure a cluster network policy (using Calico/CNI) with an IP pool of 192.168.10.0/24 and ensure pods get addresses from that range. 3) Implement NetworkPolicy to isolate traffic so pods in officevpn can communicate only within the namespace or a defined set of internal endpoints. 4) Deploy test pods and services to verify intra-namespace accessibility and isolation from the rest of the cluster; ensure no external egress is allowed unless explicitly permitted.\",\n  \"Plan C: OpenVPN server on the local network for OfficeVPN. Steps: 1) Use the OfficeVPN subnet (192.168.10.0/24) on a dedicated attachable network (as in Plan A). 2) Deploy an OpenVPN server container connected to OfficeVPN and configure server.conf to serve clients within the 192.168.10.0/24 range. 3) Generate client configs and test VPN connectivity from local devices, ensuring traffic remains within the local network and is not routed to external networks by firewall rules. 4) Validate that only authorized local clients can connect and reach resources on the OfficeVPN subnet.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Docker attachable network implementation. Steps: 1) Create a docker bridge network named OfficeVPN with subnet 192.168.10.0/24 and attachable mode: docker network create --driver bridge --subnet 192.168.10.0/24 --gateway 192.168.10.1 --attachable OfficeVPN. 2) Deploy sample containers or services connected to OfficeVPN to verify connectivity within the local scope. 3) Enforce local scope by configuring host firewall rules to prevent traffic to external networks; validate that only devices on the local subnet can reach the OfficeVPN network."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"create_a_network\\\",\\n  \\\"parameters\\\": {\\n    \\\"Name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Name of the network to create (OfficeVPN)\\\"\\n    },\\n    \\\"Driver\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Network driver to use (bridge)\\\"\\n    },\\n    \\\"Attachable\\\": {\\n      \\\"type\\\": \\\"bool\\\",\\n      \\\"description\\\": \\\"Enable attachable mode for the network\\\"\\n    },\\n    \\\"IPAM\\\": {\\n      \\\"type\\\": \\\"object\\\",\\n      \\\"description\\\": \\\"IPAM configuration for the network, including Config with Subnet and Gateway\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"create_a_network\",\n  \"parameters\": {\n    \"Name\": \"OfficeVPN\",\n    \"Driver\": \"bridge\",\n    \"Attachable\": true,\n    \"IPAM\": {\n      \"Config\": [\n        {\n          \"Subnet\": \"192.168.10.0/24\",\n          \"Gateway\": \"192.168.10.1\"\n        }\n      ]\n    }\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: JSONDecodeError('Expecting property name enclosed in double quotes: line 1 column 2 (char 1)')\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"e5dcbef9-1ab0-4ca8-ba45-d601081030d9\", \"tool_call_id\": \"call_PG6nKuiWKyq9KtkCF6Wqvtib\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Retry Docker network creation with corrected payload. Action: Resubmit a create_a_network request to docker_agent with Name'OfficeVPN', Driver'bridge', Attachabletrue, IPAM Config Subnet'192.168.10.0/24', Gateway'192.168.10.1'. Validate success and that the network exists; then deploy sample containers to OfficeVPN to verify connectivity and enforce local scope via firewall rules.\",\n  \"Plan B: If Plan A continues to fail due to tool parsing, implement an OpenVPN/WireGuard-based solution on a local host attached to the OfficeVPN subnet. Steps: set up a VPN server container connected to a dedicated bridge network OfficeVPN, configure server/client networking to stay within 192.168.10.0/24 and implement firewall rules to block external access; test connectivity from a local client.\",\n  \"Plan C: Use Kubernetes with a Calico (or similar) CNI behind NetworkPolicy to isolate OfficeVPN. Steps: create a namespace 'officevpn', configure an IP pool 192.168.10.0/24, ensure pods receive IPs from the pool, create a NetworkPolicy to restrict egress/ingress to within the namespace or allowed endpoints; deploy test pods to verify intra-namespace connectivity and local isolation.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Retry Docker network creation with corrected payload. Action: Resubmit a create_a_network request to docker_agent with Name'OfficeVPN', Driver'bridge', Attachabletrue, IPAM Config Subnet'192.168.10.0/24', Gateway'192.168.10.1'. Validate success and that the network exists; then deploy sample containers to OfficeVPN to verify connectivity and enforce local scope via firewall rules."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"create_a_network\\\",\\n  \\\"parameters\\\": {\\n    \\\"Name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Name of the network to create (e.g., OfficeVPN)\\\"\\n    },\\n    \\\"Driver\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Network driver to use (e.g., bridge)\\\"\\n    },\\n    \\\"Attachable\\\": {\\n      \\\"type\\\": \\\"bool\\\",\\n      \\\"description\\\": \\\"Whether the network is attachable by containers that are not swarm services\\\"\\n    },\\n    \\\"IPAM\\\": {\\n      \\\"type\\\": \\\"object\\\",\\n      \\\"description\\\": \\\"IP Address Management configuration for the network\\\",\\n      \\\"properties\\\": {\\n        \\\"Config\\\": {\\n          \\\"type\\\": \\\"array\\\",\\n          \\\"description\\\": \\\"List of IPAM config items; each item can specify Subnet and Gateway\\\",\\n          \\\"items\\\": {\\n            \\\"type\\\": \\\"object\\\",\\n            \\\"properties\\\": {\\n              \\\"Subnet\\\": {\\n                \\\"type\\\": \\\"str\\\",\\n                \\\"description\\\": \\\"Subnet in CIDR format, e.g., 192.168.10.0/24\\\"\\n              },\\n              \\\"Gateway\\\": {\\n                \\\"type\\\": \\\"str\\\",\\n                \\\"description\\\": \\\"Gateway for this subnet\\\"\\n              }\\n            }\\n          }\\n        },\\n        \\\"Driver\\\": {\\n          \\\"type\\\": \\\"str\\\",\\n          \\\"description\\\": \\\"IPAM driver to use (optional; default is 'default')\\\"\\n        }\\n      }\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"create_a_network\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"Name\",\n            \"parameter_value\": \"OfficeVPN\"\n        },\n        {\n            \"parameter_name\": \"Driver\",\n            \"parameter_value\": \"bridge\"\n        },\n        {\n            \"parameter_name\": \"Attachable\",\n            \"parameter_value\": \"true\"\n        },\n        {\n            \"parameter_name\": \"IPAM\",\n            \"parameter_value\": \"{\\\"Config\\\":[{\\\"Subnet\\\":\\\"192.168.10.0/24\\\",\\\"Gateway\\\":\\\"192.168.10.1\\\"}]}\"\n        }\n    ]\n}"
+    }
+]

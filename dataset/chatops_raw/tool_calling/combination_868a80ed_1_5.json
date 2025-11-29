@@ -1,0 +1,161 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nPlease retrieve the recent 50 lines of logs from the deployment 'auth-service' in the 'staging' namespace, including logs from previous containers if available, to diagnose a failure."
+    },
+    {
+        "Human Message": "Current subtask is:\nFirst, identify the pods for the auth-service deployment in staging: kubectl get pods -n staging -l app.kubernetes.io/nameauth-service -o name"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"kubectl_get\\\",\\n  \\\"parameters\\\": {\\n    \\\"resourceType\\\": \\\"pods\\\",\\n    \\\"name\\\": \\\"\\\",\\n    \\\"namespace\\\": \\\"staging\\\",\\n    \\\"labelSelector\\\": \\\"app.kubernetes.io/nameauth-service\\\",\\n    \\\"output\\\": \\\"name\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute kubectl_get to list pods with parameters: resourceTypepods, name\"\", namespacestaging, labelSelector\"app.kubernetes.io/nameauth-service\", output\"name\""
+    },
+    {
+        "Ai Message": "\"[TextContent(type'text', text'', annotationsNone)]\""
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"List all pods in the 'staging' namespace to locate any auth-service related pods (avoid using the previous label): kubectl get pods -n staging -o wide\",\n  \"Inspect the auth-service Deployment to get its exact pod selector labels, then list pods by those labels: kubectl get deployment auth-service -n staging -o jsonpath'{.spec.selector.matchLabels}'  -> use the returned labels in: kubectl get pods -n staging -l <labels> -o name\",\n  \"List all Deployments in 'staging' to verify the deployment name and labels (in case the deployment or labels differ): kubectl get deployments -n staging -o wide\",\n  \"Verify the namespace and current kube context/permissions in case the empty result was due to wrong context or RBAC: kubectl get namespace staging ; kubectl config current-context ; kubectl auth can-i get pods -n staging\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nList all pods in the 'staging' namespace to locate any auth-service related pods (avoid using the previous label): kubectl get pods -n staging -o wide"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"kubectl_get\\\",\\n  \\\"parameters\\\": {\\n    \\\"resourceType\\\": \\\"pods\\\",\\n    \\\"name\\\": \\\"\\\",\\n    \\\"namespace\\\": \\\"staging\\\",\\n    \\\"output\\\": \\\"wide\\\",\\n    \\\"allNamespaces\\\": false\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute kubectl_get to list pods with parameters: resourceTypepods, name\"\", namespacestaging, output\"wide\", allNamespacesfalse"
+    },
+    {
+        "Ai Message": "\"[TextContent(type'text', text'NAME                        READY   STATUS    RESTARTS   AGE   IP           NODE              NOMINATED NODE   READINESS GATES\\\\nweb-server-749cf7ff-4kmmt   1/1     Running   0          91s   10.42.0.17   vm-16-14-ubuntu   <none>           <none>\\\\nweb-server-749cf7ff-6f9zq   1/1     Running   0          91s   10.42.0.16   vm-16-14-ubuntu   <none>           <none>\\\\nweb-server-749cf7ff-f44zs   1/1     Running   0          91s   10.42.0.18   vm-16-14-ubuntu   <none>           <none>\\\\n', annotationsNone)]\""
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Inspect the auth-service Deployment to obtain its pod selector labels, then list pods using those labels: kubectl get deployment auth-service -n staging -o jsonpath'{.spec.selector.matchLabels}' && kubectl get pods -n staging -l <labels> -o name\",\n  \"List all Deployments in the staging namespace to verify the exact deployment name/labels, then list pods for the discovered deployment: kubectl get deployments -n staging -o wide -> identify deployment -> kubectl get pods -n staging -l <found-labels> -o name\",\n  \"Search for pods with 'auth' in their names (in case the label differs) inside staging or across namespaces: kubectl get pods -n staging --no-headers -o custom-columnsNAME:.metadata.name | grep -i auth  OR  kubectl get pods --all-namespaces | grep -i auth\",\n  \"Verify namespace and cluster context/permissions in case the absence of auth-service pods is due to wrong context/RBAC, then retry listing pods: kubectl config current-context ; kubectl get namespace staging ; kubectl auth can-i get pods -n staging\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nInspect the auth-service Deployment to obtain its pod selector labels, then list pods using those labels: kubectl get deployment auth-service -n staging -o jsonpath'{.spec.selector.matchLabels}' && kubectl get pods -n staging -l <labels> -o name"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"First, I will describe the 'auth-service' deployment in the 'staging' namespace to extract the pod selector labels. Then, I will list the pods using those labels.\\n\\nSince I need to describe the deployment to get the labels, I will describe the deployment resource.\\n\\n{\\n  \\\"tool_name\\\": \\\"kubectl_describe\\\",\\n  \\\"parameters\\\": {\\n    \\\"resourceType\\\": \\\"deployment\\\",\\n    \\\"name\\\": \\\"auth-service\\\",\\n    \\\"namespace\\\": \\\"staging\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute kubectl_describe to describe a deployment with parameters: resourceTypedeployment, nameauth-service, namespacestaging."
+    },
+    {
+        "Ai Message": "\"[TextContent(type'text', text'{\\\\n  \\\"error\\\": \\\"Resource deployment/auth-service not found\\\",\\\\n  \\\"status\\\": \\\"not_found\\\"\\\\n}', annotationsNone)]\""
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Find the actual Deployment and its pod selector in the staging namespace, then list pods by that selector and fetch logs. Commands: 1) kubectl get deployments -n staging -o wide  2) kubectl get deployment <found-deployment> -n staging -o jsonpath'{.spec.selector.matchLabels}'  3) kubectl get pods -n staging -l <labels> -o name  -> for each pod found: kubectl logs -n staging <pod> --all-containers --previous --tail50\",\n  \"Plan B: Search across namespaces in case the deployment/pods live outside 'staging' or are named differently. Commands: 1) kubectl get deployments --all-namespaces | grep -i auth  OR kubectl get pods --all-namespaces | grep -i auth  -> if you find a matching pod: kubectl logs -n <pod-namespace> <pod> --all-containers --previous --tail50\",\n  \"Plan C: Verify cluster context and RBAC to ensure our lack of resources isn't due to wrong context or missing permissions. Commands: kubectl config current-context ; kubectl get namespace staging ; kubectl auth can-i get pods -n staging. If permissions are insufficient, provide a kubeconfig with proper access or switch context and retry one of the discovery plans above.\",\n  \"Plan D: Enumerate all workload resources in staging to discover replicasets/statefulsets/daemonsets or pods related to auth-service, then get logs from discovered pods. Commands: kubectl get all -n staging -o wide  and kubectl get rs,sts,ds -n staging -o wide -> identify relevant pods -> kubectl logs -n staging <pod> --all-containers --previous --tail50\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Find the actual Deployment and its pod selector in the staging namespace, then list pods by that selector and fetch logs. Commands: 1) kubectl get deployments -n staging -o wide  2) kubectl get deployment <found-deployment> -n staging -o jsonpath'{.spec.selector.matchLabels}'  3) kubectl get pods -n staging -l <labels> -o name  -> for each pod found: kubectl logs -n staging <pod> --all-containers --previous --tail50"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"First, I will get the list of deployments in the staging namespace to identify the deployment and its selector labels.\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute kubectl_get to list deployments with parameters: resourceTypedeployments, name\"\", namespacestaging, output\"wide\", allNamespacesfalse"
+    },
+    {
+        "Ai Message": "\"[TextContent(type'text', text'NAME         READY   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS   IMAGES       SELECTOR\\\\nweb-server   3/3     3            3           2m22s   nginx        nginx:1.21   appweb-server\\\\n', annotationsNone)]\""
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Search across all namespaces for resources named or labeled with 'auth' to find the real deployment/pods. Commands: kubectl get deployments --all-namespaces | grep -i auth ; kubectl get pods --all-namespaces | grep -i auth. If you find a matching pod: kubectl logs -n <namespace> <pod> --all-containers --previous --tail50\",\n  \"Plan B: Enumerate every workload in the staging namespace to locate pods related to auth-service even if named differently. Commands: kubectl get all -n staging -o wide ; kubectl get rs,sts,ds -n staging -o wide. For any candidate pod: kubectl logs -n staging <pod> --all-containers --previous --tail50\",\n  \"Plan C: Verify cluster context and RBAC in case resources are missing due to wrong context or lack of permissions. Commands: kubectl config current-context ; kubectl get namespace staging ; kubectl auth can-i get pods -n staging. If permissions are insufficient, provide a kubeconfig with access or switch context and retry Plan A or B.\",\n  \"Plan D: Ask the user to confirm the deployment name/labels or whether auth-service is managed under a different name (e.g., via Helm release), and to provide a kubeconfig or cluster access details if this cluster/context is not accessible. Once confirmed, run the appropriate discovery (Plan A or B) and fetch logs: kubectl logs -n <ns> <pod> --all-containers --previous --tail50\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Search across all namespaces for resources named or labeled with 'auth' to find the real deployment/pods. Commands: kubectl get deployments --all-namespaces | grep -i auth ; kubectl get pods --all-namespaces | grep -i auth. If you find a matching pod: kubectl logs -n <namespace> <pod> --all-containers --previous --tail50"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"First, I will search for deployments with 'auth' in all namespaces.\\n\\n{\\n  \\\"tool_name\\\": \\\"kubectl_get\\\",\\n  \\\"parameters\\\": {\\n    \\\"resourceType\\\": \\\"deployments\\\",\\n    \\\"name\\\": \\\"\\\",\\n    \\\"namespace\\\": \\\"all\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute kubectl_get to list deployments across all namespaces with parameters: resourceTypedeployments, name\"\", namespace\"\", allNamespacestrue, output\"wide\""
+    },
+    {
+        "Ai Message": "\"[TextContent(type'text', text'NAMESPACE     NAME                     READY   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS               IMAGES                                     SELECTOR\\\\necommerce     order-processing         1/1     1            1           16m     order-processing         postgres:13                                apporder-processing\\\\nkube-system   coredns                  1/1     1            1           26d     coredns                  rancher/mirrored-coredns-coredns:1.12.0    k8s-appkube-dns\\\\nkube-system   local-path-provisioner   1/1     1            1           26d     local-path-provisioner   rancher/local-path-provisioner:v0.0.30     applocal-path-provisioner\\\\nkube-system   metrics-server           1/1     1            1           26d     metrics-server           rancher/mirrored-metrics-server:v0.7.2     k8s-appmetrics-server\\\\nkube-system   traefik                  1/1     1            1           26d     traefik                  rancher/mirrored-library-traefik:2.11.18   app.kubernetes.io/instancetraefik-kube-system,app.kubernetes.io/nametraefik\\\\nstaging       web-server               3/3     3            3           2m47s   nginx                    nginx:1.21                                 appweb-server\\\\n', annotationsNone)]\""
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Search pods across all namespaces for names containing 'auth' and fetch logs if found: kubectl get pods --all-namespaces --no-headers -o custom-columnsNAMESPACE:.metadata.namespace,NAME:.metadata.name | grep -i auth ; if a pod is found run: kubectl logs -n <namespace> <pod> --all-containers --previous --tail50\",\n  \"Plan B: Search all workload resources (deployments, statefulsets, daemonsets, jobs, cronjobs) for 'auth' in their names, then get pods from any match and fetch logs: kubectl get deployment,sts,ds,jobs,cronjobs --all-namespaces | grep -i auth -> for any found resource: kubectl get pods -n <namespace> -l <selector-from-resource> -o name && kubectl logs -n <namespace> <pod> --all-containers --previous --tail50\",\n  \"Plan C: Search Services/Endpoints for 'auth' to discover pods via selectors: kubectl get svc --all-namespaces | grep -i auth ; kubectl get endpoints --all-namespaces | grep -i auth ; if a service is found describe it to get the selector and then list pods and fetch logs as above\",\n  \"Plan D: Check package managers and config sources (Helm/Argo/manifest repos) and confirm context/permissions if nothing is found: helm list --all-namespaces | grep -i auth (if Helm is used) ; kubectl config current-context ; kubectl auth can-i get pods --all-namespaces. If access is limited or the user confirms a different namespace/name, request the correct kubeconfig/context or the exact deployment name and then retry Plan A/B/C\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Search pods across all namespaces for names containing 'auth' and fetch logs if found: kubectl get pods --all-namespaces --no-headers -o custom-columnsNAMESPACE:.metadata.namespace,NAME:.metadata.name | grep -i auth ; if a pod is found run: kubectl logs -n <namespace> <pod> --all-containers --previous --tail50"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"First, I will list all pods across all namespaces to find any with names containing 'auth'.\\n\\nThen, if a matching pod is found, I will fetch logs from that pod.\\n\\nLet's start by listing all pods across all namespaces.\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\" : \"kubectl_get\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"resourceType\",\n            \"parameter_value\" : \"pods\"\n        },\n        {\n            \"parameter_name\" : \"name\",\n            \"parameter_value\" : \"\"\n        },\n        {\n            \"parameter_name\" : \"namespace\",\n            \"parameter_value\" : \"\"\n        },\n        {\n            \"parameter_name\" : \"allNamespaces\",\n            \"parameter_value\" : \"true\"\n        },\n        {\n            \"parameter_name\" : \"output\",\n            \"parameter_value\" : \"custom-columnsNAMESPACE:.metadata.namespace,NAME:.metadata.name\"\n        },\n        {\n            \"parameter_name\" : \"noHeaders\",\n            \"parameter_value\" : \"true\"\n        }\n    ]\n}"
+    }
+]

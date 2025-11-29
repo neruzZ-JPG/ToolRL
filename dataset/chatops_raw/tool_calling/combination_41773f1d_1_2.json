@@ -1,0 +1,80 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nPlease list all merge requests assigned to user ID 12345 in the group 'fdseChatops' group 97683359 that are merged or closed, and include details such as source and target branches. Then, fetch all events related to the project with ID 68456825 that occurred after March 1, 2024, to track recent activity."
+    },
+    {
+        "Human Message": "Current subtask is:\nAcquire a GitLab personal access token with read_api scope and export it (e.g., GITLAB_TOKEN) to authenticate subsequent API requests for group 97683359 and project 68456825."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"empty\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "[\"I attempted to call gitlab_agent with tool \\\"empty\\\" and parameters {} (agent cannot auto-create a user personal access token). Plan A: You (the user) create a GitLab Personal Access Token with scope read_api and export it as GITLAB_TOKEN. Steps: 1) In GitLab UI go to User Settings \u2192 Access Tokens. 2) Give a name (e.g., fdseChatops-token), check scope read_api, create and copy the token immediately. 3) Export it in your shell: bash/zsh: export GITLAB_TOKEN\\\"<PASTE_TOKEN_HERE>\\\"; to persist: add that line to ~/.bashrc or ~/.profile. PowerShell (session): $env:GITLAB_TOKEN  \\\"<PASTE_TOKEN_HERE>\\\"; persist with: setx GITLAB_TOKEN \\\"<PASTE_TOKEN_HERE>\\\". After you provide or set this token I will use it to query group 97683359 and project 68456825.\", \n \"Plan B: If you cannot create a user-level PAT, create a Project Access Token on project 68456825 (sufficient for project-level reads) and export it. Steps: 1) In GitLab UI navigate to the project \u2192 Settings \u2192 Access Tokens (Project access tokens). 2) Create a token with name and scope read_api, copy it. 3) Export: export GITLAB_TOKEN\\\"<TOKEN>\\\" (or use PowerShell commands above). Then provide/set the token so I can continue.\", \n \"Plan C: If you need automation or cannot interact with UI but have an admin or an existing admin token, create a project access token via API and export it. Example curl to create project access token (replace <ADMIN_TOKEN> and GitLab host if self-hosted): curl --request POST --header \\\"PRIVATE-TOKEN: <ADMIN_TOKEN>\\\" --data-urlencode \\\"namefdseChatops-pat\\\" --data-urlencode \\\"scopes[]read_api\\\" \\\"https://gitlab.com/api/v4/projects/68456825/access_tokens\\\". The response contains the token value\u2014copy it and export as GITLAB_TOKEN as in Plan A. After you provide the token (or confirm it's exported in the environment I can access), I will fetch the merge requests and project events as requested.\"]"
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: 1 validation error for Http_request\\nbody\\n  Field required [typemissing, input_value{'url': 'https://gitlab.c...OKEN\\\": \\\"GITLAB_TOKEN\\\"}'}, input_typedict]\\n    For further information visit https://errors.pydantic.dev/2.9/v/missing\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"23ff9e4e-607c-444f-bcf8-33c0a80e38a3\", \"tool_call_id\": \"call_fWFiRAPh6Y3HNzrkvE8OLdye\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: You (the user) create a GitLab Personal Access Token (PAT) with scope read_api in your GitLab account (User Settings \u2192 Access Tokens). Copy the token immediately and export it as GITLAB_TOKEN in your shell so I can use it. Example commands: bash/zsh: export GITLAB_TOKEN\\\"<PASTE_TOKEN_HERE>\\\" (add to ~/.bashrc or ~/.profile to persist). PowerShell (session): $env:GITLAB_TOKEN  \\\"<PASTE_TOKEN_HERE>\\\"; persist with: setx GITLAB_TOKEN \\\"<PASTE_TOKEN_HERE>\\\". After exporting, reply here confirming the token is set (do not paste the token in chat).\",\n  \"Plan B: If you cannot create a user PAT, create a Project Access Token on project 68456825 (Project \u2192 Settings \u2192 Access Tokens) with scope read_api, copy it, and export it as GITLAB_TOKEN using the same export commands above. Then confirm the variable is set so I can proceed.\",\n  \"Plan C: If you cannot create tokens via UI, ask an admin to create a project access token via the API and supply you the token. Admin CLI example (replace <ADMIN_TOKEN> and host): curl --request POST --header \\\"PRIVATE-TOKEN: <ADMIN_TOKEN>\\\" --data-urlencode \\\"namefdseChatops-pat\\\" --data-urlencode \\\"scopes[]read_api\\\" \\\"https://gitlab.com/api/v4/projects/68456825/access_tokens\\\". Admin returns the token to you; export it as GITLAB_TOKEN and confirm. (I cannot create PATs myself due to permission/security limits.)\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: You (the user) create a GitLab Personal Access Token (PAT) with scope read_api in your GitLab account (User Settings \u2192 Access Tokens). Copy the token immediately and export it as GITLAB_TOKEN in your shell so I can use it. Example commands: bash/zsh: export GITLAB_TOKEN\"<PASTE_TOKEN_HERE>\" (add to ~/.bashrc or ~/.profile to persist). PowerShell (session): $env:GITLAB_TOKEN  \"<PASTE_TOKEN_HERE>\"; persist with: setx GITLAB_TOKEN \"<PASTE_TOKEN_HERE>\". After exporting, reply here confirming the token is set (do not paste the token in chat)."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Use gitlab_agent tool \"verify_pat\" with parameters: {\"env_var\": \"GITLAB_TOKEN\", \"required_scopes\": [\"read_api\"], \"gitlab_host\": \"https://gitlab.com\"}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"404 Project Not Found\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"a72d147c-0fbc-4159-852a-57e2e3eb4e3d\", \"tool_call_id\": \"call_vzIFHX99nINXh39p1ddrAtkD\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Plan A: Confirm the environment variable GITLAB_TOKEN is set on the machine where I run API checks (do NOT paste the token here). To check: bash/zsh: echo \\\"$GITLAB_TOKEN\\\" (should output a non-empty string) or printenv GITLAB_TOKEN; PowerShell: echo $env:GITLAB_TOKEN. Reply here confirming it is set and that you are using gitlab.com as the host. After confirmation I will re-run the verify_pat step against https://gitlab.com.\", \n \"Plan B: If the variable is set but verification still fails, ensure the token has scope read_api and that the token owner has access to group 97683359 and project 68456825. If not, create a Project Access Token on project 68456825 with scope read_api (Project \u2192 Settings \u2192 Access Tokens), export it as GITLAB_TOKEN, confirm it is set (do NOT paste the token), and I will re-run verification.\", \n \"Plan C: If you use a self-hosted GitLab or a different host than gitlab.com, export GITLAB_HOST with the correct base URL (e.g., export GITLAB_HOST\\\"https://gitlab.mycompany.com\\\") and confirm both GITLAB_HOST and GITLAB_TOKEN are set. If you cannot create tokens, ask an admin to create a project access token with read_api or grant your account access to the target group/project; confirm once done and I will proceed.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Confirm the environment variable GITLAB_TOKEN is set on the machine where I run API checks (do NOT paste the token here). To check: bash/zsh: echo \"$GITLAB_TOKEN\" (should output a non-empty string) or printenv GITLAB_TOKEN; PowerShell: echo $env:GITLAB_TOKEN. Reply here confirming it is set and that you are using gitlab.com as the host. After confirmation I will re-run the verify_pat step against https://gitlab.com."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"gitlab_agent.verify_pat\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"env_var\",\n      \"parameter_value\": \"GITLAB_TOKEN\"\n    },\n    {\n      \"parameter_name\": \"required_scopes\",\n      \"parameter_value\": \"[\\\"read_api\\\"]\"\n    },\n    {\n      \"parameter_name\": \"gitlab_host\",\n      \"parameter_value\": \"https://gitlab.com\"\n    }\n  ]\n}"
+    }
+]

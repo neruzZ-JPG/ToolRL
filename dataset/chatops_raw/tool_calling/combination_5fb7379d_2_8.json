@@ -1,0 +1,260 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nFollow the GitHub user 'fdseChatops' to monitor their activity related to the 'testRepo' project."
+    },
+    {
+        "Human Message": "Current subtask is:\nOpen https://github.com/fdseChatops and verify this is the correct user and that the 'testRepo' repository is associated with them."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_a_repo\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the repository.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "github_get_a_repo ownerfdseChatops repotestRepo"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/repos#get-a-repository\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"243df84b-783d-48df-852d-cc21beba1ebc\", \"tool_call_id\": \"call_52jJH4oc9d1L8IJLuvGm5p3i\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Verify that the GitHub account 'fdseChatops' exists by calling github_get_user ownerfdseChatops.\", \"List public repositories of 'fdseChatops' using github_list_repos ownerfdseChatops and search for 'testRepo' (case-insensitive).\", \"Search GitHub for repositories named 'testRepo' owned by 'fdseChatops' using github_search_repos query'testRepo user:fdseChatops' to find forks or renamed repos.\", \"Ask the user whether 'testRepo' is private or under a different account/organization, and request a GitHub access token if private so we can check non-public repositories.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nVerify that the GitHub account 'fdseChatops' exists by calling github_get_user ownerfdseChatops."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_a_user\\\",\\n  \\\"parameters\\\": {\\n    \\\"username\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The handle for the GitHub user account.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "github_get_a_user usernamefdseChatops"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"39b1c2f2-c0c1-49ba-bbcf-e61b3802e5ef\", \"tool_call_id\": \"call_fxwrQOcwBRfZiLSutzmyeqYy\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Use github_search_users queryfdseChatops to find matching accounts and confirm whether a similarly named user or organization exists.\", \"Use github_search_repos query'testRepo user:fdseChatops' to search for any repositories named 'testRepo' tied to that user (including forks or renamed repos).\", \"Perform a direct HTTP GET of https://github.com/fdseChatops to inspect the public profile page (the web page may exist even if the API returned 404).\", \"Ask the user to confirm the exact username and whether 'testRepo' is private or belongs to a different account/organization; request a GitHub personal access token if the repository is private or on an enterprise instance.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nUse github_search_users queryfdseChatops to find matching accounts and confirm whether a similarly named user or organization exists."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_a_user\\\",\\n  \\\"parameters\\\": {\\n    \\\"username\\\": \\\"fdseChatops\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "github_search_users queryfdseChatops"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 200, 'content': b'{\\\"total_count\\\":0,\\\"incomplete_results\\\":false,\\\"items\\\":[]}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"b16540e8-794c-43c8-9080-0fd30b4b2657\", \"tool_call_id\": \"call_rlcv1PLjRAANbTkepySk9npz\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Perform a direct HTTP GET of https://github.com/fdseChatops to inspect the public profile page (the web UI may exist even if the API returned no results).\", \"Ask the user to confirm the exact username, whether 'testRepo' is public or private, and whether this is on github.com or a GitHub Enterprise instance; request a GitHub personal access token if the repo is private or on an enterprise instance.\", \"Search all public repositories for the name 'testRepo' using github_search_repos with query'testRepo' to find its owner (in case the repo exists under a different account).\", \"Broaden the user search with github_search_users using queries like 'fdse' and 'fdseChat' to find similarly named users or organizations that might match 'fdseChatops'.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPerform a direct HTTP GET of https://github.com/fdseChatops to inspect the public profile page (the web UI may exist even if the API returned no results)."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_a_user\\\",\\n  \\\"parameters\\\": {\\n    \\\"username\\\": \\\"fdseChatops\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "github_get_a_user usernamefdseChatops"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"f19b0c9a-94f8-4086-95c5-99241a9f257e\", \"tool_call_id\": \"call_qfiB9tSPwEapXd65YDGBmz9L\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Perform a direct unauthenticated HTTP GET of https://github.com/fdseChatops (web UI) and check the HTTP status and page content for evidence the account exists.\", \"Search all public repositories with github_search_repos query'testRepo' to locate the repository owner in case it exists under a different account.\", \"Ask the user to confirm the exact username and whether 'testRepo' is public or private, and request a GitHub personal access token if the repository is private or hosted on a GitHub Enterprise instance.\", \"Broaden the user search with github_search_users using queries like 'fdse', 'fdseChat', and variations of 'fdseChatops' to find similarly named users or organizations.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPerform a direct unauthenticated HTTP GET of https://github.com/fdseChatops (web UI) and check the HTTP status and page content for evidence the account exists."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_a_repo\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the repository.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: 1 validation error for Http_request\\nbody\\n  Field required [typemissing, input_value{'url': 'https://api.gith...qfWlK4KLGIJCFkmxHmXX\\\"}'}, input_typedict]\\n    For further information visit https://errors.pydantic.dev/2.9/v/missing\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"31bc986a-ae3d-421f-b1d7-a4f3671ed56f\", \"tool_call_id\": \"call_wP5yzTD7xyIIxNkuIEQQYeqY\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Use github_agent to perform a direct unauthenticated HTTP GET of https://github.com/fdseChatops via http_request (methodGET, urlhttps://github.com/fdseChatops) and inspect the HTTP status and returned HTML for signs the account/profile exists (200 with profile content vs 404 or GitHub\u2019s missing-user page).\", \"Use github_agent to search all public repositories with github_search_repos query'testRepo' to locate any repository named 'testRepo' and identify its owner (in case the repo exists under a different account).\", \"Ask the user to confirm the exact GitHub username and whether 'testRepo' is public or private and whether this is on github.com or a GitHub Enterprise instance; request a GitHub personal access token (with repo scope) if the repository is private so we can check non-public repositories via the API.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nUse github_agent to perform a direct unauthenticated HTTP GET of https://github.com/fdseChatops via http_request (methodGET, urlhttps://github.com/fdseChatops) and inspect the HTTP status and returned HTML for signs the account/profile exists (200 with profile content vs 404 or GitHub\u2019s missing-user page)."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"http_request\\\",\\n  \\\"parameters\\\": {\\n    \\\"method\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"HTTP method to use, in this case GET.\\\"\\n    },\\n    \\\"url\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The URL to perform the GET request on, in this case https://github.com/fdseChatops.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "http_request methodGET urlhttps://github.com/fdseChatops"
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: 1 validation error for Http_request\\nbody\\n  Field required [typemissing, input_value{'url': 'https://api.gith...qfWlK4KLGIJCFkmxHmXX\\\"}'}, input_typedict]\\n    For further information visit https://errors.pydantic.dev/2.9/v/missing\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"f14fcb34-a314-4890-bfc6-4c3a7b48cf86\", \"tool_call_id\": \"call_HirSlFgvlgvOMvElNV0PJWCv\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Retry the direct web GET using github_agent's http_request with explicit body to satisfy validation: http_request methodGET urlhttps://github.com/fdseChatops body\\\"\\\"\", \"Search for the repository across GitHub to find its owner: github_search_repos query'testRepo'\", \"Ask the user to confirm the exact GitHub username, whether 'testRepo' is public or private, and whether this is on github.com or a GitHub Enterprise instance; request a GitHub personal access token with repo scope if the repository is private or on an enterprise instance.\", \"Broaden the user search for similarly named accounts using github_search_users queries like 'fdse', 'fdseChat', and 'fdseChatops' to locate a matching user or organization.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nRetry the direct web GET using github_agent's http_request with explicit body to satisfy validation: http_request methodGET urlhttps://github.com/fdseChatops body\"\""
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Search GitHub for repositories named 'testRepo' using github_search_repos query'testRepo' to find the repository and its owner (public search).\", \"Broaden the user search with github_search_users using queries 'fdse', 'fdseChat', and 'fdseChatops' to locate similarly named users or organizations that might match the intended account.\", \"Ask the user to confirm the exact GitHub username and whether 'testRepo' is public or private; if it's private or on a GitHub Enterprise instance, request a GitHub personal access token (with repo and read:user scopes) and the enterprise base URL so I can check authenticated endpoints.\", \"If automated checks continue to fail, ask the user to visit https://github.com/fdseChatops and paste the HTTP status code or a screenshot of the profile page so I can verify existence manually.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nSearch GitHub for repositories named 'testRepo' using github_search_repos query'testRepo' to find the repository and its owner (public search)."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"none\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "github_search_repos querytestRepo"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/orgs/orgs#get-an-organization\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"fbea0547-f22a-4003-9084-07dd888aeedc\", \"tool_call_id\": \"call_D3jsNRFbAYOtA6P7UXylGCde\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Ask the user to confirm the exact GitHub username and the exact repository name (case-sensitive), and whether 'testRepo' is public or private; if private or on GitHub Enterprise, request a Personal Access Token (repo and read:user scopes) and the enterprise base URL so I can check authenticated endpoints.\", \"Retry broader GitHub code/repo searches via the API with multiple queries (e.g. github_search_repos query'testRepo in:name', 'testrepo', 'test-repo', 'test_repo') to locate differently-cased or hyphen/underscore variants of the repo name.\", \"Retry direct unauthenticated web requests to the GitHub UI: GET https://github.com/fdseChatops and GET https://github.com/search?qtestRepo&typerepositories using http_request with an explicit body parameter (body\\\"\\\") to satisfy the tool validation and inspect returned HTML/status for evidence of the account or repo.\", \"Search other hosting platforms (e.g. GitLab) for a repository named 'testRepo' using the gitlab_agent to determine if the project exists on a different service.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nAsk the user to confirm the exact GitHub username and the exact repository name (case-sensitive), and whether 'testRepo' is public or private; if private or on GitHub Enterprise, request a Personal Access Token (repo and read:user scopes) and the enterprise base URL so I can check authenticated endpoints."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/repos#update-a-repository\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"1ea63f1d-9352-4362-b596-024b5dd67222\", \"tool_call_id\": \"call_NTAueHu5x7jzEhHDiwo7iQ0a\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Ask the user to confirm the exact GitHub username (case-sensitive) and the exact repository name (case-sensitive), state whether 'testRepo' is public or private, and whether this is on github.com or a GitHub Enterprise instance; if the repo is private or on an enterprise instance ask them to provide a Personal Access Token (PAT) with repo and read:user scopes and the enterprise base URL so I can check authenticated endpoints.\", \"Perform broader public searches across github.com for repository-name variants and similarly named accounts (no user input required): run github_search_repos with queries 'testRepo in:name', 'test-repo in:name', 'test_repo in:name', 'testrepo in:name' and github_search_users with queries 'fdse', 'fdseChat', 'fdseChatops' \u2014 also retry web GETs to https://github.com/fdseChatops and https://github.com/search?qtestRepo&typerepositories using http_request with an explicit body parameter (body\\\"\\\") to satisfy the tool validation.\", \"Search other hosting platforms for the repository (no PAT required): use the gitlab_agent to search GitLab for repositories named 'testRepo' and similarly named users/organizations in case the project is hosted off GitHub; if found, report the owner and URL and ask whether you want monitoring configured there instead.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nAsk the user to confirm the exact GitHub username (case-sensitive) and the exact repository name (case-sensitive), state whether 'testRepo' is public or private, and whether this is on github.com or a GitHub Enterprise instance; if the repo is private or on an enterprise instance ask them to provide a Personal Access Token (PAT) with repo and read:user scopes and the enterprise base URL so I can check authenticated endpoints."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"Please confirm the exact GitHub username (case-sensitive) and repository name (case-sensitive). Also, specify whether the repository is public or private, and whether it is on github.com or a GitHub Enterprise instance. If the repository is private or on an enterprise instance, please provide a Personal Access Token (PAT) with `repo` and `read:user` scopes, and the enterprise base URL so I can access authenticated endpoints.\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\" : \"confirm_github_repository_details\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"github_username\",\n            \"parameter_value\" : \"\"\n        },\n        {\n            \"parameter_name\" : \"repository_name\",\n            \"parameter_value\" : \"\"\n        },\n        {\n            \"parameter_name\" : \"visibility\",\n            \"parameter_value\" : \"\"\n        },\n        {\n            \"parameter_name\" : \"host\",\n            \"parameter_value\" : \"\"\n        },\n        {\n            \"parameter_name\" : \"personal_access_token\",\n            \"parameter_value\" : \"\"\n        },\n        {\n            \"parameter_name\" : \"enterprise_base_url\",\n            \"parameter_value\" : \"\"\n        }\n    ]\n}"
+    }
+]

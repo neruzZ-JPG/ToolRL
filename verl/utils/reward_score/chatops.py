@@ -100,8 +100,9 @@ def compute_planning_reward(input_str, gt, pd, max_possible_reward, min_possible
     prompt_template = ChatPromptTemplate.from_template(PLANNING_JUDGE_PROMPT)
     llm = ChatOpenAI(base_url=base_url, api_key=api_key, model=model_name)
     messages = prompt_template.format_messages(input_str=input_str, pd=pd)
-    response = llm.invoke(messages)
+    
     try:
+        response = llm.invoke(messages)
         score = float(response.content)
     except:
         return min_possible_reward

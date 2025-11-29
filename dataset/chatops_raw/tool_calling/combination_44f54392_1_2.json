@@ -1,0 +1,80 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nPlease set up a persistent volume called 'project-files' with the 'local' driver and appropriate labels. After that, spin up a container that uses this volume to serve a web application on port 8080, ensuring the container's network is configured correctly. Once done, inspect the container to check if it is running properly."
+    },
+    {
+        "Human Message": "Current subtask is:\nCreate the Docker volume with labels: docker volume create --driver local --name project-files --label appweb --label tierfrontend"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"create_a_volume\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Name of the volume to create\\\"\\n    },\\n    \\\"driver\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Volume driver to use\\\"\\n    },\\n    \\\"labels\\\": {\\n      \\\"type\\\": \\\"object\\\",\\n      \\\"description\\\": \\\"Key-value pairs for labels\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "create_a_volume with parameters: nameproject-files, driverlocal, labels{\"app\":\"web\",\"tier\":\"frontend\"}\n\n[\n \"After creating the volume, Plan A: create a user-defined bridge network ('docker network create web-net') then run the container using: 'docker run -d --name web-app --network web-net -p 8080:80 --mount sourceproject-files,target/usr/share/nginx/html nginx:stable'. Finally inspect with 'docker inspect web-app' and 'docker ps -f nameweb-app' to confirm it's running.\",\n \"After creating the volume, Plan B: use docker-compose. Create a docker-compose.yml that declares the 'project-files' volume (driver: local, labels: appweb, tierfrontend), a 'web-app' service using image 'nginx:stable' with ports '8080:80', mounts the volume at /usr/share/nginx/html, and attaches to a declared network. Run 'docker compose up -d' and then inspect with 'docker compose ps' and 'docker inspect <container-id>'.\"\n]"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 201, 'content': b'{\\\"CreatedAt\\\":\\\"2025-11-11T07:19:20+08:00\\\",\\\"Driver\\\":\\\"local\\\",\\\"Labels\\\":{\\\"app\\\":\\\"web\\\",\\\"tier\\\":\\\"frontend\\\"},\\\"Mountpoint\\\":\\\"/var/snap/docker/common/var-lib-docker/volumes/project-files/_data\\\",\\\"Name\\\":\\\"project-files\\\",\\\"Options\\\":null,\\\"Scope\\\":\\\"local\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"4df6d3a1-7a92-41cf-984d-95817aa0d65b\", \"tool_call_id\": \"call_0sz1e8kXT0SAa2zG7xoICKhp\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Volume 'project-files' was created successfully (driverlocal, labels appweb,tierfrontend). Plan A: create a user-defined bridge network then run a container. Steps to execute with docker_agent: 1) docker network create web-net; 2) docker run -d --name web-app --network web-net -p 8080:80 --mount sourceproject-files,target/usr/share/nginx/html nginx:stable; 3) verify with docker inspect web-app and docker ps -f nameweb-app. Return the container ID and inspection output.\",\n  \"Plan B: use Docker Compose to start the service using the existing volume. Create a docker-compose.yml that declares the external volume 'project-files', a network, and a service 'web-app' using image 'nginx:stable' with ports '8080:80' and mount 'project-files:/usr/share/nginx/html'. Then run docker compose up -d and verify with docker compose ps and docker inspect <container-id>. Return the compose file content and the inspection output.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nVolume 'project-files' was created successfully (driverlocal, labels appweb,tierfrontend). Plan A: create a user-defined bridge network then run a container. Steps to execute with docker_agent: 1) docker network create web-net; 2) docker run -d --name web-app --network web-net -p 8080:80 --mount sourceproject-files,target/usr/share/nginx/html nginx:stable; 3) verify with docker inspect web-app and docker ps -f nameweb-app. Return the container ID and inspection output."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"create_a_network\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Name of the network to create\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "create_a_network with parameters: nameweb-net\n\n[\n  \"Run the container with docker_agent: docker run -d --name web-app --network web-net -p 8080:80 --mount sourceproject-files,target/usr/share/nginx/html nginx:stable; then verify with docker inspect web-app and docker ps -f nameweb-app. Return the container ID and the inspection output.\",\n  \"Use docker-compose with docker_agent: create a docker-compose.yml that declares the external volume 'project-files', a network 'web-net', and a service 'web-app' using image 'nginx:stable' with ports '8080:80' and mount 'project-files:/usr/share/nginx/html'; run docker compose up -d, then verify with docker compose ps and docker inspect <container-id>. Return the compose file and inspection output.\"\n]"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 400, 'content': b'{\\\"message\\\":\\\"config cannot be empty in order to create a container\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"0e1836f2-5702-4f4e-bd3b-075a0be907a8\", \"tool_call_id\": \"call_UKsS5BrP3PIA1fpGw3UAbyhj\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Retry starting the container via docker_agent with an explicit container create+start or run call. Parameters: imagenginx:stable, nameweb-app, networkweb-net, detachtrue, ports[{\\\"host\\\":8080,\\\"container\\\":80}], mounts[{\\\"source\\\":\\\"project-files\\\",\\\"target\\\":\\\"/usr/share/nginx/html\\\",\\\"type\\\":\\\"volume\\\"}]. After start, verify with docker inspect web-app and docker ps -f nameweb-app; return the container ID and full inspect output.\",\n  \"Plan B: Use docker-compose via docker_agent. Create a docker-compose.yml (version: '3.8') declaring service web-app using image nginx:stable, ports ['8080:80'], volumes [\\\"project-files:/usr/share/nginx/html\\\"], networks [web-net], and declare project-files as external volume and web-net as external network. Run 'docker compose up -d' and then verify with 'docker compose ps' and 'docker inspect <container-id>'; return the compose file content and the inspection output.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Retry starting the container via docker_agent with an explicit container create+start or run call. Parameters: imagenginx:stable, nameweb-app, networkweb-net, detachtrue, ports[{\"host\":8080,\"container\":80}], mounts[{\"source\":\"project-files\",\"target\":\"/usr/share/nginx/html\",\"type\":\"volume\"}]. After start, verify with docker inspect web-app and docker ps -f nameweb-app; return the container ID and full inspect output."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"create_a_container\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": \\\"web-app\\\",\\n    \\\"platform\\\": \\\"\\\",\\n    \\\"body\\\": {\\n      \\\"Image\\\": \\\"nginx:stable\\\",\\n      \\\"HostConfig\\\": {\\n        \\\"NetworkMode\\\": \\\"web-net\\\",\\n        \\\"PortBindings\\\": {\\n          \\\"80/tcp\\\": [{\\\"HostPort\\\": \\\"8080\\\"}]\\n        },\\n        \\\"Mounts\\\": [\\n          {\\n            \\\"Source\\\": \\\"project-files\\\",\\n            \\\"Target\\\": \\\"/usr/share/nginx/html\\\",\\n            \\\"Type\\\": \\\"volume\\\"\\n          }\\n        ]\\n      },\\n      \\\"NetworkingConfig\\\": {\\n        \\\"EndpointsConfig\\\": {\\n          \\\"web-net\\\": {}\\n        }\\n      }\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"create_a_container\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"name\",\n            \"parameter_value\": \"web-app\"\n        },\n        {\n            \"parameter_name\": \"platform\",\n            \"parameter_value\": \"\"\n        },\n        {\n            \"parameter_name\": \"body\",\n            \"parameter_value\": \"{\\\"Image\\\":\\\"nginx:stable\\\",\\\"HostConfig\\\":{\\\"NetworkMode\\\":\\\"web-net\\\",\\\"PortBindings\\\":{\\\"80/tcp\\\":[{\\\"HostPort\\\":\\\"8080\\\"}]},\\\"Mounts\\\":[{\\\"Source\\\":\\\"project-files\\\",\\\"Target\\\":\\\"/usr/share/nginx/html\\\",\\\"Type\\\":\\\"volume\\\"}]},\\\"NetworkingConfig\\\":{\\\"EndpointsConfig\\\":{\\\"web-net\\\":{}}}}\"\n        }\n    ]\n}"
+    }
+]

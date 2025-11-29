@@ -1,0 +1,161 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nList all resources available in the 'staging' namespace that are related to the 'k8s' API group, filtering for resources that support the 'get' and 'list' verbs, in wide output format."
+    },
+    {
+        "Human Message": "Current subtask is:\nFirst, identify the namespaced API resources that support get and list and whose API group contains \u201ck8s\u201d:\nkubectl api-resources --namespacedtrue --verbsget,list -o wide | grep -i \"k8s\""
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"list_api_resources\\\",\\n  \\\"parameters\\\": {\\n    \\\"namespaced\\\": {\\n      \\\"type\\\": \\\"boolean\\\",\\n      \\\"description\\\": \\\"If true, only show namespaced resources\\\",\\n      \\\"default\\\": true\\n    },\\n    \\\"verbs\\\": {\\n      \\\"type\\\": \\\"array\\\",\\n      \\\"description\\\": \\\"List of verbs to filter by\\\",\\n      \\\"default\\\": [\\\"get\\\", \\\"list\\\"]\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Invoke kubernetes_agent tool \"list_api_resources\" with parameters: {\"namespaced\": true, \"verbs\": [\"get\", \"list\"]}"
+    },
+    {
+        "Ai Message": "\"[TextContent(type'text', text'NAME                       SHORTNAMES   APIVERSION                     NAMESPACED   KIND\\\\nconfigmaps                 cm           v1                             true         ConfigMap\\\\nendpoints                  ep           v1                             true         Endpoints\\\\nevents                     ev           v1                             true         Event\\\\nlimitranges                limits       v1                             true         LimitRange\\\\npersistentvolumeclaims     pvc          v1                             true         PersistentVolumeClaim\\\\npods                       po           v1                             true         Pod\\\\npodtemplates                            v1                             true         PodTemplate\\\\nreplicationcontrollers     rc           v1                             true         ReplicationController\\\\nresourcequotas             quota        v1                             true         ResourceQuota\\\\nsecrets                                 v1                             true         Secret\\\\nserviceaccounts            sa           v1                             true         ServiceAccount\\\\nservices                   svc          v1                             true         Service\\\\ncontrollerrevisions                     apps/v1                        true         ControllerRevision\\\\ndaemonsets                 ds           apps/v1                        true         DaemonSet\\\\ndeployments                deploy       apps/v1                        true         Deployment\\\\nreplicasets                rs           apps/v1                        true         ReplicaSet\\\\nstatefulsets               sts          apps/v1                        true         StatefulSet\\\\nhorizontalpodautoscalers   hpa          autoscaling/v2                 true         HorizontalPodAutoscaler\\\\ncronjobs                   cj           batch/v1                       true         CronJob\\\\njobs                                    batch/v1                       true         Job\\\\nleases                                  coordination.k8s.io/v1         true         Lease\\\\nendpointslices                          discovery.k8s.io/v1            true         EndpointSlice\\\\nevents                     ev           events.k8s.io/v1               true         Event\\\\nhelmchartconfigs                        helm.cattle.io/v1              true         HelmChartConfig\\\\nhelmcharts                              helm.cattle.io/v1              true         HelmChart\\\\naddons                                  k3s.cattle.io/v1               true         Addon\\\\npods                                    metrics.k8s.io/v1beta1         true         PodMetrics\\\\ningresses                  ing          networking.k8s.io/v1           true         Ingress\\\\nnetworkpolicies            netpol       networking.k8s.io/v1           true         NetworkPolicy\\\\npoddisruptionbudgets       pdb          policy/v1                      true         PodDisruptionBudget\\\\nrolebindings                            rbac.authorization.k8s.io/v1   true         RoleBinding\\\\nroles                                   rbac.authorization.k8s.io/v1   true         Role\\\\ncsistoragecapacities                    storage.k8s.io/v1              true         CSIStorageCapacity\\\\ningressroutes                           traefik.containo.us/v1alpha1   true         IngressRoute\\\\ningressroutetcps                        traefik.containo.us/v1alpha1   true         IngressRouteTCP\\\\ningressrouteudps                        traefik.containo.us/v1alpha1   true         IngressRouteUDP\\\\nmiddlewares                             traefik.containo.us/v1alpha1   true         Middleware\\\\nmiddlewaretcps                          traefik.containo.us/v1alpha1   true         MiddlewareTCP\\\\nserverstransports                       traefik.containo.us/v1alpha1   true         ServersTransport\\\\ntlsoptions                              traefik.containo.us/v1alpha1   true         TLSOption\\\\ntlsstores                               traefik.containo.us/v1alpha1   true         TLSStore\\\\ntraefikservices                         traefik.containo.us/v1alpha1   true         TraefikService\\\\ningressroutes                           traefik.io/v1alpha1            true         IngressRoute\\\\ningressroutetcps                        traefik.io/v1alpha1            true         IngressRouteTCP\\\\ningressrouteudps                        traefik.io/v1alpha1            true         IngressRouteUDP\\\\nmiddlewares                             traefik.io/v1alpha1            true         Middleware\\\\nmiddlewaretcps                          traefik.io/v1alpha1            true         MiddlewareTCP\\\\nserverstransports                       traefik.io/v1alpha1            true         ServersTransport\\\\nserverstransporttcps                    traefik.io/v1alpha1            true         ServersTransportTCP\\\\ntlsoptions                              traefik.io/v1alpha1            true         TLSOption\\\\ntlsstores                               traefik.io/v1alpha1            true         TLSStore\\\\ntraefikservices                         traefik.io/v1alpha1            true         TraefikService\\\\n', annotationsNone)]\""
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Run kubernetes_agent to kubectl get each resource in namespace 'staging' whose API group contains 'k8s' (e.g., discovery.k8s.io, events.k8s.io, metrics.k8s.io, networking.k8s.io, rbac.authorization.k8s.io, storage.k8s.io, coordination.k8s.io) with -o wide (one command per resource, e.g. kubectl get <resource>.<group> -n staging -o wide).\", \"First run kubernetes_agent to list exact resource identifiers with kubectl api-resources -o name and filter for groups containing 'k8s' (e.g. kubectl api-resources -o name | grep -i k8s), then run a batch kubectl get -n staging -o wide for each returned identifier (e.g. xargs -n1 -I{} kubectl get {} -n staging -o wide).\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nRun kubernetes_agent to kubectl get each resource in namespace 'staging' whose API group contains 'k8s' (e.g., discovery.k8s.io, events.k8s.io, metrics.k8s.io, networking.k8s.io, rbac.authorization.k8s.io, storage.k8s.io, coordination.k8s.io) with -o wide (one command per resource, e.g. kubectl get <resource>.<group> -n staging -o wide)."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"list_api_resources\\\",\\n  \\\"parameters\\\": {\\n    \\\"apiGroup\\\": {\\n      \\\"type\\\": \\\"string\\\",\\n      \\\"description\\\": \\\"API group to filter by\\\"\\n    },\\n    \\\"namespaced\\\": {\\n      \\\"type\\\": \\\"boolean\\\",\\n      \\\"description\\\": \\\"If true, only show namespaced resources\\\"\\n    },\\n    \\\"output\\\": {\\n      \\\"type\\\": \\\"string\\\",\\n      \\\"description\\\": \\\"Output format (wide, name, or no-headers)\\\",\\n      \\\"enum\\\": [\\\"wide\\\", \\\"name\\\", \\\"no-headers\\\"]\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Invoke kubernetes_agent tool \"list_api_resources\" with parameters: {\"apiGroup\": \"k8s\", \"namespaced\": true, \"output\": \"name\"}"
+    },
+    {
+        "Ai Message": "\"[TextContent(type'text', text'', annotationsNone)]\""
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Run kubectl api-resources --namespaced -o wide, extract lines whose APIVERSION contains \\\"k8s\\\", build resource identifiers as <name>.<group> (strip the /version) and kubectl get each in staging with wide output. One-liner: kubectl api-resources --namespaced -o wide | awk '/k8s/ {split($3,a,\\\"/\\\"); printf \\\"%s.%s\\\\n\\\", $1, a[1] }' | xargs -r -n1 -I{} kubectl get {} -n staging -o wide\",\n  \"Plan B: Find API groups containing 'k8s' then list namespaced resources for each group and get them in staging. Example sequence: for g in $(kubectl api-versions | grep -i k8s | sort -u); do kubectl api-resources --namespaced --api-group$g -o name | xargs -r -n1 -I{} kubectl get {}.$g -n staging -o wide; done\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Run kubectl api-resources --namespaced -o wide, extract lines whose APIVERSION contains \"k8s\", build resource identifiers as <name>.<group> (strip the /version) and kubectl get each in staging with wide output. One-liner: kubectl api-resources --namespaced -o wide | awk '/k8s/ {split($3,a,\"/\"); printf \"%s.%s\\n\", $1, a[1] }' | xargs -r -n1 -I{} kubectl get {} -n staging -o wide"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"kubectl_generic\\\",\\n  \\\"parameters\\\": {\\n    \\\"command\\\": \\\"shell command\\\",\\n    \\\"args\\\": [\\n      \\\"kubectl api-resources --namespaced -o wide | awk '/k8s/ {split($3,a,\\\\\\\"/\\\\\\\"); printf \\\\\\\"%s.%s\\\\\\\\n\\\\\\\", $1, a[1] }' | xargs -r -n1 -I{} kubectl get {} -n staging -o wide\\\"\\n    ]\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Invoke kubernetes_agent tool \"kubectl_generic\" with parameters: {\"command\":\"shell command\",\"args\":[\"kubectl api-resources --namespaced -o wide | awk '/k8s/ {split($3,a,\\\"/\\\"); printf \\\"%s.%s\\\\n\\\", $1, a[1] }' | xargs -r -n1 -I{} kubectl get {} -n staging -o wide\"]}"
+    },
+    {
+        "Ai Message": "null"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Retry the one-liner but robustly extract the API group (handle apigroup/version and apigroup-only): kubectl api-resources --namespaced -o wide | awk '/k8s/ {split($3,a,\\\"/\\\"); g(a[1]!\\\"\\\"?a[1]:$3); printf \\\"%s.%s\\\\n\\\", $1, g }' | xargs -r -n1 -I{} kubectl get {} -n staging -o wide\",\n  \"Plan B: Enumerate API groups that contain 'k8s' then get namespaced resources per group: for g in $(kubectl api-versions | grep -i k8s | sort -u); do kubectl api-resources --namespaced --api-group$g -o name | xargs -r -n1 -I{} kubectl get {}.$g -n staging -o wide; done\",\n  \"Plan C: Use the known groups from prior output and run explicit gets for common resources: kubectl get events.events.k8s.io -n staging -o wide; kubectl get endpointslices.discovery.k8s.io -n staging -o wide; kubectl get pods.metrics.k8s.io -n staging -o wide; kubectl get ingresses.networking.k8s.io -n staging -o wide; kubectl get networkpolicies.networking.k8s.io -n staging -o wide; kubectl get roles.rbac.authorization.k8s.io -n staging -o wide; kubectl get rolebindings.rbac.authorization.k8s.io -n staging -o wide; kubectl get csistoragecapacities.storage.k8s.io -n staging -o wide; kubectl get leases.coordination.k8s.io -n staging -o wide\",\n  \"Plan D: Fallback to 'name' output which may already include group suffix, then get: kubectl api-resources --namespaced -o name | grep -i k8s | xargs -r -n1 -I{} kubectl get {} -n staging -o wide\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Retry the one-liner but robustly extract the API group (handle apigroup/version and apigroup-only): kubectl api-resources --namespaced -o wide | awk '/k8s/ {split($3,a,\"/\"); g(a[1]!\"\"?a[1]:$3); printf \"%s.%s\\n\", $1, g }' | xargs -r -n1 -I{} kubectl get {} -n staging -o wide"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"kubectl_generic\\\",\\n  \\\"parameters\\\": {\\n    \\\"command\\\": \\\"api-resources\\\",\\n    \\\"flags\\\": {\\n      \\\"namespaced\\\": true,\\n      \\\"output\\\": \\\"wide\\\"\\n    },\\n    \\\"args\\\": [\\\"--no-headers\\\"]\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Invoke kubernetes_agent tool \"kubectl_generic\" with parameters: {\"command\":\"shell command\",\"args\":[\"kubectl api-resources --namespaced -o wide | awk '/k8s/ {split($3,a,\\\"/\\\"); g(a[1]!\\\"\\\"?a[1]:$3); printf \\\"%s.%s\\\\n\\\", $1, g }' | xargs -r -n1 -I{} kubectl get {} -n staging -o wide\"]}"
+    },
+    {
+        "Ai Message": "null"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use resource names output (includes group when needed) and get each: kubectl api-resources --namespaced -o name | grep -i k8s | xargs -r -n1 -I{} kubectl get {} -n staging -o wide\",\n  \"Plan B: Enumerate API groups containing 'k8s' then get namespaced resources per group to ensure correct group suffixes: for g in $(kubectl api-versions | grep -i k8s | sort -u); do kubectl api-resources --namespaced --api-group$g -o name | xargs -r -n1 -I{} kubectl get {}.$g -n staging -o wide; done\",\n  \"Plan C: Parse the earlier captured wide output client-side and run explicit gets for known k8s groups (events.k8s.io, discovery.k8s.io, metrics.k8s.io, networking.k8s.io, rbac.authorization.k8s.io, storage.k8s.io, coordination.k8s.io), e.g.: kubectl get events.events.k8s.io -n staging -o wide; kubectl get endpointslices.discovery.k8s.io -n staging -o wide; kubectl get pods.metrics.k8s.io -n staging -o wide; kubectl get ingresses.networking.k8s.io -n staging -o wide; kubectl get networkpolicies.networking.k8s.io -n staging -o wide; kubectl get roles.rbac.authorization.k8s.io -n staging -o wide; kubectl get rolebindings.rbac.authorization.k8s.io -n staging -o wide; kubectl get csistoragecapacities.storage.k8s.io -n staging -o wide; kubectl get leases.coordination.k8s.io -n staging -o wide\",\n  \"Plan D: If pipeline execution fails, return raw api-resources wide output so I can build exact resource identifiers: run kubectl api-resources --namespaced -o wide --no-headers and provide the output; I will parse and produce the precise kubectl get commands for -n staging -o wide.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use resource names output (includes group when needed) and get each: kubectl api-resources --namespaced -o name | grep -i k8s | xargs -r -n1 -I{} kubectl get {} -n staging -o wide"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"The task involves listing API resources, filtering for k8s-related resources, and then fetching details for each resource in the staging namespace. \\n\\nFirst, I need to list API resources.  \\nFollowing that, I will filter and use the relevant resource names to get details with `kubectl get`.\\n\\nI will start by listing the API resources.\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Invoke kubernetes_agent tool \"kubectl_generic\" with parameters: {\"command\":\"shell command\",\"args\":[\"kubectl api-resources --namespaced -o name | grep -i k8s | xargs -r -n1 -I{} kubectl get {} -n staging -o wide\"]}"
+    },
+    {
+        "Ai Message": "null"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Ask kubernetes_agent to run `kubectl api-resources --namespaced -o wide --no-headers` and return the raw output; I will parse the APIVERSION column to construct exact resource identifiers (<name>.<group>) and then run `kubectl get <resource> -n staging -o wide` for each.\",\n  \"Plan B: Ask kubernetes_agent to enumerate API groups containing 'k8s' (`kubectl api-versions | grep -i k8s | sort -u`) and for each group run `kubectl api-resources --namespaced --api-group<group> -o name` then `kubectl get <name>.<group> -n staging -o wide` in a loop.\",\n  \"Plan C: Directly run explicit kubectl get commands for commonly expected k8s groups/resources in staging (one-off commands): `kubectl get events.events.k8s.io,endpointslices.discovery.k8s.io,pods.metrics.k8s.io,ingresses.networking.k8s.io,networkpolicies.networking.k8s.io,roles.rbac.authorization.k8s.io,rolebindings.rbac.authorization.k8s.io,csistoragecapacities.storage.k8s.io,leases.coordination.k8s.io -n staging -o wide` (or separate kubectl get per resource if combined fails).\",\n  \"Plan D: If kubernetes_agent cannot execute commands, return the raw `kubectl api-resources --namespaced -o wide --no-headers` output to me so I can parse it and produce the exact `kubectl get` commands to run locally or provide instructions to run them.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Ask kubernetes_agent to run `kubectl api-resources --namespaced -o wide --no-headers` and return the raw output; I will parse the APIVERSION column to construct exact resource identifiers (<name>.<group>) and then run `kubectl get <resource> -n staging -o wide` for each."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"kubectl_generic\\\",\\n  \\\"parameters\\\": {\\n    \\\"command\\\": \\\"api-resources\\\",\\n    \\\"subCommand\\\": \\\"None\\\",\\n    \\\"resourceType\\\": \\\"\\\",\\n    \\\"name\\\": \\\"\\\",\\n    \\\"namespace\\\": \\\"\\\",\\n    \\\"outputFormat\\\": \\\"wide\\\",\\n    \\\"flags\\\": {\\n      \\\"namespaced\\\": true,\\n      \\\"no-headers\\\": true\\n    },\\n    \\\"args\\\": []\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"kubectl_generic\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"command\",\n      \"parameter_value\": \"api-resources\"\n    },\n    {\n      \"parameter_name\": \"subCommand\",\n      \"parameter_value\": \"None\"\n    },\n    {\n      \"parameter_name\": \"resourceType\",\n      \"parameter_value\": \"\"\n    },\n    {\n      \"parameter_name\": \"name\",\n      \"parameter_value\": \"\"\n    },\n    {\n      \"parameter_name\": \"namespace\",\n      \"parameter_value\": \"\"\n    },\n    {\n      \"parameter_name\": \"outputFormat\",\n      \"parameter_value\": \"wide\"\n    },\n    {\n      \"parameter_name\": \"flags\",\n      \"parameter_value\": \"{\\\"namespaced\\\":true,\\\"no-headers\\\":true}\"\n    },\n    {\n      \"parameter_name\": \"args\",\n      \"parameter_value\": \"[]\"\n    }\n  ]\n}"
+    }
+]

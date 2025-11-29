@@ -1,0 +1,89 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI want to set up a new container environment for a project named 'SmartHomeAutomation' that runs on Ubuntu 20.04, with the hostname 'HomeController', and exposes port 8080. After creating the container, I need to initialize a web server inside it with specific environment variables for API keys and mounting a local directory at '/app/data'."
+    },
+    {
+        "Human Message": "Current subtask is:\nStart by researching how to create a Docker container with Ubuntu 20.04, setting a custom hostname, and exposing ports. Consider which base image to use and how to specify environment variables and volume mounts in your container configuration."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use ubuntu:20.04 as the base image, create a Dockerfile that installs a lightweight web server (nginx), configures it to serve content from /app/data, exposes port 80 inside the container, and includes an entrypoint script that reads API_KEY and other env vars. Build with 'docker build -t smarthome-ubuntu .' and run with 'docker run -dit --name SmartHomeAutomation -h HomeController -p 8080:80 -v /path/on/host/data:/app/data -e API_KEY... -e API_SECRET... smarthome-ubuntu'.\",\n  \"Plan B: Use docker-compose to define the SmartHomeAutomation service with Ubuntu 20.04 as the image, set environment variables (e.g., API_KEY, API_SECRET), mount the local data directory to /app/data, map ports '8080:80', assign hostname 'HomeController', and include an entrypoint script to install/start nginx or another web server on container boot.\",\n  \"Plan C: Use a minimal Ubuntu 20.04 base with a small Python HTTP server to serve /app/data. Create a startup script that exports API_KEY and runs 'python3 -m http.server 8080 --directory /app/data'. Run with 'docker run -dit --name SmartHomeAutomation -h HomeController -p 8080:8080 -v /path/on/host/data:/app/data -e API_KEY... smarthome-ubuntu-python'.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use ubuntu:20.04 as the base image, create a Dockerfile that installs a lightweight web server (nginx), configures it to serve content from /app/data, exposes port 80 inside the container, and includes an entrypoint script that reads API_KEY and other env vars. Build with 'docker build -t smarthome-ubuntu .' and run with 'docker run -dit --name SmartHomeAutomation -h HomeController -p 8080:80 -v /path/on/host/data:/app/data -e API_KEY... -e API_SECRET... smarthome-ubuntu'."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use ubuntu:20.04 as the base image, create a Dockerfile that installs nginx, configures it to serve content from /app/data, exposes port 80 inside the container, and includes an entrypoint script that reads API_KEY and other env vars. Build with 'docker build -t smarthome-ubuntu .' and run with 'docker run -dit --name SmartHomeAutomation -h HomeController -p 8080:80 -v /path/on/host/data:/app/data -e API_KEY... -e API_SECRET... smarthome-ubuntu'.\",\n  \"Plan B: Use docker-compose to define the SmartHomeAutomation service with Ubuntu 20.04 as the image, set environment variables (e.g., API_KEY, API_SECRET), mount the local data directory to /app/data, map ports '8080:80', assign hostname 'HomeController', and include an entrypoint script to install/start nginx or another web server on container boot.\",\n  \"Plan C: Use a minimal Ubuntu 20.04 base with a small Python HTTP server to serve /app/data. Create a startup script that exports API_KEY and runs 'python3 -m http.server 8080 --directory /app/data'. Run with 'docker run -dit --name SmartHomeAutomation -h HomeController -p 8080:8080 -v /path/on/host/data:/app/data -e API_KEY... smarthome-ubuntu-python'.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use ubuntu:20.04 as the base image, create a Dockerfile that installs nginx, configures it to serve content from /app/data, exposes port 80 inside the container, and includes an entrypoint script that reads API_KEY and other env vars. Build with 'docker build -t smarthome-ubuntu .' and run with 'docker run -dit --name SmartHomeAutomation -h HomeController -p 8080:80 -v /path/on/host/data:/app/data -e API_KEY... -e API_SECRET... smarthome-ubuntu'."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"build_an_image\\\",\\n  \\\"parameters\\\": {\\n    \\\"inputStream\\\": {\\n      \\\"type\\\": \\\"binary\\\",\\n      \\\"description\\\": \\\"Tarball build context containing a Dockerfile that starts FROM ubuntu:20.04, installs nginx, configures nginx to serve content from /app/data, exposes port 80, and includes an entrypoint script that reads API_KEY and other environment variables. The context should also include /entrypoint.sh (executable) and any initial data under /app/data.\\\"\\n    },\\n    \\\"t\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Tag for the built image. Use smarthome-ubuntu to match the plan.\\\"\\n    },\\n    \\\"dockerfile\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Path to the Dockerfile inside the build context. Optional; defaults to Dockerfile.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "[\n  \"Execute build_an_image with tool_namebuild_an_image, and parameters: {inputStream: <binary tarball of the build context containing Dockerfile (FROM ubuntu:20.04), nginx installation steps, /app/data configuration, entrypoint.sh, and any initial data>, t: 'smarthome-ubuntu', dockerfile: 'Dockerfile'}\"\n]"
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: JSONDecodeError('Expecting value: line 1 column 1 (char 0)')\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"6836cc0f-b97f-4a49-a10e-9571cfe807e2\", \"tool_call_id\": \"call_prdbcSGFMLsqGWqt3xyKItOJ\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Create a tarball build context containing a Dockerfile that starts FROM ubuntu:20.04, installs nginx, configures nginx to serve content from /app/data, exposes port 80 inside the container, and includes an entrypoint script that reads API_KEY and API_SECRET from environment variables. The entrypoint should start nginx in the foreground. Build with 'docker build -t smarthome-ubuntu .' (using the tarball as context) and run with 'docker run -dit --name SmartHomeAutomation -h HomeController -p 8080:80 -v /path/on/host/data:/app/data -e API_KEY... -e API_SECRET... smarthome-ubuntu'.\",\n  \"Plan B: Use docker-compose to define the SmartHomeAutomation service. Create a docker-compose.yml with: version: '3', services: SmartHomeAutomation: build: context: ., dockerfile: Dockerfile, container_name: SmartHomeAutomation, hostname: HomeController, ports: ['8080:80'], volumes: ['/path/on/host/data:/app/data'], environment: ['API_KEY...', 'API_SECRET...']. Ensure the image has a proper entrypoint script to start nginx and export env vars. Then run with 'docker-compose up -d'.\",\n  \"Plan C: Create a minimal Ubuntu-based image that runs a Python simple HTTP server. Dockerfile: FROM ubuntu:20.04, RUN apt-get update && apt-get install -y python3, COPY entrypoint.sh /entrypoint.sh, RUN chmod +x /entrypoint.sh, EXPOSE 80, ENTRYPOINT [\\\"/entrypoint.sh\\\"]. entrypoint.sh exports API_KEY/API_SECRET from env and starts 'python3 -m http.server 80 --directory /app/data'. Run with 'docker run -dit --name SmartHomeAutomation -h HomeController -p 8080:80 -v /path/on/host/data:/app/data -e API_KEY... -e API_SECRET... smarthome-ubuntu-python'.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Create a tarball build context containing a Dockerfile that starts FROM ubuntu:20.04, installs nginx, configures nginx to serve content from /app/data, exposes port 80 inside the container, and includes an entrypoint script that reads API_KEY and API_SECRET from environment variables. The entrypoint should start nginx in the foreground. Build with 'docker build -t smarthome-ubuntu .' (using the tarball as context) and run with 'docker run -dit --name SmartHomeAutomation -h HomeController -p 8080:80 -v /path/on/host/data:/app/data -e API_KEY... -e API_SECRET... smarthome-ubuntu'."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"build_an_image\\\",\\n  \\\"parameters\\\": {\\n    \\\"inputStream\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Binary tar archive containing the build context, including a Dockerfile at the root (or at the path specified by the dockerfile parameter).\\\"\\n    },\\n    \\\"dockerfile\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Path within the build context to the Dockerfile. Default is Dockerfile.\\\"\\n    },\\n    \\\"t\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Tag to apply to the built image in the format name:tag. Example: smarthome-ubuntu:latest\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"build_an_image\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"inputStream\",\n      \"parameter_value\": \"<binary tarball of the build context containing a Dockerfile (FROM ubuntu:20.04), nginx installation steps, configuration to serve /app/data, an entrypoint.sh that reads API_KEY/API_SECRET from environment, and initial data under /app/data>\"\n    },\n    {\n      \"parameter_name\": \"t\",\n      \"parameter_value\": \"smarthome-ubuntu\"\n    },\n    {\n      \"parameter_name\": \"dockerfile\",\n      \"parameter_value\": \"Dockerfile\"\n    }\n  ]\n}"
+    }
+]

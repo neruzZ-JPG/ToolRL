@@ -1,0 +1,125 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nPlease fetch the raw content of the 'config/settings.json' file from the project with ID 68456825 in GitLab to review the current configuration parameters."
+    },
+    {
+        "Human Message": "Current subtask is:\nVerify you have a GitLab Personal Access Token with read_repository (or read_api) scope for project 68456825; create one under User Settings -> Access Tokens if needed."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Ask the user to provide a GitLab Personal Access Token (PAT) with read_repository or read_api scope (or a project access token) so I can use it to fetch config/settings.json from project 68456825.\",\n  \"Provide step-by-step instructions for the user to create a PAT under GitLab User Settings -> Access Tokens with read_repository (or read_api) scope, then have the user paste the PAT here (or a project access token) so I can fetch the file.\",\n  \"If the user prefers not to share tokens, provide the exact curl/HTTP command and the GitLab API raw file URL (with a placeholder for a PAT) for the user to run locally and either share the output or confirm success.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nAsk the user to provide a GitLab Personal Access Token (PAT) with read_repository or read_api scope (or a project access token) so I can use it to fetch config/settings.json from project 68456825."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"Please provide a GitLab Personal Access Token (PAT) with read_repository or read_api scope (or a project access token) so I can use it to fetch the config/settings.json file from project 68456825.\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Use gitlab_agent tool \"send_user_prompt\" with parameters:\n- project_id: 68456825\n- user_message: \"Please provide a GitLab Personal Access Token (PAT) with read_repository or read_api scope (or a project access token) so I can use it to fetch config/settings.json from project 68456825. If you prefer not to share a token, say so and I will provide the exact curl/HTTP command you can run locally instead.\"\n- required_scopes: [\"read_repository\", \"read_api\"]"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"404 File Not Found\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"2deafbb6-ac1e-43a3-80da-e0e340364bdc\", \"tool_call_id\": \"call_DVBEKQVuaC3yRsNorE4UJJZ7\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"User pastes a GitLab Personal Access Token (PAT) or a project access token with read_repository or read_api scope. I will use it to call the GitLab API raw-file endpoint for project 68456825 (I need the token and optionally the ref/branch; if no ref is provided I will use the repository default branch) and return the contents of config/settings.json.\",\n  \"If the user won't share a token, they run this locally and paste the output: curl --header \\\"PRIVATE-TOKEN: <PAT>\\\" \\\"https://gitlab.com/api/v4/projects/68456825/repository/files/config%2Fsettings.json/raw?ref<branch>\\\" (replace <PAT> and <branch> with your token and branch name, e.g., main). I will analyze the pasted output.\",\n  \"If the user needs help creating a token, I will provide step-by-step instructions to create a Personal Access Token under User Settings \u2192 Access Tokens (name, expiration, select read_repository or read_api scope), then the user can paste the token here for me to use.\",\n  \"If the user refuses to share any token, they can instead create a temporary project access token or deploy token with read_repository scope, or make the file accessible publicly/a guest user for a short time; the user should then provide the token or confirm access so I can fetch the file.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nUser pastes a GitLab Personal Access Token (PAT) or a project access token with read_repository or read_api scope. I will use it to call the GitLab API raw-file endpoint for project 68456825 (I need the token and optionally the ref/branch; if no ref is provided I will use the repository default branch) and return the contents of config/settings.json."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_repo_file_raw\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": 68456825,\\n    \\\"file_path\\\": \\\"config/settings.json\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Use gitlab_agent tool \"gitlab_get_repo_file_raw\" with parameters:\n- id: 68456825\n- file_path: \"config/settings.json\"\n- private_token: \"<PASTE_YOUR_GITLAB_PAT_HERE>\"\n- ref: \"<optional branch or commit SHA; omit or set to default branch to use repository default>\""
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: 1 validation error for Http_request\\nheaders\\n  Input should be a valid string [typestring_type, input_value{'PRIVATE-TOKEN': 'glpat-vJAFLGxPt6rtWwHdbJR4'}, input_typedict]\\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"f2ccbd58-ea73-4e8e-8974-775dfafb4d88\", \"tool_call_id\": \"call_6oMtVrPK55M8BxvPdOtoDuN0\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Retry fetching the file if you paste the GitLab PAT (or project access token) and optional ref/branch here. I will re-run the API call for project 68456825/file config/settings.json and fix the previous error by sending the token as a single header string (PRIVATE-TOKEN: <token>) so the request validates correctly.\",\n  \"If you prefer not to share a token, run this locally and paste the output: curl --header \\\"PRIVATE-TOKEN: <PAT>\\\" \\\"https://gitlab.com/api/v4/projects/68456825/repository/files/config%2Fsettings.json/raw?ref<branch>\\\" (replace <PAT> and optional <branch>), then I will analyze the pasted content.\",\n  \"If you need a token, follow these steps to create one and then paste it here: GitLab -> User Settings -> Access Tokens -> give a name, optional expiry, select read_repository or read_api scope, Create personal access token, then copy and paste the token here (or create a Project Access Token with read_repository scope and paste it).\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nRetry fetching the file if you paste the GitLab PAT (or project access token) and optional ref/branch here. I will re-run the API call for project 68456825/file config/settings.json and fix the previous error by sending the token as a single header string (PRIVATE-TOKEN: <token>) so the request validates correctly."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_repo_file_raw\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"The project ID, which is 68456825.\\\"\\n    },\\n    \\\"file_path\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The path to the file: config/settings.json.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Use gitlab_agent tool \"gitlab_get_repo_file_raw\" with parameters:\n- id: 68456825\n- file_path: \"config/settings.json\"\n- private_token: \"<PASTE_YOUR_GITLAB_PAT_HERE>\"\n- ref: \"<optional branch or commit SHA; omit or set to default branch if not provided>\""
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"404 File Not Found\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"1a4889df-6dae-4078-bb69-f82e3eaaf436\", \"tool_call_id\": \"call_sCNJyW40Xq3JPA9mlLFtXhtA\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"I will retry fetching config/settings.json from project 68456825 if you provide a GitLab Personal Access Token (PAT) or project access token with read_repository or read_api scope, and optionally the branch/ref (if omitted I'll use the repository default). I will call GET /projects/68456825/repository/files/config%2Fsettings.json/raw?ref<ref> with header 'PRIVATE-TOKEN: <PAT>' and return the file contents.\",\n  \"If you prefer not to share a token, run these locally and paste the output here: 1) Fetch the file: curl --header \\\"PRIVATE-TOKEN: <PAT>\\\" \\\"https://gitlab.com/api/v4/projects/68456825/repository/files/config%2Fsettings.json/raw?ref<branch>\\\" 2) To verify the path, list the directory: curl --header \\\"PRIVATE-TOKEN: <PAT>\\\" \\\"https://gitlab.com/api/v4/projects/68456825/repository/tree?pathconfig&ref<branch>\\\". Replace <PAT> and <branch> and paste outputs for me to analyze.\",\n  \"If the file may be in a different path/branch or inaccessible, confirm the exact file path and branch name, or temporarily make the file/repo accessible, or paste the file contents here. Once you confirm the correct path/branch or provide access/content, I will proceed to fetch and review the configuration.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nI will retry fetching config/settings.json from project 68456825 if you provide a GitLab Personal Access Token (PAT) or project access token with read_repository or read_api scope, and optionally the branch/ref (if omitted I'll use the repository default). I will call GET /projects/68456825/repository/files/config%2Fsettings.json/raw?ref<ref> with header 'PRIVATE-TOKEN: <PAT>' and return the file contents."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_repo_file_raw\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": 68456825,\\n    \\\"file_path\\\": \\\"config/settings.json\\\",\\n    \\\"ref\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The branch or commit reference. If omitted, the default branch will be used.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"gitlab_get_repo_file_raw\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"id\",\n            \"parameter_value\": \"68456825\"\n        },\n        {\n            \"parameter_name\": \"file_path\",\n            \"parameter_value\": \"config/settings.json\"\n        },\n        {\n            \"parameter_name\": \"private_token\",\n            \"parameter_value\": \"<PASTE_YOUR_GITLAB_PAT_HERE>\"\n        },\n        {\n            \"parameter_name\": \"ref\",\n            \"parameter_value\": \"<optional branch or commit SHA; omit or set to default branch if not provided>\"\n        }\n    ]\n}"
+    }
+]

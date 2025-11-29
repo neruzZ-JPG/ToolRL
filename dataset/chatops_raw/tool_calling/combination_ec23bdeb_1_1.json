@@ -1,0 +1,71 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"{\"toolname\" : \"query_dog_info\", \"parameters\" : [{\"parameter_name\" : \"dog_species\", \"parameter_value\" : \"beagle\"}]}\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nPlease set up a new container called 'database_backup' using the 'mysql:5.7' image on 'linux/amd64', allocate 2GB of memory, and map host port 3306 to the container's MySQL port, with environment variables 'MYSQL_ROOT_PASSWORDsecurepass' and 'MYSQL_DATABASEbackupdb'."
+    },
+    {
+        "Human Message": "Current subtask is:\nSSH to the target host and run 'docker info' to confirm Docker is installed/running and supports linux/amd64; fix any issues before proceeding."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Plan A: Grant docker_agent SSH access so it can run diagnostics and fix issues. Provide target host IP, SSH port (if nonstandard), SSH username, and either password or private key (paste key text) and confirm sudo access. docker_agent will run `docker info`, verify Engine status and supported platforms (and install/start Docker or enable services if needed).\", \"Plan B: I provide the exact diagnostic commands for you to run and paste the outputs. Run: `docker info` and `docker version --format '{{json .}}'` and `docker run --rm --platform linux/amd64 hello-world` (or `docker run --rm --platform linux/amd64 mysql:5.7 echo ok`). Paste the full outputs and I will analyze and give remediation steps.\", \"Plan C: I provide step-by-step remediation commands you can run to install/enable Docker and multi-arch support (install Docker engine, enable/start systemd service, install qemu-user-static and register binfmt). If you choose this, tell me the host OS (e.g., Ubuntu 20.04, CentOS 7) and I will return the appropriate commands to run and verify.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Grant docker_agent SSH access so it can run diagnostics and fix issues. Provide target host IP, SSH port (if nonstandard), SSH username, and either password or private key (paste key text) and confirm sudo access. docker_agent will run `docker info`, verify Engine status and supported platforms (and install/start Docker or enable services if needed)."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"\\\"\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"ssh_diagnose_docker\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"target_host_ip\",\n      \"parameter_value\": \"\"\n    },\n    {\n      \"parameter_name\": \"ssh_port\",\n      \"parameter_value\": \"22\"\n    },\n    {\n      \"parameter_name\": \"ssh_username\",\n      \"parameter_value\": \"\"\n    },\n    {\n      \"parameter_name\": \"auth_method\",\n      \"parameter_value\": \"password\"\n    },\n    {\n      \"parameter_name\": \"ssh_password\",\n      \"parameter_value\": \"\"\n    },\n    {\n      \"parameter_name\": \"ssh_private_key\",\n      \"parameter_value\": \"\"\n    },\n    {\n      \"parameter_name\": \"sudo\",\n      \"parameter_value\": \"true\"\n    }\n  ]\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 400, 'content': b'{\\\"message\\\":\\\"config cannot be empty in order to create a container\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"9b7f0607-ba63-436c-9081-127aef5e1f3b\", \"tool_call_id\": \"call_GBfg4VYCF7LrLI4FYrsNJUgf\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Plan A: Grant docker_agent SSH access so it can run diagnostics and fix issues. Provide target host IP, SSH port (if nonstandard), SSH username, and either password or the private key text; confirm the account has sudo. I will forward these to docker_agent to run `docker info`, `docker version --format '{{json .}}'`, and `docker run --rm --platform linux/amd64 hello-world` (or `mysql:5.7 echo ok`), then install/start Docker or enable multi-arch support if needed.\", \"Plan B: I provide the exact diagnostic commands for you to run and paste outputs here. Run: `docker info`, `docker version --format '{{json .}}'`, and `docker run --rm --platform linux/amd64 hello-world` (or `docker run --rm --platform linux/amd64 mysql:5.7 echo ok`). Paste the full outputs and I will analyze and give remediation steps.\", \"Plan C: Tell me the host OS (e.g., Ubuntu 20.04, Debian 11, CentOS 7/8) and whether you can run commands as root or via sudo. I will return a tailored, step-by-step remediation script to install/enable Docker, start the service, and enable multi-arch support (qemu/binfmt) plus verification commands to run afterward.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Grant docker_agent SSH access so it can run diagnostics and fix issues. Provide target host IP, SSH port (if nonstandard), SSH username, and either password or the private key text; confirm the account has sudo. I will forward these to docker_agent to run `docker info`, `docker version --format '{{json .}}'`, and `docker run --rm --platform linux/amd64 hello-world` (or `mysql:5.7 echo ok`), then install/start Docker or enable multi-arch support if needed."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"\\\"\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"ssh_diagnose_docker\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"target_host_ip\",\n      \"parameter_value\": \"\"\n    },\n    {\n      \"parameter_name\": \"ssh_port\",\n      \"parameter_value\": \"22\"\n    },\n    {\n      \"parameter_name\": \"ssh_username\",\n      \"parameter_value\": \"\"\n    },\n    {\n      \"parameter_name\": \"auth_method\",\n      \"parameter_value\": \"password\"\n    },\n    {\n      \"parameter_name\": \"ssh_password\",\n      \"parameter_value\": \"\"\n    },\n    {\n      \"parameter_name\": \"ssh_private_key\",\n      \"parameter_value\": \"\"\n    },\n    {\n      \"parameter_name\": \"sudo\",\n      \"parameter_value\": \"true\"\n    }\n  ]\n}"
+    }
+]
