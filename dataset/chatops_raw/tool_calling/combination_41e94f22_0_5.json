@@ -1,0 +1,179 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI need to find the latest open issues related to the 'Login Page' feature in the project owned by user 'fdseChatops' on GitLab, specifically within group ID 97683359, so I can prioritize bug fixes."
+    },
+    {
+        "Human Message": "Current subtask is:\nIdentify the project ID: list projects in group 97683359 owned by fdseChatops (UI or GET /groups/97683359/projects?ownedtrue&searchLogin%20Page). Note the exact project and its ID\u2014you\u2019ll need it to query issues."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Use gitlab_agent to call GET /groups/97683359/projects with query params ownedtrue and search'Login Page' to list projects; provide the GitLab base URL (if not gitlab.com) and a Personal Access Token with read_api or api scope so the agent can filter results for projects owned by user 'fdseChatops' and return the exact project name and its project ID.\", \"If API access is not available, manually locate the project in the GitLab web UI: search within group 97683359 for 'Login Page' projects owned by 'fdseChatops' and provide the project URL or project path (or a screenshot). With that I can extract and report the exact project and its project ID.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nUse gitlab_agent to call GET /groups/97683359/projects with query params ownedtrue and search'Login Page' to list projects; provide the GitLab base URL (if not gitlab.com) and a Personal Access Token with read_api or api scope so the agent can filter results for projects owned by user 'fdseChatops' and return the exact project name and its project ID."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_user_projects\\\",\\n  \\\"parameters\\\": {\\n    \\\"archived\\\": {\\n      \\\"type\\\": \\\"bool\\\",\\n      \\\"description\\\": \\\"Limit by archived status. Not required here.\\\"\\n    },\\n    \\\"id_after\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"Limit results to projects with IDs greater than specified. Not required.\\\"\\n    },\\n    \\\"id_before\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"Limit results to projects with IDs less than specified. Not required.\\\"\\n    },\\n    \\\"membership\\\": {\\n      \\\"type\\\": \\\"bool\\\",\\n      \\\"description\\\": \\\"Limit by projects that the current user is a member of. Not required here.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Call gitlab_get_user_projects on gitlab_agent with parameters:\n- group_id: 97683359\n- query: { owned: true, search: \"Login Page\" }\n- base_url: \"https://gitlab.com\" (replace if using a self\u2011hosted GitLab)\n- personal_access_token: \"<PERSONAL_ACCESS_TOKEN_WITH_api_or_read_api_scope>\"\n\nOptional (not required): archived, membership, id_after, id_before."
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 401, 'content': b'{\\\"message\\\":\\\"401 Unauthorized\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"44eb865c-f92a-4a00-b901-b8185f352e86\", \"tool_call_id\": \"call_BWoLi7X5UaLW9mPpoHt2s5qT\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Provide a GitLab Personal Access Token (api or read_api scope) and confirm the GitLab base URL (default https://gitlab.com). I will call gitlab_agent gitlab_get_user_projects with group_id97683359 and query { owned: true, search: 'Login Page' } and return the exact project name and project ID. (Current attempt returned 401 Unauthorized \u2014 token required.)\",\n  \"Plan B: If you cannot share a token, run this locally and paste the JSON output here: curl --header \\\"PRIVATE-TOKEN: <YOUR_TOKEN>\\\" \\\"https://gitlab.com/api/v4/groups/97683359/projects?ownedtrue&searchLogin%20Page\\\". I will parse the pasted response and extract the exact project name and ID.\",\n  \"Plan C: If API access is not possible, follow these UI steps and paste the project URL or project ID: 1) Open the group page for ID 97683359 in GitLab; 2) Use the group's project search for 'Login Page' and filter by owner 'fdseChatops'; 3) Open the matching project and get the Project ID from Settings > General (or note the project URL/path). Provide that project URL or numeric Project ID and I will proceed to query issues.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Provide a GitLab Personal Access Token (api or read_api scope) and confirm the GitLab base URL (default https://gitlab.com). I will call gitlab_agent gitlab_get_user_projects with group_id97683359 and query { owned: true, search: 'Login Page' } and return the exact project name and project ID. (Current attempt returned 401 Unauthorized \u2014 token required.)"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_user_projects\\\",\\n  \\\"parameters\\\": {\\n    \\\"group_id\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"ID of the group to fetch projects from\\\"\\n    },\\n    \\\"query\\\": {\\n      \\\"type\\\": \\\"object\\\",\\n      \\\"description\\\": \\\"Additional query parameters such as 'owned' and 'search' to filter projects\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Call gitlab_get_user_projects on gitlab_agent with parameters:\n- group_id: 97683359\n- query: { owned: true, search: \"Login Page\" }\n- base_url: \"https://gitlab.com\"  (replace if using a self-hosted GitLab)\n- personal_access_token: \"<PERSONAL_ACCESS_TOKEN_WITH_api_or_read_api_scope>\""
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: 1 validation error for Http_request\\nbody\\n  Input should be a valid string [typestring_type, input_value{}, input_typedict]\\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"61ac7468-f532-45ec-9b26-d4f421a9fef5\", \"tool_call_id\": \"call_iBqEShTkOly8OTGX2hrd2HIb\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Provide a GitLab Personal Access Token (api or read_api scope) and confirm the GitLab base URL (default https://gitlab.com). I will call gitlab_agent.gitlab_get_user_projects with group_id97683359 and query { owned: true, search: 'Login Page' } (ensuring the request body and token are passed as strings to avoid the previous validation error) and return the exact project name and numeric project ID.\",\n  \"Plan B: If you cannot share a token, run locally and paste the raw JSON output from: curl --header \\\"PRIVATE-TOKEN: <YOUR_TOKEN>\\\" \\\"https://gitlab.com/api/v4/groups/97683359/projects?ownedtrue&searchLogin%20Page\\\". I will parse that JSON and extract the exact project name and project ID for you.\",\n  \"Plan C: If API access isn't possible, open the GitLab web UI for group ID 97683359, search projects for 'Login Page' and filter by owner 'fdseChatops', then paste the project URL or the numeric Project ID shown in the project's Settings > General. I will use that project ID to continue to the issues query step.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Provide a GitLab Personal Access Token (api or read_api scope) and confirm the GitLab base URL (default https://gitlab.com). I will call gitlab_agent.gitlab_get_user_projects with group_id97683359 and query { owned: true, search: 'Login Page' } (ensuring the request body and token are passed as strings to avoid the previous validation error) and return the exact project name and numeric project ID."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_user_projects\\\",\\n  \\\"parameters\\\": {\\n    \\\"group_id\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"The ID of the group to retrieve projects from\\\"\\n    },\\n    \\\"query\\\": {\\n      \\\"type\\\": \\\"dict\\\",\\n      \\\"description\\\": \\\"Query parameters such as owned and search criteria\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Call gitlab_get_user_projects on gitlab_agent with parameters:\n- group_id: 97683359\n- query: { \"owned\": true, \"search\": \"Login Page\" } \u2014 send these as URL query parameters (e.g., ownedtrue&searchLogin%20Page)\n- base_url: \"https://gitlab.com\"  (replace if using a self\u2011hosted GitLab)\n- personal_access_token: \"<PERSONAL_ACCESS_TOKEN_WITH_api_or_read_api_scope>\""
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 401, 'content': b'{\\\"message\\\":\\\"401 Unauthorized\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"e3c1c02e-0713-4885-bb47-23ad0dbc2e94\", \"tool_call_id\": \"call_41MJl0z9rJoVTEZWixQyXHaV\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Provide a GitLab Personal Access Token (api or read_api scope) as a plain string and confirm the GitLab base URL (default https://gitlab.com). I will call gitlab_agent.gitlab_get_user_projects with group_id97683359 and query ownedtrue&search'Login Page' (ensuring the token and request body are passed as strings) and return the exact project name and numeric project ID. Note: previous attempt returned 401 Unauthorized.\",\n  \"If you cannot share a token, run this locally and paste the raw JSON response here: curl --header \\\"PRIVATE-TOKEN: <YOUR_TOKEN>\\\" \\\"https://gitlab.com/api/v4/groups/97683359/projects?ownedtrue&searchLogin%20Page\\\". I will parse the pasted JSON and extract the exact project name and project ID.\",\n  \"If API access isn't possible, use the GitLab web UI: open the group page for ID 97683359, search projects for 'Login Page' and filter by owner 'fdseChatops', open the matching project and copy the Project ID from Settings > General (or paste the project URL/path). Provide that Project ID or URL and I will proceed to query issues.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nProvide a GitLab Personal Access Token (api or read_api scope) as a plain string and confirm the GitLab base URL (default https://gitlab.com). I will call gitlab_agent.gitlab_get_user_projects with group_id97683359 and query ownedtrue&search'Login Page' (ensuring the token and request body are passed as strings) and return the exact project name and numeric project ID. Note: previous attempt returned 401 Unauthorized."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Call gitlab_get_user_projects on gitlab_agent with parameters:\n- group_id: 97683359\n- query: \"ownedtrue&searchLogin%20Page\"  (send as URL query string)\n- base_url: \"https://gitlab.com\"  (replace if self-hosted)\n- personal_access_token: \"<PERSONAL_ACCESS_TOKEN_WITH_api_or_read_api_scope>\""
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"404 User Not Found\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"ff413cb6-aa86-4bec-baf7-5ac03780935a\", \"tool_call_id\": \"call_SZ6ObeNlEWmcigjGEXgE3Lnn\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Provide a valid GitLab Personal Access Token (api or read_api scope) that belongs to user 'fdseChatops' and confirm the GitLab base URL (default https://gitlab.com). I will call gitlab_agent.gitlab_get_user_projects with group_id97683359 and query ownedtrue&search'Login Page' and return the exact project name and numeric project ID. Note: previous responses (401 Unauthorized, then 404 User Not Found) indicate either no token was provided, the token is invalid/expired, or the token's user doesn't exist\u2014so the token must be valid and owned by fdseChatops for ownedtrue to work.\",\n  \"Plan B: If you can supply a valid token with access to the group but not belonging to fdseChatops, provide that token and confirm base_url. I will call GET /groups/97683359/projects?searchLogin%20Page (omit ownedtrue) and locally filter the returned projects for those where the project namespace or owner equals 'fdseChatops' (e.g., namespace.path or owner.username  'fdseChatops') and return the exact project name and project ID.\",\n  \"Plan C: If you cannot share any token, either run this locally and paste the raw JSON output here: curl --header \\\"PRIVATE-TOKEN: <YOUR_TOKEN>\\\" \\\"https://gitlab.com/api/v4/groups/97683359/projects?ownedtrue&searchLogin%20Page\\\" (or without ownedtrue if token isn't fdseChatops), or open the GitLab UI for group 97683359, search for 'Login Page' and filter by owner 'fdseChatops', then paste the project URL or numeric Project ID. I will parse that input and extract the exact project name and ID.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Provide a valid GitLab Personal Access Token (api or read_api scope) that belongs to user 'fdseChatops' and confirm the GitLab base URL (default https://gitlab.com). I will call gitlab_agent.gitlab_get_user_projects with group_id97683359 and query ownedtrue&search'Login Page' and return the exact project name and numeric project ID. Note: previous responses (401 Unauthorized, then 404 User Not Found) indicate either no token was provided, the token is invalid/expired, or the token's user doesn't exist\u2014so the token must be valid and owned by fdseChatops for ownedtrue to work."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Call gitlab_get_user_projects on gitlab_agent with parameters:\n- group_id: 97683359\n- query: \"ownedtrue&searchLogin%20Page\" (send as URL query string)\n- base_url: \"https://gitlab.com\"  (replace if using a self\u2011hosted GitLab)\n- personal_access_token: \"<PERSONAL_ACCESS_TOKEN_BELONGING_TO_fdseChatops_WITH_api_or_read_api_scope>\""
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 401, 'content': b'{\\\"message\\\":\\\"401 Unauthorized\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"e5400451-1b0b-4bd1-850d-3f7bc1f51ad7\", \"tool_call_id\": \"call_nUitHSjsrdRmUor0beT2V7ew\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Provide a valid GitLab Personal Access Token (plain string) that belongs to user 'fdseChatops' and confirm the GitLab base URL (default https://gitlab.com). I will call gitlab_agent.gitlab_get_user_projects with group_id97683359 and query ownedtrue&search'Login Page' and return the exact project name and numeric project ID (required token scope: api or read_api).\",\n  \"Plan B: Provide any valid GitLab Personal Access Token (plain string) with access to group 97683359 and confirm base URL. I will call GET /groups/97683359/projects?searchLogin%20Page (omit ownedtrue), then filter results locally for projects where namespace.path or owner.username  'fdseChatops' and return the exact project name and project ID.\",\n  \"Plan C: If you cannot share a token, run this locally and paste the raw JSON output here: curl --header \\\"PRIVATE-TOKEN: <YOUR_TOKEN>\\\" \\\"https://gitlab.com/api/v4/groups/97683359/projects?ownedtrue&searchLogin%20Page\\\" (or without ownedtrue if the token isn\u2019t fdseChatops). I will parse the pasted JSON and extract the exact project name and numeric project ID.\",\n  \"Plan D: If API calls are impossible, open the GitLab web UI for group ID 97683359, search projects for 'Login Page', filter by owner 'fdseChatops', open the matching project and copy the Project ID from Settings > General (or paste the project URL/path). Provide that project URL or numeric Project ID and I will proceed to query issues.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Provide a valid GitLab Personal Access Token (plain string) that belongs to user 'fdseChatops' and confirm the GitLab base URL (default https://gitlab.com). I will call gitlab_agent.gitlab_get_user_projects with group_id97683359 and query ownedtrue&search'Login Page' and return the exact project name and numeric project ID (required token scope: api or read_api)."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_user_projects\\\",\\n  \\\"parameters\\\": {\\n    \\\"group_id\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"The ID of the group or user for which to retrieve projects, in this case 97683359\\\"\\n    },\\n    \\\"search\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Search term to filter projects, in this case 'Login Page'\\\"\\n    },\\n    \\\"owned\\\": {\\n      \\\"type\\\": \\\"bool\\\",\\n      \\\"description\\\": \\\"Filter to only include projects owned by the user\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"gitlab_get_user_projects\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"group_id\",\n            \"parameter_value\": \"97683359\"\n        },\n        {\n            \"parameter_name\": \"search\",\n            \"parameter_value\": \"Login Page\"\n        },\n        {\n            \"parameter_name\": \"owned\",\n            \"parameter_value\": \"true\"\n        },\n        {\n            \"parameter_name\": \"base_url\",\n            \"parameter_value\": \"https://gitlab.com\"\n        },\n        {\n            \"parameter_name\": \"personal_access_token\",\n            \"parameter_value\": \"<PERSONAL_ACCESS_TOKEN_BELONGING_TO_fdseChatops_WITH_api_or_read_api_scope>\"\n        }\n    ]\n}"
+    }
+]

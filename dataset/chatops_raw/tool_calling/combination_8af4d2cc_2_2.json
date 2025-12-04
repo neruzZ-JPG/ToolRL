@@ -1,0 +1,80 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"{\"toolname\" : \"query_dog_info\", \"parameters\" : [{\"parameter_name\" : \"dog_species\", \"parameter_value\" : \"beagle\"}]}\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nCreate a local scope volume named 'backup_storage' labeled 'backup' with specific access modes set to 'single' and sharing as 'none'. Then, push the Docker image 'backup_service:stable' to our company's registry located at 'registry.company.com'. Once uploaded, start the container with ID 'lmno456pq' to initiate backup procedures."
+    },
+    {
+        "Human Message": "Current subtask is:\nFirst, create the local-scoped volume with the required label and options:\ndocker volume create --driver local --name backup_storage --label backup --opt accesssingle --opt sharingnone"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"create_a_volume\\\",\\n  \\\"parameters\\\": {\\n    \\\"Name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Name of the volume.\\\"\\n    },\\n    \\\"Driver\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Name of the volume driver used by the volume.\\\"\\n    },\\n    \\\"Labels\\\": {\\n      \\\"type\\\": \\\"object\\\",\\n      \\\"description\\\": \\\"User-defined key/value metadata.\\\"\\n    },\\n    \\\"Options\\\": {\\n      \\\"type\\\": \\\"object\\\",\\n      \\\"description\\\": \\\"Options for the volume driver.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"create_a_volume\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"Name\",\n      \"parameter_value\": \"backup_storage\"\n    },\n    {\n      \"parameter_name\": \"Driver\",\n      \"parameter_value\": \"local\"\n    },\n    {\n      \"parameter_name\": \"Labels\",\n      \"parameter_value\": {\n        \"backup\": \"true\"\n      }\n    },\n    {\n      \"parameter_name\": \"Options\",\n      \"parameter_value\": {\n        \"access\": \"single\",\n        \"sharing\": \"none\"\n      }\n    }\n  ]\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 201, 'content': b'{\\\"CreatedAt\\\":\\\"2025-11-11T19:52:06+08:00\\\",\\\"Driver\\\":\\\"local\\\",\\\"Labels\\\":{\\\"backup\\\":\\\"true\\\"},\\\"Mountpoint\\\":\\\"/var/snap/docker/common/var-lib-docker/volumes/backup_storage/_data\\\",\\\"Name\\\":\\\"backup_storage\\\",\\\"Options\\\":null,\\\"Scope\\\":\\\"local\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"ca890011-bb43-4171-bd8b-d732c15b8eb1\", \"tool_call_id\": \"call_lWrJa8Kg847QmIWznBdu81CW\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Recreate the volume with the requested options. Steps: (1) Remove the existing volume 'backup_storage' (destructive). (2) Call docker_agent.create_a_volume with Name'backup_storage', Driver'local', Labels{\\\"backup\\\":\\\"true\\\"}, Options{\\\"access\\\":\\\"single\\\",\\\"sharing\\\":\\\"none\\\"}. Use this if you confirm it's safe to delete the current volume.\",\n  \"Plan B: Accept the current volume (label present, options not set) and continue with the remaining user tasks: push 'backup_service:stable' to registry.company.com and start container ID 'lmno456pq'. Note: accesssingle and sharingnone will not be enforced.\",\n  \"Plan C: Investigate why the options were not applied. Steps: (1) Call docker_agent.inspect_volume for 'backup_storage' to confirm Options are null. (2) Query the Docker host/driver to determine supported local driver options. If the local driver doesn't support 'access' and 'sharing', propose switching to a volume plugin that supports these options or using an alternative approach (e.g., bind mount or plugin).\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Recreate the volume with the requested options. Steps: (1) Remove the existing volume 'backup_storage' (destructive). (2) Call docker_agent.create_a_volume with Name'backup_storage', Driver'local', Labels{\"backup\":\"true\"}, Options{\"access\":\"single\",\"sharing\":\"none\"}. Use this if you confirm it's safe to delete the current volume."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"delete_a_volume\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": \\\"backup_storage\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"delete_a_volume\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"name\",\n      \"parameter_value\": \"backup_storage\"\n    }\n  ]\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 204, 'content': b''}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"9d5df573-c4c9-45ab-8fa6-bc6be92b4d67\", \"tool_call_id\": \"call_MycSdDCVPGkUD6tUKfqQ3pL6\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Create the volume with the requested options immediately. Steps: call docker_agent.create_a_volume with Name'backup_storage', Driver'local', Labels{\\\"backup\\\":\\\"true\\\"}, Options{\\\"access\\\":\\\"single\\\",\\\"sharing\\\":\\\"none\\\"}. Proceed even if the local driver may ignore these options.\",\n  \"Plan B: Probe the Docker engine/driver capabilities first. Steps: call docker_agent.inspect_engine_info (or equivalent) to check whether the local volume driver supports 'access' and 'sharing' options; if supported, then call docker_agent.create_a_volume with the requested Options; if not supported, report back and recommend using a volume plugin or alternative approach.\",\n  \"Plan C: Create the volume with the label only (safe fallback). Steps: call docker_agent.create_a_volume with Name'backup_storage', Driver'local', Labels{\\\"backup\\\":\\\"true\\\"}, Optionsnull (omit access/sharing). Then continue with pushing the image and starting the container.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Create the volume with the requested options immediately. Steps: call docker_agent.create_a_volume with Name'backup_storage', Driver'local', Labels{\"backup\":\"true\"}, Options{\"access\":\"single\",\"sharing\":\"none\"}. Proceed even if the local driver may ignore these options."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"create_a_volume\\\",\\n  \\\"parameters\\\": {\\n    \\\"Name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Name of the volume.\\\",\\n      \\\"value\\\": \\\"backup_storage\\\"\\n    },\\n    \\\"Driver\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Name of the volume driver used by the volume.\\\",\\n      \\\"value\\\": \\\"local\\\"\\n    },\\n    \\\"Labels\\\": {\\n      \\\"type\\\": \\\"object\\\",\\n      \\\"description\\\": \\\"User-defined key/value metadata.\\\",\\n      \\\"value\\\": {\\n        \\\"backup\\\": \\\"true\\\"\\n      }\\n    },\\n    \\\"Options\\\": {\\n      \\\"type\\\": \\\"object\\\",\\n      \\\"description\\\": \\\"Additional options for volume creation.\\\",\\n      \\\"value\\\": {\\n        \\\"access\\\": \\\"single\\\",\\n        \\\"sharing\\\": \\\"none\\\"\\n      }\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"create_a_volume\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"Name\",\n      \"parameter_value\": \"backup_storage\"\n    },\n    {\n      \"parameter_name\": \"Driver\",\n      \"parameter_value\": \"local\"\n    },\n    {\n      \"parameter_name\": \"Labels\",\n      \"parameter_value\": {\n        \"backup\": \"true\"\n      }\n    },\n    {\n      \"parameter_name\": \"Options\",\n      \"parameter_value\": {\n        \"access\": \"single\",\n        \"sharing\": \"none\"\n      }\n    }\n  ]\n}"
+    }
+]

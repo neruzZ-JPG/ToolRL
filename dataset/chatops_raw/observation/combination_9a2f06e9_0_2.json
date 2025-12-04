@@ -1,0 +1,80 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI need to check the current running containers on the server to identify which services are active, and then explore detailed network settings of a specific container named 'web_app_container'."
+    },
+    {
+        "Human Message": "Current subtask is:\nStart by identifying the running containers on the server. Think about the command you'd use to list active containers, and then decide how to locate the specific 'web_app_container' among them."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"list_containers\\\",\\n  \\\"parameters\\\": {\\n    \\\"all\\\": {\\n      \\\"type\\\": \\\"bool\\\",\\n      \\\"description\\\": \\\"Return all containers. Set to false to list only running containers.\\\"\\n    },\\n    \\\"filters\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Filters to process on the container list, encoded as JSON (a map[string][]string). Use {\\\\\\\"name\\\\\\\":[\\\\\\\"web_app_container\\\\\\\"]} to locate the container by name.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"list_containers\",\n  \"parameters\": {\n    \"all\": false,\n    \"filters\": \"{\\\"name\\\":[\\\"web_app_container\\\"]}\"\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 200, 'content': b'[]\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"0a51543b-0097-4222-9399-c84877f48276\", \"tool_call_id\": \"call_YZoWCxV4oQrYhopjqEGiqnld\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use docker_agent to list all containers (alltrue) and filter by name 'web_app_container'; if found, run an inspection to retrieve its NetworkSettings.\",\n  \"Plan B: If Plan A does not locate the container by exact name, broaden the search to container names containing 'web_app' (partial match) and then inspect the first match's network configuration.\",\n  \"Plan C: If the container still cannot be found by name, attempt to inspect containers by their IDs from any previous listings or by image-name association, to extract NetworkSettings.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use docker_agent to list all containers (alltrue) and filter by name 'web_app_container'; if found, run an inspection to retrieve its NetworkSettings."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan B: Use docker_agent to list all containers (alltrue) and filter by names that contain 'web_app' (partial match); if a match is found, run an inspection to retrieve its NetworkSettings.\",\n  \"Plan C: If no containers match 'web_app' or 'web_app_container', list all containers with full details (including IDs and images) and identify potential candidates by image name or labels, then inspect the most relevant candidate's NetworkSettings.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan C: If no containers match 'web_app' or 'web_app_container', list all containers with full details (including IDs and images) and identify potential candidates by image name or labels, then inspect the most relevant candidate's NetworkSettings."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"list_containers\\\",\\n  \\\"parameters\\\": {\\n    \\\"all\\\": {\\n      \\\"type\\\": \\\"bool\\\",\\n      \\\"description\\\": \\\"Return all containers. By default, only running containers are shown.\\\"\\n    },\\n    \\\"limit\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"Return this number of most recently created containers, including non-running ones.\\\"\\n    },\\n    \\\"size\\\": {\\n      \\\"type\\\": \\\"bool\\\",\\n      \\\"description\\\": \\\"Return the size of container as fields SizeRw and SizeRootFs.\\\"\\n    },\\n    \\\"filters\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Filters to process on the container list, encoded as JSON (a map[string][]string).\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"list_containers\",\n  \"parameters\": {\n    \"all\": true,\n    \"limit\": 200,\n    \"size\": false,\n    \"filters\": \"{}\"\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 200, 'content': b'[{\\\"Id\\\":\\\"666694d6110c0d06e638d069b165481c87804248afb18961359739c587f34c7c\\\",\\\"Names\\\":[\\\"/dev-server-01\\\"],\\\"Image\\\":\\\"ubuntu:22.04\\\",\\\"ImageID\\\":\\\"sha256:392fa14dddd09da29a5c3d26948ff81c494424035b755d01b84ab12d92127433\\\",\\\"Command\\\":\\\"bash -lc \\\\'sleep infinity\\\\'\\\",\\\"Created\\\":1760719548,\\\"Ports\\\":[],\\\"Labels\\\":{\\\"org.opencontainers.image.ref.name\\\":\\\"ubuntu\\\",\\\"org.opencontainers.image.version\\\":\\\"22.04\\\"},\\\"State\\\":\\\"running\\\",\\\"Status\\\":\\\"Up 2 minutes\\\",\\\"HostConfig\\\":{\\\"NetworkMode\\\":\\\"bridge\\\"},\\\"NetworkSettings\\\":{\\\"Networks\\\":{\\\"bridge\\\":{\\\"IPAMConfig\\\":null,\\\"Links\\\":null,\\\"Aliases\\\":null,\\\"MacAddress\\\":\\\"4a:1e:8b:b5:9b:ef\\\",\\\"DriverOpts\\\":null,\\\"GwPriority\\\":0,\\\"NetworkID\\\":\\\"a3a01110c4da9faba8a934789e0f5a667639cd239d50f002c0bfb7323faa17ff\\\",\\\"EndpointID\\\":\\\"9d342d87914c8d5829a3a7ad0bcb5fd2e60db6b55167e2a5a593ce856946c6c2\\\",\\\"Gateway\\\":\\\"172.17.0.1\\\",\\\"IPAddress\\\":\\\"172.17.0.2\\\",\\\"IPPrefixLen\\\":16,\\\"IPv6Gateway\\\":\\\"\\\",\\\"GlobalIPv6Address\\\":\\\"\\\",\\\"GlobalIPv6PrefixLen\\\":0,\\\"DNSNames\\\":null}}},\\\"Mounts\\\":[]}]\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"129c9377-ab4d-4d53-90b1-ccfd314e4776\", \"tool_call_id\": \"call_DtUkGda4qWAlvyVCk2CuI9vw\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan D: Inspect container 666694d6110c0d06e638d069b165481c87804248afb18961359739c587f34c7c to retrieve its NetworkSettings.\",\n  \"Plan E: If Plan D does not provide the required NetworkSettings, inspect additional candidate containers from the listing (IDs and images) to identify active services and their network configurations.\"\n]"
+    }
+]

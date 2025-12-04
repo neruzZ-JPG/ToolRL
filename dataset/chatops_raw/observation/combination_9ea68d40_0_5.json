@@ -1,0 +1,170 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI need to review all the recent changes made to the pull request numbered 42 in the repository named 'testRepo' owned by 'chatopsFdse' to understand the latest developments."
+    },
+    {
+        "Human Message": "Current subtask is:\nFirst, locate PR #42 in chatopsFdse/testRepo on GitHub and open the 'Files changed' tab to review all recent changes."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_pull_request_files\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository. Example: chatopsFdse\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The repository name. Example: testRepo\\\"\\n    },\\n    \\\"pull_number\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"The pull request number to inspect. For this task, 42\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\"tool_name\": \"github_pull_request_files\", \"parameters\": {\"owner\": \"chatopsFdse\", \"repo\": \"testRepo\", \"pull_number\": 42}}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/pulls/pulls#list-pull-requests-files\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"f3064650-6668-443f-a0e7-70eb21d12e71\", \"tool_call_id\": \"call_KV3ugTSfU4dfddNJ6Io6dhLl\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Verify that the repository 'chatopsFdse/testRepo' exists and that pull request #42 exists and is accessible; if yes, retrieve the 'Files changed' data for PR #42 using the GitHub API.\",\n  \"Plan B: If PR #42 cannot be found, search through all pull requests in 'chatopsFdse/testRepo' for a PR with a title or head branch that matches the intended change, then fetch the files changed for that PR.\",\n  \"Plan C: Check repository visibility and authentication; if the repo is private, obtain or refresh a token with read access and retry; if access is denied, contact the repo owner to confirm the correct PR number or grant access.\" \n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Verify that the repository 'chatopsFdse/testRepo' exists and that pull request #42 exists and is accessible; if yes, retrieve the 'Files changed' data for PR #42 using the GitHub API."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_pull_request_files\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository. The name is not case sensitive.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the repository without the `.git` extension. The name is not case sensitive.\\\"\\n    },\\n    \\\"pull_number\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"The pull request number to fetch the changed files for.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\"tool_name\": \"github_pull_request_files\", \"parameters\": {\"owner\": \"chatopsFdse\", \"repo\": \"testRepo\", \"pull_number\": 42}}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/pulls/pulls#list-pull-requests-files\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"9ec5a8fd-43bf-423a-aa7d-2d821aa2ed7e\", \"tool_call_id\": \"call_et6utJti3VIX8FUE30CxTCrE\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan B: Search through all pull requests in 'chatopsFdse/testRepo' to locate PR with number 42 or a related PR (by title/head branch) and then fetch the 'Files changed' data for that PR using the GitHub API.\",\n  \"Plan C: Check repository visibility and authentication; if the repo is private or access is restricted, refresh or provide a token with read access and retry fetching PR #42's files changed.\",\n  \"Plan D: If PR 42 does not exist, reach out to the repository owner to confirm the correct PR number or identify the intended PR to review, and then retrieve its files changed.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan B: Search through all pull requests in 'chatopsFdse/testRepo' to locate PR with number 42 or a related PR (by title/head branch) and then fetch the 'Files changed' data for that PR using the GitHub API."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_repo_pull_requests\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository (GitHub username or organization).\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The repository name.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\"tool_name\": \"github_get_repo_pull_requests\", \"parameters\": {\"owner\": \"chatopsFdse\", \"repo\": \"testRepo\"}}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 200, 'content': b'[]'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"95a13612-d5ff-46b7-89d5-bbecdd2a5f43\", \"tool_call_id\": \"call_GsF58p7CLLEv8jiY9fBDVqin\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan C: Directly fetch PR #42 using the GitHub API endpoint GET /repos/{owner}/{repo}/pulls/42 to verify existence; if found, then fetch the 'Files changed' data for that PR.\",\n  \"Plan D: If PR #42 is not found, fetch all PRs with stateall and search by title or head branch to locate a related PR, then retrieve its 'Files changed'.\",\n  \"Plan E: If repository access is restricted or private, ensure a valid token with read permissions is available and retry; if access cannot be granted, contact the repository owner to confirm the correct PR number or identify the intended PR to review.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan C: Directly fetch PR #42 using the GitHub API endpoint GET /repos/{owner}/{repo}/pulls/42 to verify existence; if found, then fetch the 'Files changed' data for that PR."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_pull_request_files\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository. The name is not case sensitive.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The repository name without the `.git` extension. The name is not case sensitive.\\\"\\n    },\\n    \\\"pull_number\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"The pull request number to fetch files for (e.g., 42).\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\"tool_name\": \"github_pull_request_files\", \"parameters\": {\"owner\": \"chatopsFdse\", \"repo\": \"testRepo\", \"pull_number\": 42}}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/pulls/pulls#list-pull-requests-files\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"e1065644-9dca-4221-a8c7-a5d99d5c03da\", \"tool_call_id\": \"call_TD1sXj3kUhBF3N3xttDON973\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan D: Fetch all pull requests in chatopsFdse/testRepo (stateall) and locate a PR with a matching title or head branch to PR 42, then retrieve the 'Files changed' data for that PR using GET /repos/{owner}/{repo}/pulls/{pull_number}/files.\",\n  \"Plan E: If repository access is restricted or not public, ensure a valid token with read permissions and retry; if access is denied, request the repository owner to grant access or verify PR number and branch.\",\n  \"Plan F: If no suitable PR is found, report back with a summary of what was found and request user clarification on the correct PR to review.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan D: Fetch all pull requests in chatopsFdse/testRepo (stateall) and locate a PR with a matching title or head branch to PR 42, then retrieve the 'Files changed' data for that PR using GET /repos/{owner}/{repo}/pulls/{pull_number}/files."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_repo_pull_requests\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository. For this task: 'chatopsFdse'.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The repository name. For this task: 'testRepo'.\\\"\\n    },\\n    \\\"state\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The state of pull requests to fetch. Use 'all' to include open, closed, and merged PRs.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\"tool_name\": \"github_get_repo_pull_requests\", \"parameters\": {\"owner\": \"chatopsFdse\", \"repo\": \"testRepo\", \"state\": \"all\"}}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/pulls/pulls#list-pull-requests\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"83de2b18-bf33-41d8-9a54-52a60978103b\", \"tool_call_id\": \"call_lpbXxwCq0EFwpMvdD5KQId9o\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan D1: Verify repository existence and access by querying GET /repos/chatopsFdse/testRepo. If the repository exists and is accessible (200), proceed to fetch PRs. If not (404), report to the user that the repository is missing or access is restricted and stop the subtask.\",\n  \"Plan D2: If the repository exists, retry fetching all pull requests with stateall and authentication. If the list is still not accessible (404), attempt to fetch PR #42 directly via GET /repos/chatopsFdse/testRepo/pulls/42; if found, retrieve its 'Files changed'. If not found, proceed to Plan D3.\",\n  \"Plan D3: If PR #42 cannot be located, search for PRs by title or head branch that resemble the intended change and fetch the 'Files changed' data for the best matching PR.\",\n  \"Plan D4: If repository access is restricted or requires a token, provide or refresh a token with read permissions and retry; if access cannot be granted, contact the repository owner to confirm the correct PR number or grant access.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan D2: If the repository exists, retry fetching all pull requests with stateall and authentication. If the list is still not accessible (404), attempt to fetch PR #42 directly via GET /repos/chatopsFdse/testRepo/pulls/42; if found, retrieve its 'Files changed'. If not found, proceed to Plan D3."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_repo_pull_requests\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository. The name is not case sensitive.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The repository name. The name is not case sensitive.\\\"\\n    },\\n    \\\"state\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"State of pull requests to fetch. Allowed values: open, closed, all.\\\"\\n    },\\n    \\\"per_page\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"Number of pull requests to return per page (max 100).\\\"\\n    },\\n    \\\"page\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"Page number to fetch for pagination.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\"tool_name\": \"github_get_repo_pull_requests\", \"parameters\": {\"owner\": \"chatopsFdse\", \"repo\": \"testRepo\", \"state\": \"all\", \"per_page\": 100, \"page\": 1}}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/pulls/pulls#list-pull-requests\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"b99f5597-daed-4705-b770-f8f6053e3417\", \"tool_call_id\": \"call_iH9B1cx1hM1c1jb5bjtpxNbY\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan D3: If PR #42 cannot be located through listing, search PRs by title or head branch in chatopsFdse/testRepo and fetch the 'Files changed' for the best matching PR using GET /repos/{owner}/{repo}/pulls/{pull_number}/files.\",\n  \"Plan D4: If repository access is restricted or requires a token, ensure a valid token with read permissions and retry; if access cannot be granted, contact the repository owner to confirm the correct PR number or identify the intended PR to review.\",\n  \"Plan D5: If all else fails, ask the user to confirm PR number or provide a direct PR link to review.\"\n]"
+    }
+]

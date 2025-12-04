@@ -1,0 +1,125 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI need to find all open issues assigned to me in the 'testRepo' repository on GitHub, specifically those labeled as 'bug' or 'urgent', created or updated after July 1, 2023."
+    },
+    {
+        "Human Message": "Current subtask is:\nOpen the testRepo repository on GitHub and go to the Issues tab to begin filtering."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_repo_issues\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository. The name is not case sensitive.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The repository name. In this case: testRepo.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Execute github_get_repo_issues using owner as the currently authenticated user and repo as 'testRepo'.\",\n  \"Plan B: Request the repository owner from the user (GitHub account or organization) and then execute github_get_repo_issues with that owner and repo 'testRepo'.\"\n]"
+    },
+    {
+        "Ai Message": "{\"content\": \"I can proceed, but I need one missing detail to complete Plan B.\\n\\nQuestion:\\n- What is the repository owner (GitHub account or organization) for the repo named testRepo?\\n\\nReasoning:\\n- For the endpoint GET https://api.github.com/repos/{owner}/{repo}/issues, we must supply the owner. Plan B requires you provide the repository owner. Once you provide the owner, I will execute:\\n  - Method: GET\\n  - URL: https://api.github.com/repos/{owner}/testRepo/issues\\n  - Headers: Authorization: Bearer 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\\n  - Body: none (not required for GET)\\n\\nNotes:\\n- I will use the personal usage token (the one labeled for personal usage) as the Authorization header, as Plan B targets a specific owner (which could be a user or an organization member with access to testRepo).\\n- By default, this list will include open issues and may include pull requests (GitHub treats PRs as issues in this endpoint).\\n\\nPlease provide the owner (e.g., \\\"octocat\\\" or \\\"my-org\\\"), and I\\u2019ll run the API call right away.\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 1897, \"prompt_tokens\": 2830, \"total_tokens\": 4727, \"completion_tokens_details\": {\"audio_tokens\": 0, \"reasoning_tokens\": 1600, \"accepted_prediction_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_name\": \"gpt-5-nano-2025-08-07\", \"system_fingerprint\": null, \"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"run-0defe027-868a-427e-84b9-831bdcb80eb4-0\", \"example\": false, \"tool_calls\": [], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 2830, \"output_tokens\": 1897, \"total_tokens\": 4727, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 1600}}}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Execute github_get_repo_issues with owner set to the currently authenticated user and repo set to 'testRepo', then filter the returned issues for: status 'open', assignee equal to you, labels containing 'bug' or 'urgent', and (created_at > 2023-07-01 OR updated_at > 2023-07-01).\",\n  \"Plan B: Request the repository owner (GitHub account or organization) and then execute github_get_repo_issues with owner and repo 'testRepo', followed by the same filtering as Plan A.\",\n  \"Plan C: If supported, attempt to use a server-side search/query to filter by labels and dates directly (e.g., GitHub search API) to reduce data transfer, then fetch the resulting open issues assigned to you in 'testRepo'.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Execute github_get_repo_issues with owner set to the currently authenticated user and repo set to 'testRepo', then filter the returned issues for: status 'open', assignee equal to you, labels containing 'bug' or 'urgent', and (created_at > 2023-07-01 OR updated_at > 2023-07-01)."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_repo_issues\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository. For Plan A, set to the login of the authenticated user.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Repository name. In this task, 'testRepo'.\\\"\\n    },\\n    \\\"state\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Filter by issue state. Use 'open' to list open issues.\\\"\\n    },\\n    \\\"assignee\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Login of the user to filter issues assigned to.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"github_get_repo_issues\",\n  \"parameters\": {\n    \"owner\": \"authenticated_user\",\n    \"repo\": \"testRepo\",\n    \"state\": \"open\",\n    \"assignee\": \"authenticated_user\"\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/issues/issues#list-repository-issues\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"b088004f-022b-4945-88bf-20c5247d214d\", \"tool_call_id\": \"call_rPQvjOO4LTjoRvToF5iwa8nM\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Retrieve the authenticated user's login from GitHub (GET /user) and then retry github_get_repo_issues with owner set to that login, repo 'testRepo', state 'open', assignee set to that login, and later filter for labels 'bug' or 'urgent' and created_at/updated_at after 2023-07-01.\",\n  \"Plan B: If Plan A cannot determine the authenticated user or access the repository, request from the user the repository owner (GitHub account or organization) and then run github_get_repo_issues with owner and repo 'testRepo' with the same filters.\",\n  \"Plan C: If supported, use the GitHub Search API to query issues with: repo:<owner>/testRepo is:open assignee:<owner_or_user> (labels:bug OR labels:urgent) created:>2023-07-01 OR updated:>2023-07-01, which reduces data transfer; then fetch full details for the resulting issues.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Retrieve the authenticated user's login from GitHub (GET /user) and then retry github_get_repo_issues with owner set to that login, repo 'testRepo', state 'open', assignee set to that login, and later filter for labels 'bug' or 'urgent' and created_at/updated_at after 2023-07-01."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Retrieve the authenticated user's login via GET /user using the GitHub agent, then execute github_get_repo_issues with owner set to that login, repo 'testRepo', state 'open', assignee set to that login, and later filter for labels 'bug' or 'urgent' with created_at/updated_at after 2023-07-01.\",\n  \"Plan B: If Plan A cannot determine the authenticated user, request the repository owner (GitHub account or organization) from the user, then run github_get_repo_issues with owner set to that value, repo 'testRepo', state 'open', assignee set to that owner, and apply the same filters.\",\n  \"Plan C: If available, use the GitHub Search API to directly query issues with: repo:<owner>/testRepo is:open assignee:<owner_or_user> (labels:bug OR labels:urgent) created:>2023-07-01 OR updated:>2023-07-01, then fetch full details for the resulting issues.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan B: If Plan A cannot determine the authenticated user, request the repository owner (GitHub account or organization) from the user, then run github_get_repo_issues with owner set to that value, repo 'testRepo', state 'open', assignee set to that owner, and apply the same filters."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_repo_issues\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The repository owner (GitHub account or organization). Required. Example: 'exampleOwner'.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Repository name. For this task, 'testRepo'.\\\"\\n    },\\n    \\\"state\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Filter issues by state. Example: 'open'.\\\"\\n    },\\n    \\\"assignee\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Login of the user to whom the issues are assigned. For Plan B, set to the repository owner value once provided.\\\"\\n    },\\n    \\\"milestone\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Filter by milestone (number or '*').\\\"\\n    },\\n    \\\"labels\\\": {\\n      \\\"type\\\": \\\"list[str]\\\",\\n      \\\"description\\\": \\\"Filter issues by one or more labels.\\\"\\n    },\\n    \\\"since\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Only issues updated since this time (ISO 8601).\\\"\\n    },\\n    \\\"sort\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Sort field. Example: 'created', 'updated', 'comments'.\\\"\\n    },\\n    \\\"direction\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Sort direction. 'asc' or 'desc'.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "FAIL, Missing repository owner. Plan B cannot proceed without the repository owner (GitHub account or organization). Please provide the owner to continue with github_get_repo_issues for testRepo."
+    },
+    {
+        "Ai Message": "{\"content\": \"It looks like the request cannot proceed because the repository owner is missing.\\n\\nTo fetch issues for testRepo, please provide:\\n- owner: the GitHub account name or organization that owns testRepo\\n\\nOnce you provide the owner, I can run an appropriate API call (from the given list) using:\\n- owner: \\\"<provided_owner>\\\"\\n- repo: \\\"testRepo\\\"\\n\\nIf you\\u2019d prefer, I can first verify the repository exists by calling github_get_a_repo with the same owner and repo after you provide the owner.\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 1714, \"prompt_tokens\": 2419, \"total_tokens\": 4133, \"completion_tokens_details\": {\"audio_tokens\": 0, \"reasoning_tokens\": 1600, \"accepted_prediction_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_name\": \"gpt-5-nano-2025-08-07\", \"system_fingerprint\": null, \"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"run-6b209c69-1444-4dca-a3a3-99911edd6aa8-0\", \"example\": false, \"tool_calls\": [], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 2419, \"output_tokens\": 1714, \"total_tokens\": 4133, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 1600}}}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Retrieve the authenticated user's login from GitHub (GET /user) and retry github_get_repo_issues with owner set to that login, repo 'testRepo', state 'open', assignee set to that login, labels containing 'bug' or 'urgent', and created_at/updated_at after 2023-07-01.\",\n  \"Plan B: Request the repository owner (GitHub account or organization) from the user, then run github_get_repo_issues with owner set to that value, repo 'testRepo', state 'open', assignee set to that owner, and apply the same filters for labels and dates.\",\n  \"Plan C: If available, use the GitHub Search API to directly query issues with is:open in repo '<owner>/testRepo' and (labels:bug OR labels:urgent) assigned to <owner> with created:>2023-07-01 OR updated:>2023-07-01, then fetch full details for the resulting issues.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Retrieve the authenticated user's login from GitHub (GET /user) and retry github_get_repo_issues with owner set to that login, repo 'testRepo', state 'open', assignee set to that login, labels containing 'bug' or 'urgent', and created_at/updated_at after 2023-07-01."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_repo_issues\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Owner login for the repository. For Plan A, this should be the authenticated user's login retrieved from GET /user.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Repository name (e.g., 'testRepo').\\\"\\n    },\\n    \\\"state\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Issue state to filter by. Use 'open'.\\\"\\n    },\\n    \\\"assignee\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Login of the assignee to filter by. Use the authenticated user's login as Plan A.\\\"\\n    },\\n    \\\"labels\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Comma-separated list of labels to filter by. To match issues containing 'bug' or 'urgent', provide 'bug,urgent' (note: this requires issues to have both labels; OR filtering may require client-side processing).\\\"\\n    },\\n    \\\"since\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Filter issues updated since this date (ISO 8601). Use 2023-07-01T00:00:00Z to approximate created_at/updated_at after 2023-07-01.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\" : \"github_get_repo_issues\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\",\n            \"parameter_value\" : \"authenticated_user\"\n        },\n        {\n            \"parameter_name\" : \"repo\",\n            \"parameter_value\" : \"testRepo\"\n        },\n        {\n            \"parameter_name\" : \"state\",\n            \"parameter_value\" : \"open\"\n        },\n        {\n            \"parameter_name\" : \"assignee\",\n            \"parameter_value\" : \"authenticated_user\"\n        },\n        {\n            \"parameter_name\" : \"labels\",\n            \"parameter_value\" : \"bug,urgent\"\n        },\n        {\n            \"parameter_name\" : \"since\",\n            \"parameter_value\" : \"2023-07-01T00:00:00Z\"\n        }\n    ]\n}"
+    }
+]

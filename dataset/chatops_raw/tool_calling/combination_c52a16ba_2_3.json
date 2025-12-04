@@ -1,0 +1,107 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"{\"toolname\" : \"query_dog_info\", \"parameters\" : [{\"parameter_name\" : \"dog_species\", \"parameter_value\" : \"beagle\"}]}\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nPull the image 'nginx:1.23.4' from the registry to serve as the frontend for the order portal."
+    },
+    {
+        "Human Message": "Current subtask is:\nConfirm the target registry (e.g., Docker Hub) and ensure you have access; verify that the nginx:1.23.4 tag exists."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"get_image_details\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": \\\"nginx:1.23.4\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"get_image_details\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"name\",\n            \"parameter_value\": \"nginx:1.23.4\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"No such image: nginx:1.23.4\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"b479f899-985d-48c6-a146-d8a82df7ce68\", \"tool_call_id\": \"call_fSC6lnsV6tuEMUIyXSmjlIEm\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"The docker agent returned 404 (No such image: nginx:1.23.4). Plan A: Verify the tag on Docker Hub using the Docker Hub registry API (GET https://registry.hub.docker.com/v2/repositories/library/nginx/tags/1.23.4). If the tag exists, proceed to pull from Docker Hub.\",\n  \"Plan B: If the tag is not on Docker Hub, search alternative registries (e.g., internal/private registry or another public registry). Provide the registry URL and, if required, credentials so the agent can query the registry for nginx:1.23.4.\",\n  \"Plan C: If the tag exists but access is denied or returns errors, confirm registry access by performing an authenticated docker pull (docker login). Provide necessary registry credentials or grant agent access, then retry pulling nginx:1.23.4 to validate access.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nThe docker agent returned 404 (No such image: nginx:1.23.4). Plan A: Verify the tag on Docker Hub using the Docker Hub registry API (GET https://registry.hub.docker.com/v2/repositories/library/nginx/tags/1.23.4). If the tag exists, proceed to pull from Docker Hub."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"get_image_details\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": \\\"nginx:1.23.4\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"get_image_details\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"name\",\n            \"parameter_value\": \"nginx:1.23.4\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"No such image: nginx:1.23.4\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"e28b6ede-14fc-4a09-aa38-b6e3287ee515\", \"tool_call_id\": \"call_8RvDYvUlk3ZuIVfTZc6Tf16R\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Re-check Docker Hub directly using the Docker Hub Registry API endpoint GET https://registry.hub.docker.com/v2/repositories/library/nginx/tags/1.23.4 to confirm the tag truly does not exist. This requires no credentials; proceed to query the registry and report the HTTP status and response body.\",\n  \"Plan B: If tag 1.23.4 is not present on Docker Hub, list nginx tags on Docker Hub (e.g., GET https://registry.hub.docker.com/v2/repositories/library/nginx/tags?page_size100) to find the closest available 1.23.x or acceptable alternative (e.g., 1.23, 1.23.5, or latest). I will present candidate tags and you can confirm which alternate tag to use for the frontend.\",\n  \"Plan C: If the image is hosted in a private/internal registry, provide the registry URL and any required credentials (or confirm access), and I will query that registry for nginx:1.23.4 and attempt an authenticated pull. If you cannot provide credentials, I can also prepare instructions to authenticate and pull the image yourself.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Re-check Docker Hub directly using the Docker Hub Registry API endpoint GET https://registry.hub.docker.com/v2/repositories/library/nginx/tags/1.23.4 to confirm the tag truly does not exist. This requires no credentials; proceed to query the registry and report the HTTP status and response body."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"None\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"http_request\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"method\",\n            \"parameter_value\": \"GET\"\n        },\n        {\n            \"parameter_name\": \"url\",\n            \"parameter_value\": \"https://registry.hub.docker.com/v2/repositories/library/nginx/tags/1.23.4\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: ConnectionError(MaxRetryError(\\\"HTTPSConnectionPool(host'registry.hub.docker.com', port443): Max retries exceeded with url: /v2/repositories/library/nginx/tags/1.23.4 (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x745658b10a70>: Failed to establish a new connection: [Errno 101] Network is unreachable'))\\\"))\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"ff4a4993-d88b-41de-bfe3-54daea4be733\", \"tool_call_id\": \"call_RMqo5PN6kErIUwCwXvcgPx2e\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Enable outbound network access for the docker agent (or provide proxy/credential access) so I can re-run GET https://registry.hub.docker.com/v2/repositories/library/nginx/tags/1.23.4; I will report the HTTP status and response body. Note: previous attempts returned network unreachable.\",\n  \"Plan B: If you cannot enable network for the agent, run one of these locally and paste the output so I can interpret it: (1) curl -i https://registry.hub.docker.com/v2/repositories/library/nginx/tags/1.23.4 or (2) docker pull nginx:1.23.4 (the docker agent previously returned 404).\",\n  \"Plan C: If the tag is absent on Docker Hub, allow me to query the tags list (GET https://registry.hub.docker.com/v2/repositories/library/nginx/tags?page_size100) to find the nearest 1.23.x alternative (e.g., 1.23.5 or latest) and then attempt to pull that image \u2014 this also requires network access.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Enable outbound network access for the docker agent (or provide proxy/credential access) so I can re-run GET https://registry.hub.docker.com/v2/repositories/library/nginx/tags/1.23.4; I will report the HTTP status and response body. Note: previous attempts returned network unreachable."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"create_an_image\\\",\\n  \\\"parameters\\\": {\\n    \\\"fromImage\\\": \\\"nginx:1.23.4\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"create_an_image\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"fromImage\",\n            \"parameter_value\": \"nginx:1.23.4\"\n        }\n    ]\n}"
+    }
+]

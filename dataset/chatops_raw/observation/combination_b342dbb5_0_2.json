@@ -1,0 +1,80 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI need to shut down the container with ID 'abc123' after ensuring all processes are properly terminated."
+    },
+    {
+        "Human Message": "Current subtask is:\nFirst, confirm the container is running and list its processes: docker inspect --format '{{.State.Status}}' abc123 && docker top abc123"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"To confirm if the container with ID \\\"abc123\\\" is running, I will inspect its state. Then, if needed, I can list its processes. Please note I will first inspect the container's state.\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "[\"Execute the check now using docker_agent: run \\\"docker inspect --format '{{.State.Status}}' abc123 && docker top abc123\\\" to confirm if the container is running and list its processes.\", \"If the container is running and processes are present, attempt a graceful shutdown: run \\\"docker stop --time30 abc123\\\", then re-run \\\"docker top abc123\\\" to verify processes have terminated; if still running, escalate to \\\"docker kill abc123\\\".\", \"If processes inside the container are stubborn, run \\\"docker exec abc123 pkill -TERM -f <process_name>\\\" or appropriate kill commands inside the container, then run \\\"docker stop abc123\\\"; if that fails, force kill and remove with \\\"docker kill abc123 && docker rm -f abc123\\\".\"]"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"No such container: abc123\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"ae085b4a-d012-41b4-8f47-7f0d05405872\", \"tool_call_id\": \"call_xNtEbvJu1vGjC7bqePWLLozz\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Container 'abc123' not found locally (404). Plan A: Search locally for the full/partial ID and, if found, inspect and list its processes then stop it. Commands to run with docker_agent: \\\"docker ps -a --no-trunc | grep abc123\\\"; if found, run \\\"docker inspect --format '{{.State.Status}}' <FULL_ID> && docker top <FULL_ID>\\\" then graceful stop \\\"docker stop --time30 <FULL_ID>\\\" and re-check \\\"docker top <FULL_ID>\\\" (escalate to kill if needed).\", \n \"Plan B: Container may exist on a different Docker context/host. Ask the user to confirm the host or Docker context. If they provide it, run with docker_agent: \\\"docker context ls\\\" then \\\"docker --context <CONTEXT> ps -a --no-trunc | grep abc123\\\" and, if found in that context, run the inspect/top/stop sequence in that context: \\\"docker --context <CONTEXT> inspect --format '{{.State.Status}}' <FULL_ID> && docker --context <CONTEXT> top <FULL_ID>\\\" followed by graceful stop.\", \n \"Plan C: The container ID may be incorrect or the container was removed. List recent containers so the user can identify the correct target. Command to run with docker_agent: \\\"docker ps -a --format '{{.ID}} {{.Names}} {{.Status}} {{.Image}}' | head -n 200\\\" \u2014 user selects correct container ID/name, then proceed with inspect/top and graceful shutdown as in Plan A.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nContainer 'abc123' not found locally (404). Plan A: Search locally for the full/partial ID and, if found, inspect and list its processes then stop it. Commands to run with docker_agent: \"docker ps -a --no-trunc | grep abc123\"; if found, run \"docker inspect --format '{{.State.Status}}' <FULL_ID> && docker top <FULL_ID>\" then graceful stop \"docker stop --time30 <FULL_ID>\" and re-check \"docker top <FULL_ID>\" (escalate to kill if needed)."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"get_container_details\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": \\\"abc123\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute on docker_agent: run tool \"get_container_details\" with parameters { \"id\": \"abc123\" } (this should perform a local search equivalent to `docker ps -a --no-trunc | grep abc123` to find the full container ID)."
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"No such container: abc123\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"c89865b3-be92-41dd-befd-8b6a2c3dc50b\", \"tool_call_id\": \"call_qiWrfKToFcdsYr4VaXMh16ij\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Local search returned \\\"No such container: abc123\\\". Plan A \u2014 ask the user to confirm the Docker host/context or provide SSH access to the host. If they provide a Docker context name <CONTEXT>, run: docker --context <CONTEXT> inspect --format '{{.State.Status}}' abc123 && docker --context <CONTEXT> top abc123 (then docker --context <CONTEXT> stop --time30 abc123, escalate to kill if needed). If they provide SSH details (user@host), run via SSH: ssh user@host 'docker inspect --format \\\"{{.State.Status}}\\\" abc123 && docker top abc123' and then graceful stop/kill as needed.\", \n \"Plan B \u2014 help the user identify the correct container locally: run docker ps -a --format '{{.ID}} {{.Names}} {{.Status}} {{.Image}}' | head -n 200 and have the user pick the correct ID or name; once identified, run docker inspect --format '{{.State.Status}}' <FULL_ID> && docker top <FULL_ID> then docker stop --time30 <FULL_ID> and verify processes terminated (escalate to docker kill if necessary).\",\n \"Plan C \u2014 container may be managed elsewhere (Kubernetes/pod or removed). Ask the user whether this is a k8s-managed workload or provide the cluster/context; if k8s, run kubectl get pods --all-namespaces -o wide | grep abc123 and, if found, do kubectl delete pod <POD> --grace-period<secs> --timeout<duration> to terminate gracefully. If the container was removed, report that nothing to stop and request the correct target or timestamp of removal to investigate docker events/logs.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nLocal search returned \"No such container: abc123\". Plan A \u2014 ask the user to confirm the Docker host/context or provide SSH access to the host. If they provide a Docker context name <CONTEXT>, run: docker --context <CONTEXT> inspect --format '{{.State.Status}}' abc123 && docker --context <CONTEXT> top abc123 (then docker --context <CONTEXT> stop --time30 abc123, escalate to kill if needed). If they provide SSH details (user@host), run via SSH: ssh user@host 'docker inspect --format \"{{.State.Status}}\" abc123 && docker top abc123' and then graceful stop/kill as needed."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Plan A - Check another Docker context/host: I will run the inspect/top/stop sequence in a different Docker context if you provide the context name or remote Docker host. Please reply with the Docker context name (as shown by `docker context ls`) or the target host. Command I will run once you provide it: `docker --context <CONTEXT> inspect --format '{{.State.Status}}' abc123 && docker --context <CONTEXT> top abc123` (then `docker --context <CONTEXT> stop --time30 abc123`, escalate to `docker --context <CONTEXT> kill abc123` if needed). I only need the context name or host to proceed.\",\n\n \"Plan B - Run commands over SSH on the target host: if the container is on a remote host, provide SSH access details (user@host and whether to use your SSH key or a one-time command). With SSH I will run: `ssh user@host \\\"docker inspect --format '{{.State.Status}}' abc123 && docker top abc123\\\"` and, if running, `ssh user@host \\\"docker stop --time30 abc123\\\"` (escalate to `docker kill` if graceful stop fails). Provide SSH connection string and permission to run the commands.\",\n\n \"Plan C - Find the correct local container ID/name: the given short ID may be wrong or truncated. I can list recent local containers so you can pick the right target. Please confirm you want me to list them. Command I will run: `docker ps -a --no-trunc --format '{{.ID}} {{.Names}} {{.Status}} {{.Image}}' | head -n 200`. After you pick the correct full ID or name, I will inspect/top/stop that container (`docker inspect --format '{{.State.Status}}' <FULL_ID> && docker top <FULL_ID>` then `docker stop --time30 <FULL_ID>` and verify).\"]"
+    }
+]

@@ -1,0 +1,89 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nCreate a new organizational repository named 'InnovativeApp' with a detailed description about a smart home automation system, set as public, including issues and wiki enabled, and initializing with a README file."
+    },
+    {
+        "Human Message": "Current subtask is:\nLog in to GitHub, switch to the organization, and create a new repository named InnovativeApp with Public visibility; enable Issues and Wiki, initialize with a README, and add a detailed description of a smart home automation system."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_create_an_org_repo\\\",\\n  \\\"parameters\\\": {\\n    \\\"org\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The organization name under which to create the repository\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Request the GitHub organization name to use (org_name) and confirm repository details: repository name 'InnovativeApp', public visibility, enable issues, enable wiki, initialize with README, and set the description.\",\n  \"Plan B: Once org_name is provided, execute the github_create_an_org_repo tool with parameters: orgorg_name, name'InnovativeApp', description'A detailed description of a smart home automation system that integrates devices, sensors, and automation rules for energy efficiency, security, and convenience.', privatefalse, has_issuestrue, has_wikitrue, has_readmetrue.\"\n]"
+    },
+    {
+        "Ai Message": "{\"content\": \"I\\u2019m ready to create the repository, but I need the organization name to use (org_name).\\n\\nPlan A (required): Please provide the GitHub organization name to create the repo under.\\n\\nPlan B (once org_name is provided): I will call github_create_an_org_repo with:\\n- org: org_name\\n- name: \\\"InnovativeApp\\\"\\n- description: \\\"A detailed description of a smart home automation system that integrates devices, sensors, and automation rules for energy efficiency, security, and convenience.\\\"\\n- private: false\\n- has_issues: true\\n- has_wiki: true\\n- auto_init: true\\n\\nNotes:\\n- The parameter to initialize with a README is auto_init, not has_readme.\\n- If you want, I can also include a homepage field later (optional).\", \"additional_kwargs\": {\"refusal\": null}, \"response_metadata\": {\"token_usage\": {\"completion_tokens\": 1517, \"prompt_tokens\": 2405, \"total_tokens\": 3922, \"completion_tokens_details\": {\"audio_tokens\": 0, \"reasoning_tokens\": 1344, \"accepted_prediction_tokens\": 0, \"rejected_prediction_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0}}, \"model_name\": \"gpt-5-nano-2025-08-07\", \"system_fingerprint\": null, \"finish_reason\": \"stop\", \"logprobs\": null}, \"type\": \"ai\", \"name\": null, \"id\": \"run-611e0dd4-139d-4265-9063-7c1667da0074-0\", \"example\": false, \"tool_calls\": [], \"invalid_tool_calls\": [], \"usage_metadata\": {\"input_tokens\": 2405, \"output_tokens\": 1517, \"total_tokens\": 3922, \"input_token_details\": {\"audio\": 0, \"cache_read\": 0}, \"output_token_details\": {\"audio\": 0, \"reasoning\": 1344}}}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Request the GitHub organization name (org_name) to proceed. Once provided, execute github_create_an_org_repo with: orgorg_name, name'InnovativeApp', description'A detailed description of a smart home automation system that integrates devices, sensors, and automation rules for energy efficiency, security, and convenience.', privatefalse, has_issuestrue, has_wikitrue, auto_inittrue.\",\n  \"Plan B: If the user prefers not to specify an organization, create the repository under the authenticated user's account with the same settings (name'InnovativeApp', description'A detailed description of a smart home automation system that integrates devices, sensors, and automation rules for energy efficiency, security, and convenience.'), public visibility, has_issuestrue, has_wikitrue, and auto_inittrue, and later transfer the repository to the organization when org_name is available.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Request the GitHub organization name (org_name) to proceed. Once provided, execute github_create_an_org_repo with: orgorg_name, name'InnovativeApp', description'A detailed description of a smart home automation system that integrates devices, sensors, and automation rules for energy efficiency, security, and convenience.', privatefalse, has_issuestrue, has_wikitrue, auto_inittrue."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Request the GitHub organization name (org_name) to proceed. Once provided, execute github_create_an_org_repo with: orgorg_name, name'InnovativeApp', description'A detailed description of a smart home automation system that integrates devices, sensors, and automation rules for energy efficiency, security, and convenience.', privatefalse, has_issuestrue, has_wikitrue, auto_inittrue.\",\n  \"Plan B: If org_name is not provided, create the repository under the authenticated user's account with the same settings (name'InnovativeApp', description'A detailed description of a smart home automation system that integrates devices, sensors, and automation rules for energy efficiency, security, and convenience.'), public visibility, has_issuestrue, has_wikitrue, auto_inittrue, and later transfer the repository to the organization when org_name is available.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Request the GitHub organization name (org_name) to proceed. Once provided, execute github_create_an_org_repo with: orgorg_name, name'InnovativeApp', description'A detailed description of a smart home automation system that integrates devices, sensors, and automation rules for energy efficiency, security, and convenience.', privatefalse, has_issuestrue, has_wikitrue, auto_inittrue."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Request the GitHub organization name (org_name) to proceed. Once provided, execute github_create_an_org_repo with: orgorg_name, name'InnovativeApp', description'A detailed description of a smart home automation system that integrates devices, sensors, and automation rules for energy efficiency, security, and convenience.', privatefalse, has_issuestrue, has_wikitrue, auto_inittrue.\",\n  \"Plan B: If org_name is not provided, create the repository under the authenticated user's account with the same settings (name'InnovativeApp', description'A detailed description of a smart home automation system that integrates devices, sensors, and automation rules for energy efficiency, security, and convenience.'), public visibility, has_issuestrue, has_wikitrue, auto_inittrue, and later transfer the repository to the organization when org_name is available.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Request the GitHub organization name (org_name) to proceed. Once provided, execute github_create_an_org_repo with: orgorg_name, name'InnovativeApp', description'A detailed description of a smart home automation system that integrates devices, sensors, and automation rules for energy efficiency, security, and convenience.', privatefalse, has_issuestrue, has_wikitrue, auto_inittrue."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_create_an_org_repo\\\",\\n  \\\"parameters\\\": {\\n    \\\"org\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The organization name. Please provide the organization (org) to create the repository in.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"github_create_an_org_repo\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"org\",\n            \"parameter_value\": \"org_name\"\n        },\n        {\n            \"parameter_name\": \"name\",\n            \"parameter_value\": \"InnovativeApp\"\n        },\n        {\n            \"parameter_name\": \"description\",\n            \"parameter_value\": \"A detailed description of a smart home automation system that integrates devices, sensors, and automation rules for energy efficiency, security, and convenience.\"\n        },\n        {\n            \"parameter_name\": \"private\",\n            \"parameter_value\": \"false\"\n        },\n        {\n            \"parameter_name\": \"has_issues\",\n            \"parameter_value\": \"true\"\n        },\n        {\n            \"parameter_name\": \"has_wiki\",\n            \"parameter_value\": \"true\"\n        },\n        {\n            \"parameter_name\": \"auto_init\",\n            \"parameter_value\": \"true\"\n        }\n    ]\n}"
+    }
+]

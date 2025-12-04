@@ -33,6 +33,7 @@ export N_GPUS=2
 export ROLLOUT_TP_SIZE=1
 # export VLLM_ATTENTION_BACKEND=XFORMERS // only for vllm<=0.6.3
 # All the env variables below are set to 0 by default
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 export WITHLENGTH=0
 export REFINEDREWARD=0
 export COARSEREWARD=0

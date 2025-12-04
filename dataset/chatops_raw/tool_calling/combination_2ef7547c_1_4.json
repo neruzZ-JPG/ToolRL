@@ -1,0 +1,134 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nFind the merge requests in group 97683359 that are assigned to user ID 68456825 and include the label 'feature enhancement' to prioritize recent feature updates."
+    },
+    {
+        "Human Message": "Current subtask is:\nFirst, confirm this is on GitLab and ensure you have a Personal Access Token with read_api; verify access to group 97683359 on the instance (base URL) to proceed."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_search_in_group\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": 97683359,\\n    \\\"scope\\\": \\\"projects\\\",\\n    \\\"search\\\": \\\"\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "[\"Execute gitlab_search_in_group with parameters id97683359, scopeprojects, search\\\"\\\" using the GitLab instance base_url and a Personal Access Token with read_api (provide base_url and token); report whether access to group 97683359 is confirmed.\", \"If you do not have a Personal Access Token, I will provide step-by-step instructions to create one with read_api scope; after you create it, provide the token and base_url and I will run the verification.\", \"If the group is on gitlab.com and is public and you prefer not to provide a token, I can attempt an unauthenticated visibility check (provide confirmation to proceed); if that fails, you must supply a token or add access for verification.\"]"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 400, 'content': b'{\\\"error\\\":\\\"search is missing, scope is missing, scope does not have a valid value\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"a3e8a4d0-89e5-4af1-895c-bce8d351c66c\", \"tool_call_id\": \"call_EzhMXNPW2t2WrmJCaGBk38cO\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Provide the GitLab instance base_url and a Personal Access Token (scope read_api). I will verify access by calling gitlab_get_group with id97683359 using the provided base_url and token and then report whether access to the group is confirmed.\", \"If the group is hosted on gitlab.com and you prefer not to share a token, confirm that the group is public and hosted on gitlab.com; I will attempt an unauthenticated GET to https://gitlab.com/api/v4/groups/97683359 to check visibility and report the result (if it fails, a token will be required).\", \"If you do not have a Personal Access Token, request that I provide step-by-step instructions to create one with read_api scope; after you create it, supply the token and base_url and I will run the verification.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nProvide the GitLab instance base_url and a Personal Access Token (scope read_api). I will verify access by calling gitlab_get_group with id97683359 using the provided base_url and token and then report whether access to the group is confirmed."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_group\\\",\\n  \\\"parameters\\\": {\\n    \\\"base_url\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The base URL of your GitLab instance, e.g., https://gitlab.com\\\"\\n    },\\n    \\\"access_token\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Your Personal Access Token with read_api scope\\\"\\n    },\\n    \\\"id\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"The ID of the group to verify access, e.g., 97683359\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute gitlab_get_group with parameters base_url{BASE_URL}, access_token{PERSONAL_ACCESS_TOKEN_with_read_api}, id97683359."
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 400, 'content': b'{\\\"error\\\":\\\"search is missing, scope is missing, scope does not have a valid value\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"35fe88e6-0b0a-4126-9545-f43f8207242e\", \"tool_call_id\": \"call_r2l0OQVnarxEQtjJas35U2Rj\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: You provide the GitLab instance base_url and a Personal Access Token (scope read_api). I will call gitlab_get_group id97683359 using those credentials to verify access; if confirmed I will proceed to list merge requests assigned to user_id68456825 with label'feature enhancement'. Required: base_url and PAT.\",\n  \"Plan B: If the group is hosted on gitlab.com and you prefer not to share a token, confirm that the group is on gitlab.com and that you consent to an unauthenticated check. I will attempt an unauthenticated GET to https://gitlab.com/api/v4/groups/97683359; if the group is public I will proceed to query merge requests (may be limited); if it is private the check will fail and a token will be required.\",\n  \"Plan C: You do not have a PAT yet \u2014 I will provide step-by-step instructions to create a Personal Access Token with read_api scope. After you create and supply the token and base_url I will run the verification and continue to find the requested merge requests.\",\n  \"Plan D: If you cannot or will not share a token and the group is private, I can provide exact curl commands or a small script you can run locally (using your credentials or token) to fetch merge requests assigned to user_id68456825 with label'feature enhancement'; you then paste the output and I will analyze/prioritize results.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: You provide the GitLab instance base_url and a Personal Access Token (scope read_api). I will call gitlab_get_group id97683359 using those credentials to verify access; if confirmed I will proceed to list merge requests assigned to user_id68456825 with label'feature enhancement'. Required: base_url and PAT."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_group_merge_requests_list\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"The ID of the group to retrieve merge requests from\\\"\\n    },\\n    \\\"scope\\\": {\\n      \\\"type\\\": \\\"string\\\",\\n      \\\"description\\\": \\\"The scope of merge requests to search in\\\"\\n    },\\n    \\\"search\\\": {\\n      \\\"type\\\": \\\"string\\\",\\n      \\\"description\\\": \\\"The search query\\\"\\n    },\\n    \\\"assignee_id\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"ID of the user to whom the merge requests are assigned\\\"\\n    },\\n    \\\"labels\\\": {\\n      \\\"type\\\": \\\"string\\\",\\n      \\\"description\\\": \\\"Labels to filter merge requests by\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute gitlab_get_group_merge_requests_list with parameters base_url{BASE_URL}, access_token{PERSONAL_ACCESS_TOKEN_with_read_api}, id97683359, scopeall, search\"\", assignee_id68456825, labels\"feature enhancement\""
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: 1 validation error for Http_request\\nheaders\\n  Input should be a valid string [typestring_type, input_value{'PRIVATE-TOKEN': 'glpat-vJAFLGxPt6rtWwHdbJR4'}, input_typedict]\\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"ebaf119f-0353-40ce-81ef-df65bacb1967\", \"tool_call_id\": \"call_tOGw1JGDtOpzl5qonABrJsyr\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: You provide the GitLab base_url (e.g., https://gitlab.com) and a Personal Access Token with read_api. I will re-run gitlab_get_group_merge_requests_list with id97683359, scopeall, assignee_id68456825, labels'feature enhancement' and ensure headers are formatted per the agent's expectation; I will return the list of matching merge requests sorted by most recent.\",\n  \"Plan B: If the group is hosted on gitlab.com and you prefer not to share a token, confirm that and consent to an unauthenticated check. I will attempt to GET https://gitlab.com/api/v4/groups/97683359/merge_requests?scopeall&assignee_id68456825&labelsfeature%20enhancement; if the group is public I will return results, otherwise I'll request a token.\",\n  \"Plan C: If you do not yet have a PAT, request that I provide step-by-step instructions to create a Personal Access Token with read_api scope for your GitLab instance. After you create and provide the token and base_url, I will execute the query and return the MRs.\",\n  \"Plan D: If you cannot or will not provide credentials, I will give you a ready-to-run curl command (or small script) you can execute locally (with or without your PAT depending on group visibility) to fetch merge requests assigned to user_id68456825 with label'feature enhancement'; you can paste the output here and I will analyze and prioritize results.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: You provide the GitLab base_url (e.g., https://gitlab.com) and a Personal Access Token with read_api. I will re-run gitlab_get_group_merge_requests_list with id97683359, scopeall, assignee_id68456825, labels'feature enhancement' and ensure headers are formatted per the agent's expectation; I will return the list of matching merge requests sorted by most recent."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_group_merge_requests_list\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"The ID of the group to retrieve merge requests from (e.g., 97683359).\\\"\\n    },\\n    \\\"scope\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Scope of merge requests to include (e.g., 'all').\\\"\\n    },\\n    \\\"approved_by_ids\\\": {\\n      \\\"type\\\": \\\"array\\\",\\n      \\\"description\\\": \\\"IDs of users who approved the merge requests (e.g., [68456825]).\\\"\\n    },\\n    \\\"labels\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Labels to filter by, such as 'feature enhancement'.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute gitlab_get_group_merge_requests_list with parameters base_url{BASE_URL}, access_token{PERSONAL_ACCESS_TOKEN_with_read_api}, id97683359, scopeall, assignee_id68456825, labels\"feature enhancement\""
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: 1 validation error for Http_request\\nheaders\\n  Input should be a valid string [typestring_type, input_value{'PRIVATE-TOKEN': 'glpat-vJAFLGxPt6rtWwHdbJR4'}, input_typedict]\\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"fdf63e7a-a902-4111-954a-d9fcf55064d9\", \"tool_call_id\": \"call_LhjQAOIu8NmR5AVkuq3nQvp6\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Plan A: Provide the GitLab base_url (e.g., https://gitlab.com) and a Personal Access Token with read_api scope. I will verify access to group 97683359 and run gitlab_get_group_merge_requests_list (id97683359, scopeall, assignee_id68456825, labels\\\"feature enhancement\\\"), returning MR results sorted by most recent. Required: base_url and PAT.\", \n \"Plan B: Confirm the group is hosted on gitlab.com and consent to an unauthenticated check. I will attempt to GET https://gitlab.com/api/v4/groups/97683359/merge_requests?scopeall&assignee_id68456825&labelsfeature%20enhancement; if the group is public I will return results, otherwise I will request a PAT.\", \n \"Plan C: Request step-by-step instructions to create a Personal Access Token with read_api scope for your GitLab instance. After you create and supply the token and base_url I will verify group access and fetch the merge requests.\", \n \"Plan D: If you cannot share credentials, I will provide a ready-to-run curl command (or small script) you can run locally with your PAT to fetch merge requests (id97683359, assignee_id68456825, labels\\\"feature enhancement\\\"). You run it and paste the output here; I will analyze and prioritize the results.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Provide the GitLab base_url (e.g., https://gitlab.com) and a Personal Access Token with read_api scope. I will verify access to group 97683359 and run gitlab_get_group_merge_requests_list (id97683359, scopeall, assignee_id68456825, labels\"feature enhancement\"), returning MR results sorted by most recent. Required: base_url and PAT."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_group_merge_requests_list\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"The ID of the group, which is 97683359.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\" : \"gitlab_get_group_merge_requests_list\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"base_url\",\n            \"parameter_value\" : \"BASE_URL\"\n        },\n        {\n            \"parameter_name\" : \"access_token\",\n            \"parameter_value\" : \"PERSONAL_ACCESS_TOKEN_with_read_api\"\n        },\n        {\n            \"parameter_name\" : \"id\",\n            \"parameter_value\" : \"97683359\"\n        },\n        {\n            \"parameter_name\" : \"scope\",\n            \"parameter_value\" : \"all\"\n        },\n        {\n            \"parameter_name\" : \"assignee_id\",\n            \"parameter_value\" : \"68456825\"\n        },\n        {\n            \"parameter_name\" : \"labels\",\n            \"parameter_value\" : \"feature enhancement\"\n        }\n    ]\n}"
+    }
+]

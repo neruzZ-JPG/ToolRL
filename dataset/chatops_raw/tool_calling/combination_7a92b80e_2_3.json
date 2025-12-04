@@ -1,0 +1,107 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nShow me all the branches that are protected or unprotected in the repository 'testRepo' under the user 'chatopsFdse' to review branch security settings."
+    },
+    {
+        "Human Message": "Current subtask is:\nFirst, confirm the hosting platform (e.g., GitHub/GitLab) for chatopsFdse/testRepo and ensure you have an access token with permissions to view branch protection (e.g., repo scope on GitHub) before attempting API or UI checks."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_a_repo\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The owner of the repository, e.g., 'chatopsFdse'.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the repository, e.g., 'testRepo'.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "[\"Execute github_get_a_repo with parameters owner'chatopsFdse' and repo'testRepo' to confirm the repository exists on GitHub and whether the current credentials/token allow viewing branch protection (if repo exists and access is allowed, proceed to list branch protections).\", \"If the repository is not found on GitHub, execute gitlab_get_project (owner/group'chatopsFdse', project'testRepo') via gitlab_agent to check if the repo is hosted on GitLab and whether we have permission to view branch protection there.\", \"If hosting cannot be confirmed or we lack an access token with required scopes (e.g., repo scope on GitHub or api scope on GitLab), ask the user to provide the hosting platform and a personal access token with the necessary permissions so we can proceed to enumerate branch protection settings.\"]"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 401, 'content': b'{\\\"message\\\":\\\"401 Unauthorized\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"61c52908-80f1-4acb-9267-0c33d1a8bc17\", \"tool_call_id\": \"call_iYpCJDaoVlFbUg2XBpr51WCp\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Try GitLab: execute gitlab_get_project with owner/group'chatopsFdse' and project'testRepo' via gitlab_agent (try unauthenticated first; if 401/403, a GitLab personal access token with api scope will be required).\", \"Ask the user to confirm the hosting platform (GitHub or GitLab) and provide a personal access token with the required scopes (GitHub: repo scope to view branch protection; GitLab: api scope). Once provided, I will re-run the appropriate API call to enumerate branch protection settings.\", \"Try unauthenticated GitHub check: execute github_get_a_repo for owner'chatopsFdse' and repo'testRepo' without credentials to determine if the repository is public; if public, attempt to list branches and branch-protection settings (if accessible) without a token.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nTry GitLab: execute gitlab_get_project with owner/group'chatopsFdse' and project'testRepo' via gitlab_agent (try unauthenticated first; if 401/403, a GitLab personal access token with api scope will be required)."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_project\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": \\\"chatopsFdse/testRepo\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute gitlab_get_project with parameters id'chatopsFdse/testRepo' to check if the project exists and whether unauthenticated access is allowed (if 401/403, a GitLab personal access token with api scope will be required)."
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"404 Project Not Found\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"6b87df53-1df7-4f4e-98bd-1966900c4538\", \"tool_call_id\": \"call_EgAmQTIZ1KtNIX48VEQBchOU\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Ask the user to confirm the hosting platform is GitHub and provide a Personal Access Token (PAT) with repo scope (or repo:status/public_repo as applicable). Once provided, I will authenticate and execute: github_get_a_repo owner'chatopsFdse' repo'testRepo' then github_list_branches owner'chatopsFdse' repo'testRepo' and inspect the 'protected' field for each branch (and call branch protection endpoints if deeper details are needed).\",\n  \"Plan B: Ask the user to confirm the hosting platform is GitLab (or GitLab CE/EE/self-hosted) and provide a Personal Access Token with api scope (or a token that permits read access to the project). Once provided, I will authenticate and execute: gitlab_get_project id'chatopsFdse/testRepo' then gitlab_list_branches/project_protected_branches id'chatopsFdse/testRepo' to enumerate branches and protection settings.\",\n  \"Plan C: If the user cannot/does not want to share a token, provide curl commands the user can run locally and paste results. For GitHub: curl -H 'Accept: application/vnd.github+json' -H 'Authorization: token <PAT>' https://api.github.com/repos/chatopsFdse/testRepo/branches (or omit Authorization for public repos) and inspect the 'protected' field; for GitLab: curl --header 'PRIVATE-TOKEN: <TOKEN>' 'https://gitlab.com/api/v4/projects/<url-encoded id>/repository/branches' and/or '/protected_branches'. Ask the user to run and paste the output so I can analyze branch protection status.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Ask the user to confirm the hosting platform is GitHub and provide a Personal Access Token (PAT) with repo scope (or repo:status/public_repo as applicable). Once provided, I will authenticate and execute: github_get_a_repo owner'chatopsFdse' repo'testRepo' then github_list_branches owner'chatopsFdse' repo'testRepo' and inspect the 'protected' field for each branch (and call branch protection endpoints if deeper details are needed)."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_a_repo\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The owner of the repository.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the repository.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute github_get_a_repo with parameters owner'chatopsFdse' and repo'testRepo' to confirm the repository exists on GitHub and whether the current credentials allow viewing branch protection."
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/repos#get-a-repository\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"3cccde32-007b-467a-b02f-9402bdfceab7\", \"tool_call_id\": \"call_VTxt798OM9kwxQJYs7cq0IZd\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: I attempted GitHub and got 404 Not Found. If the repo is on github.com, please confirm that and provide a GitHub Personal Access Token (PAT). For private repos I need repo scope; for public repos public_repo may suffice. Once you provide the PAT (or confirm it\u2019s public), I will authenticate and run: github_get_a_repo owner'chatopsFdse' repo'testRepo' then github_list_branches owner'chatopsFdse' repo'testRepo' and inspect the 'protected' field for each branch (and call the branch protection endpoints for deeper details).\",\n  \"Plan B: I attempted GitLab and got 404 Project Not Found. If the repo is on GitLab (gitlab.com or a self\u2011hosted instance), please confirm the exact host (gitlab.com or base URL) and provide a GitLab Personal Access Token with api scope (or a token that can read the project). Once provided I will run: gitlab_get_project id'chatopsFdse/testRepo' then gitlab_list_branches/project_protected_branches id'chatopsFdse/testRepo' to enumerate branches and protection settings.\",\n  \"Plan C: If you do not want to share a token, run these locally and paste the outputs: For GitHub (public or with PAT): curl -H 'Accept: application/vnd.github+json' [-H 'Authorization: token <PAT>'] https://api.github.com/repos/chatopsFdse/testRepo/branches and inspect the 'protected' field; for detailed protection per-branch call: https://api.github.com/repos/chatopsFdse/testRepo/branches/{branch}/protection. For GitLab: curl --header 'PRIVATE-TOKEN: <TOKEN>' 'https://gitlab.com/api/v4/projects/$(urlencode chatopsFdse%2FtestRepo)/repository/branches' and '.../protected_branches'. If self-hosted, replace gitlab.com with your GitLab base URL. Paste the outputs and I will analyze them and list which branches are protected/unprotected.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: I attempted GitHub and got 404 Not Found. If the repo is on github.com, please confirm that and provide a GitHub Personal Access Token (PAT). For private repos I need repo scope; for public repos public_repo may suffice. Once you provide the PAT (or confirm it\u2019s public), I will authenticate and run: github_get_a_repo owner'chatopsFdse' repo'testRepo' then github_list_branches owner'chatopsFdse' repo'testRepo' and inspect the 'protected' field for each branch (and call the branch protection endpoints for deeper details)."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_a_repo\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The owner of the repository, e.g., 'chatopsFdse'.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the repository, e.g., 'testRepo'.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"github_get_a_repo\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"owner\",\n            \"parameter_value\": \"chatopsFdse\"\n        },\n        {\n            \"parameter_name\": \"repo\",\n            \"parameter_value\": \"testRepo\"\n        }\n    ]\n}"
+    }
+]

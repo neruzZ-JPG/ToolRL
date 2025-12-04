@@ -1,0 +1,107 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nCan you retrieve detailed information about the repository owned by 'chatopsFdse' named 'testRepo', including its fork status, default branch, and recent activity?"
+    },
+    {
+        "Human Message": "Current subtask is:\nIdentify the hosting platform (e.g., GitHub) for chatopsFdse/testRepo and verify access; if GitHub, start by hitting https://api.github.com/repos/chatopsFdse/testRepo to confirm existence/visibility and whether authentication (PAT) is required."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_a_repo\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository, in this case 'chatopsFdse'.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the repository, in this case 'testRepo'.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "[\n  \"Execute github_get_a_repo with owner'chatopsFdse' and repo'testRepo' unauthenticated; if response is 200, extract 'fork' (and parent info if forked), 'default_branch', 'pushed_at'/'updated_at' and then call /repos/chatopsFdse/testRepo/commits to summarize recent activity (latest commits, authors, timestamps).\",\n  \"If the unauthenticated github_get_a_repo returns 404 or 403 indicating private access, ask the user to provide a GitHub Personal Access Token (PAT) and re-run github_get_a_repo authenticated to verify existence/visibility and retrieve the same fields and commits.\",\n  \"If github_get_a_repo returns 404 and owner appears not to exist on GitHub, attempt to locate the repository on GitLab by invoking gitlab_agent to check for chatopsFdse/testRepo on GitLab (owner/name) and, if found, retrieve equivalent repository metadata and recent commits.\",\n  \"If the request fails due to GitHub rate limiting (403 with rate-limit message), request a PAT to authenticate or wait for rate limit reset and then retry the github_get_a_repo call with authentication to obtain the repository details.\"\n]"
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: 1 validation error for Http_request\\nbody\\n  Field required [typemissing, input_value{'url': 'https://api.gith... 'GET', 'headers': '{}'}, input_typedict]\\n    For further information visit https://errors.pydantic.dev/2.9/v/missing\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"9a5613a0-6c35-45e4-8f72-03b59ef4f344\", \"tool_call_id\": \"call_WeOqQoTLXTaxIBqMCTVcCSdD\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Retry the github_get_a_repo call unauthenticated using github_agent, ensuring a correctly formatted HTTP request; if 200, extract 'fork' (and parent info), 'default_branch', 'pushed_at'/'updated_at' and then call /repos/chatopsFdse/testRepo/commits to summarize recent commits (authors, messages, timestamps); if response is 403 with rate-limit info, request a PAT or wait; if 404, proceed to Plan C.\",\n  \"Request the user's GitHub Personal Access Token (PAT) and then run github_get_a_repo authenticated via github_agent with owner'chatopsFdse' and repo'testRepo' to retrieve the same metadata and commits (handle private repo access or rate limits).\",\n  \"If unauthenticated github response is 404, query gitlab_agent to check for a project at path 'chatopsFdse/testRepo' on GitLab; if found, retrieve equivalent repository metadata (fork status, default branch, last activity) and recent commits; if not found, report repository not found on GitHub/GitLab.\",\n  \"Ask the user to confirm the exact hosting platform (GitHub or GitLab) and that the owner/repo names are spelled correctly; based on confirmation, choose the corresponding agent (github_agent or gitlab_agent) and proceed with an authenticated or unauthenticated repo metadata + commits query.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nRetry the github_get_a_repo call unauthenticated using github_agent, ensuring a correctly formatted HTTP request; if 200, extract 'fork' (and parent info), 'default_branch', 'pushed_at'/'updated_at' and then call /repos/chatopsFdse/testRepo/commits to summarize recent commits (authors, messages, timestamps); if response is 403 with rate-limit info, request a PAT or wait; if 404, proceed to Plan C."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_a_repo\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the repository.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute github_get_a_repo with owner'chatopsFdse' and repo'testRepo' without authentication (unauthenticated request)."
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: 1 validation error for Http_request\\nbody\\n  Field required [typemissing, input_value{'url': 'https://api.gith... 'GET', 'headers': '{}'}, input_typedict]\\n    For further information visit https://errors.pydantic.dev/2.9/v/missing\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"58003526-c4d9-440c-9068-2ab6c8d2e601\", \"tool_call_id\": \"call_EMAFNd2Ug8ke0yDdAogo4gqx\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Retry the unauthenticated github_get_a_repo call via github_agent, instructing the agent to make a correctly formatted HTTP request to GET https://api.github.com/repos/chatopsFdse/testRepo (include proper headers like Accept: application/vnd.github+json and User-Agent) and: if 200 > extract 'fork' (and parent), 'default_branch', 'pushed_at'/'updated_at' and then call /repos/chatopsFdse/testRepo/commits to summarize recent commits (authors, messages, timestamps); if 403 with rate-limit > stop and prompt for PAT; if 404 > mark not found and move to Plan C.\",\n  \"Request a GitHub Personal Access Token (PAT) from the user, then run github_get_a_repo authenticated (Authorization: token <PAT>) with owner'chatopsFdse' and repo'testRepo' to retrieve the same metadata and recent commits\u2014this handles private repos and rate-limit issues.\",\n  \"If unauthenticated GitHub call returns 404 (or if the user prefers), query gitlab_agent to check for a project at path 'chatopsFdse/testRepo' on GitLab; if found, retrieve equivalent metadata (fork/parent, default branch, last activity) and recent commits; if not found on GitLab either, report repository not found.\",\n  \"Ask the user to confirm the hosting platform and that the owner/repo names are spelled correctly before retrying (this avoids repeated failed calls due to typos); based on confirmation, choose Plan A, B, or C.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nRetry the unauthenticated github_get_a_repo call via github_agent, instructing the agent to make a correctly formatted HTTP request to GET https://api.github.com/repos/chatopsFdse/testRepo (include proper headers like Accept: application/vnd.github+json and User-Agent) and: if 200 > extract 'fork' (and parent), 'default_branch', 'pushed_at'/'updated_at' and then call /repos/chatopsFdse/testRepo/commits to summarize recent commits (authors, messages, timestamps); if 403 with rate-limit > stop and prompt for PAT; if 404 > mark not found and move to Plan C."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_a_repo\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The owner of the repository, e.g., 'chatopsFdse'.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the repository, e.g., 'testRepo'.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute github_get_a_repo with owner'chatopsFdse' and repo'testRepo' using an unauthenticated GET to https://api.github.com/repos/chatopsFdse/testRepo with headers Accept: application/vnd.github+json and User-Agent: devops-bot; if response is 200 extract 'fork' (and parent info if present), 'default_branch', 'pushed_at' and 'updated_at', then call GET https://api.github.com/repos/chatopsFdse/testRepo/commits (same headers) to summarize the latest commits (commit message, author name/email, author date); if response is 403 with rate-limit, stop and prompt for a PAT; if 404, mark not found and proceed to check GitLab."
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/commits/commits#list-commits\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"c04e07c6-7990-4cd4-87aa-5915bb7da2bd\", \"tool_call_id\": \"call_atByJSuWu6swUZjFjbMgVBD8\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Request a GitHub Personal Access Token (PAT) from the user, then run an authenticated GET https://api.github.com/repos/chatopsFdse/testRepo (Authorization: token <PAT>, Accept: application/vnd.github+json, User-Agent: devops-bot). If 200, extract 'fork' (and parent if forked), 'default_branch', 'pushed_at'/'updated_at' and call /repos/chatopsFdse/testRepo/commits to summarize recent commits (message, author, timestamp). If 404/403 persists, report not accessible.\",\n  \"Plan B: Query GitLab for the project at path 'chatopsFdse/testRepo' using gitlab_agent (GET /projects/:urlencoded_path) unauthenticated; if found, retrieve equivalent metadata (fork/parent info if available, default branch, last activity) and recent commits (authors, messages, timestamps) and report results.\",\n  \"Plan C: Validate whether the GitHub account exists by calling GET https://api.github.com/users/chatopsFdse unauthenticated; if the user is not found (404), report that the GitHub owner likely does not exist and skip further GitHub checks; if the user exists, conclude the 404 for the repo likely means private or removed and prompt for PAT to continue.\",\n  \"Plan D: Ask the user to confirm the exact hosting platform (GitHub or GitLab) and the spelling of owner/name (chatopsFdse/testRepo). Based on their confirmation, either proceed with Plan A (GitHub + PAT), Plan B (GitLab check), or report repository not found if they confirm the names and GitHub unauthenticated 404.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Request a GitHub Personal Access Token (PAT) from the user, then run an authenticated GET https://api.github.com/repos/chatopsFdse/testRepo (Authorization: token <PAT>, Accept: application/vnd.github+json, User-Agent: devops-bot). If 200, extract 'fork' (and parent if forked), 'default_branch', 'pushed_at'/'updated_at' and call /repos/chatopsFdse/testRepo/commits to summarize recent commits (message, author, timestamp). If 404/403 persists, report not accessible."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"github_get_a_repo\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"owner\",\n            \"parameter_value\": \"chatopsFdse\"\n        },\n        {\n            \"parameter_name\": \"repo\",\n            \"parameter_value\": \"testRepo\"\n        },\n        {\n            \"parameter_name\": \"Authorization\",\n            \"parameter_value\": \"token <USER_PAT> (please provide your PAT)\"\n        },\n        {\n            \"parameter_name\": \"headers\",\n            \"parameter_value\": \"Accept: application/vnd.github+json; User-Agent: devops-bot\"\n        },\n        {\n            \"parameter_name\": \"on_success\",\n            \"parameter_value\": \"If 200: extract 'fork' (and 'parent' if present), 'default_branch', 'pushed_at' and 'updated_at'; then call github_list_commits (owner 'chatopsFdse', repo 'testRepo') and summarize latest commits (commit message, author name/email, author date).\"\n        },\n        {\n            \"parameter_name\": \"on_403\",\n            \"parameter_value\": \"If 403 with rate-limit, return rate-limit info and request a PAT or wait.\"\n        },\n        {\n            \"parameter_name\": \"on_404\",\n            \"parameter_value\": \"If 404, report repository inaccessible/not found.\"\n        }\n    ]\n}"
+    }
+]

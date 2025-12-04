@@ -1,0 +1,206 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI need to list all the pods running in the 'production' namespace to monitor their status and resource usage."
+    },
+    {
+        "Human Message": "Current subtask is:\nFirst, identify which tool you'll use to interact with the Kubernetes cluster. Think about what command or API call can list all pods specifically in the 'production' namespace. Once you've chosen your method, consider how to filter or display the relevant information effectively."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use kubernetes_agent to run 'kubectl get pods -n production -o wide' to list all pods in the production namespace with their status, and 'kubectl top pods -n production' to gather CPU/memory usage if the Metrics Server is available. Compile a concise report with pod name, status, restarts, age, and resource usage.\",\n  \"Plan B: Use kubernetes_agent to query the Kubernetes API directly: call GET /api/v1/namespaces/production/pods to retrieve pods in production, then (if available) call GET /apis/metrics.k8s.io/v1beta1/namespaces/production/pods to obtain CPU/memory usage, and format a summary report.\",\n  \"Plan C: If metrics are unavailable or access is restricted, provide a lightweight monitoring fallback by deploying or enabling a metrics provider (e.g., Metrics Server) and/or a small script to periodically capture pod status and basic usage, then present the results. Optionally integrate with a dashboard for ongoing monitoring.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use kubernetes_agent to run 'kubectl get pods -n production -o wide' to list all pods in the production namespace with their status, and 'kubectl top pods -n production' to gather CPU/memory usage if the Metrics Server is available. Compile a concise report with pod name, status, restarts, age, and resource usage."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use kubernetes_agent to run 'kubectl get pods -n production -o wide' to list pods with their status and restarts, and 'kubectl top pods -n production' to gather CPU/memory usage; then compile a concise report including pod name, status, restarts, age, and resource usage.\",\n  \"Plan B: Have kubernetes_agent query the Kubernetes API directly: GET /api/v1/namespaces/production/pods to retrieve pods in production, then (if available) GET /apis/metrics.k8s.io/v1beta1/namespaces/production/pods to obtain CPU/memory usage, and format a summary report.\",\n  \"Plan C: If metrics are unavailable or access is restricted, implement a lightweight fallback by deploying or enabling a metrics provider (e.g., Metrics Server) and/or a small script to periodically capture pod status and basic usage, then present the results.\" \n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use kubernetes_agent to run 'kubectl get pods -n production -o wide' to list pods with their status and restarts, and 'kubectl top pods -n production' to gather CPU/memory usage; then compile a concise report including pod name, status, restarts, age, and resource usage."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use kubernetes_agent to run 'kubectl get pods -n production -o wide' to list pods with their status and restarts, and 'kubectl top pods -n production' to gather CPU/memory usage; then compile a concise report including pod name, status, restarts, age, and resource usage.\",\n  \"Plan B: Use kubernetes_agent to query the Kubernetes API directly: GET /api/v1/namespaces/production/pods to retrieve pods in production; then GET /apis/metrics.k8s.io/v1beta1/namespaces/production/pods for CPU/memory usage, and format a summary report.\",\n  \"Plan C: If metrics are unavailable or access is restricted, enable or install a metrics provider (e.g., Metrics Server) and/or implement a lightweight script to periodically capture pod status and basic usage, then present the results; optionally push results to a dashboard.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use kubernetes_agent to run 'kubectl get pods -n production -o wide' to list pods with their status and restarts, and 'kubectl top pods -n production' to gather CPU/memory usage; then compile a concise report including pod name, status, restarts, age, and resource usage."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan D: Use Jenkins_agent to execute the exact kubectl commands: 'kubectl get pods -n production -o wide' and 'kubectl top pods -n production', then compile and return a concise report with pod name, status, restarts, age, and resource usage.\",\n  \"Plan E: Use github_agent to run a scripted workflow (or a small CLI tool) that queries the Kubernetes API for pods in the production namespace (GET /api/v1/namespaces/production/pods) and, if available, metrics (GET /apis/metrics.k8s.io/v1beta1/namespaces/production/pods), then format a summary report.\",\n  \"Plan F: Retry or wait for kubernetes_agent to become available, and in the meantime prepare a lightweight report structure template to be filled once access is restored; optionally document prerequisites and access paths for quicker execution when the agent is back online.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan D: Use Jenkins_agent to execute the exact kubectl commands: 'kubectl get pods -n production -o wide' and 'kubectl top pods -n production', then compile and return a concise report with pod name, status, restarts, age, and resource usage."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "jenkins_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"build_job\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Name of the Jenkins job configured to run kubectl commands for production namespace\\\"\\n    },\\n    \\\"json\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"JSON string containing build parameters for the job. Example: {\\\\\\\"commands\\\\\\\":[\\\\\\\"kubectl get pods -n production -o wide\\\\\\\",\\\\\\\"kubectl top pods -n production\\\\\\\"]}\\\"\\n    },\\n    \\\"token\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Optional Jenkins API token for authentication\\\"\\n    },\\n    \\\"Jenkins-Crumb\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"CSRF protection token, if required by Jenkins\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"build_job\",\n  \"parameters\": {\n    \"name\": \"production-kubectl-ops\",\n    \"json\": \"{\\\"commands\\\":[\\\"kubectl get pods -n production -o wide\\\",\\\"kubectl top pods -n production\\\"]}\",\n    \"token\": \"\",\n    \"Jenkins-Crumb\": \"\"\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: ConnectionError(MaxRetryError(\\\"HTTPConnectionPool(host'localhost', port8080): Max retries exceeded with url: /job/production-kubectl-ops/build?json%7B%22commands%22%3A%5B%22kubectl%20get%20pods%20-n%20production%20-o%20wide%22%2C%22kubectl%20top%20pods%20-n%20production%22%5D%7D (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ca28c7ea990>: Failed to establish a new connection: [Errno 111] Connection refused'))\\\"))\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"4fb08faa-8a4d-41a1-8a3d-d30b77f01779\", \"tool_call_id\": \"call_KLAm0FrcX6Xy2E9xb2wqT22K\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan G: Retry the Jenkins approach by invoking the build_job with the same parameters, but ensure connectivity to the Jenkins server and the Kubernetes cluster is available (verify Jenkins host, port, API token, and crumb). If needed, refresh authentication. The commands to run remain: kubectl get pods -n production -o wide and kubectl top pods -n production; then compile and return a concise report.\",\n  \"Plan H: If the kubernetes_agent becomes available, execute kubectl get pods -n production -o wide to list pods with status and restarts, and kubectl top pods -n production to gather CPU/memory usage, then format a report including pod name, status, restarts, age, and resource usage.\",\n  \"Plan I: Use docker_agent to run a lightweight kubectl + metrics script inside a container (with kubeconfig access) to query the Kubernetes API: GET /api/v1/namespaces/production/pods for pods and, if metrics-server is present, GET /apis/metrics.k8s.io/v1beta1/namespaces/production/pods for CPU/memory; then produce a formatted summary report.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan G: Retry the Jenkins approach by invoking the build_job with the same parameters, but ensure connectivity to the Jenkins server and the Kubernetes cluster is available (verify Jenkins host, port, API token, and crumb). If needed, refresh authentication. The commands to run remain: kubectl get pods -n production -o wide and kubectl top pods -n production; then compile and return a concise report."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "jenkins_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan H: Wait for or re-activate the kubernetes_agent. Once available, run 'kubectl get pods -n production -o wide' and 'kubectl top pods -n production' to compile the report with pod name, status, restarts, age, and resource usage.\",\n  \"Plan I: Use docker_agent to run a lightweight container with kubeconfig access that can query the Kubernetes API and metrics server. Execute 'kubectl get pods -n production -o wide' and 'kubectl top pods -n production' inside the container, then format the results into a concise report.\",\n  \"Plan J: Produce a report template and request that the user provide either the live pod data or grant cluster/API access so the agent can fill in the real-time values later. The template should include: pod_name, status, restarts, age, cpu_usage, memory_usage.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan H: Wait for or re-activate the kubernetes_agent. Once available, run 'kubectl get pods -n production -o wide' and 'kubectl top pods -n production' to compile the report with pod name, status, restarts, age, and resource usage."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan K: Wait for kubernetes_agent to become available; once it is, run 'kubectl get pods -n production -o wide' and 'kubectl top pods -n production' and generate a report with pod name, status, restarts, age, cpu_usage, memory_usage.\",\n  \"Plan L: Use docker_agent to run a portable kubectl runner container (with kubeconfig access) to execute the two commands and produce the same report.\",\n  \"Plan M: If Kubernetes API access is available via a generic HTTP client, fetch GET /api/v1/namespaces/production/pods and, if metrics server present, GET /apis/metrics.k8s.io/v1beta1/namespaces/production/pods, then format results.\",\n  \"Plan N: Provide a ready-to-fill report structure and request live data or credentials to fill in later when any agent has access.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan K: Wait for kubernetes_agent to become available; once it is, run 'kubectl get pods -n production -o wide' and 'kubectl top pods -n production' and generate a report with pod name, status, restarts, age, cpu_usage, memory_usage."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan L: Use docker_agent to run a portable kubectl runner container (with kubeconfig access) to execute the two commands and produce the same report.\",\n  \"Plan M: If Kubernetes API access is available via a generic HTTP client, fetch GET /api/v1/namespaces/production/pods and, if metrics server present, GET /apis/metrics.k8s.io/v1beta1/namespaces/production/pods, then format results.\",\n  \"Plan N: Provide a ready-to-fill report structure and request live data or credentials to fill in later when any agent has access.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan L: Use docker_agent to run a portable kubectl runner container (with kubeconfig access) to execute the two commands and produce the same report."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"create_a_container\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Container name to assign.\\\"\\n    },\\n    \\\"platform\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Platform for image lookup, optional.\\\"\\n    },\\n    \\\"body\\\": {\\n      \\\"type\\\": \\\"object\\\",\\n      \\\"description\\\": \\\"ContainerConfig payload. Include fields such as Image (portable kubectl runner image), Cmd/Entrypoint to run a startup script that executes the two kubectl commands and writes the report to a mounted path. Mount kubeconfig from host into the container (e.g., Bind /host/kubeconfig:/root/.kube/config:ro). Also mount an output/report directory (e.g., /report) for the generated report.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"create_a_container\",\n  \"parameters\": {\n    \"name\": \"kubectl-runner-prod\",\n    \"platform\": \"linux/amd64\",\n    \"body\": {\n      \"Image\": \"registry.example.com/kubectl-runner:latest\",\n      \"Cmd\": [\n        \"/bin/sh\",\n        \"-c\",\n        \"kubectl get pods -n production -o wide; kubectl top pods -n production\"\n      ],\n      \"Bind\": [\n        {\n          \"hostPath\": \"/host/kubeconfig\",\n          \"containerPath\": \"/root/.kube/config\",\n          \"mode\": \"ro\"\n        },\n        {\n          \"hostPath\": \"/host/report\",\n          \"containerPath\": \"/report\",\n          \"mode\": \"rw\"\n        }\n      ]\n    }\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"No such image: registry.example.com/kubectl-runner:latest\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"6065c5ab-35af-4717-9bb5-2b66ff81c445\", \"tool_call_id\": \"call_jnjEYoYuYYOjqCL9qAMBQyPD\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan N: Acquire or build a valid kubectl-runner image in the registry, then retry creating the docker container with the same parameters and run 'kubectl get pods -n production -o wide' and 'kubectl top pods -n production' to generate the report.\",\n  \"Plan O: Fall back to a lightweight Kubernetes API approach inside a container (or host) by running a script that queries GET /api/v1/namespaces/production/pods for pods and, if metrics-server is available, GET /apis/metrics.k8s.io/v1beta1/namespaces/production/pods for CPU/memory, then format the results into the report.\",\n  \"Plan P: If all container-based options fail, provide a ready-to-fill report structure and request live data or credentials to complete the task later; document prerequisites and steps to resolve image/access issues for quicker execution once an agent is available.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan N: Acquire or build a valid kubectl-runner image in the registry, then retry creating the docker container with the same parameters and run 'kubectl get pods -n production -o wide' and 'kubectl top pods -n production' to generate the report."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"create_a_container\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Assign the specified name to the container. Must match /?[a-zA-Z0-9][a-zA-Z0-9_.-]+$/. Can be omitted to let Docker generate a name.\\\"\\n    },\\n    \\\"platform\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Platform in the format os[/arch[/variant]] used for image lookup. If omitted, host platform is used.\\\"\\n    },\\n    \\\"body\\\": {\\n      \\\"type\\\": \\\"object\\\",\\n      \\\"description\\\": \\\"Container configuration object (ContainerConfig). Include at minimum Image (e.g., kubectl-runner), Cmd or Entrypoint, Env, Exposed Ports, and HostConfig as needed to match the previous container's parameters. Ensure the image is a valid kubectl-runner image available in the registry (or build/publish it prior to this step).\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\" : \"create_a_container\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"message\",\n            \"parameter_value\" : \"FAIL, Connection to Jenkins server or registry is not available. The plan requires a functional Jenkins instance or container registry to spin up the kubectl-runner container. Consider alternative paths: use the Kubernetes API directly, retry once the agents are back, or provide a local data collection script. If you'd like, I can craft a lightweight in-cluster script that lists pods in production namespace and their CPU/memory usage, then report back.\"\n        }\n    ]\n}"
+    }
+]

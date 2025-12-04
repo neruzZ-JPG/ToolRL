@@ -1,0 +1,80 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI want to stop the container with ID 'container123' after completing the deployment process for the project 'alpha' in the 'testRepo' repository, and then follow the user 'devOpsTeam' on GitHub to stay updated with their latest activities."
+    },
+    {
+        "Human Message": "Current subtask is:\nConfirm deployment completion for 'alpha' in 'testRepo'\u2014check the CI/CD pipeline status and deployment logs\u2014before stopping container 'container123'."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "jenkins_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"To confirm the deployment completion for 'alpha' in 'testRepo', I need to check the last build status of the relevant job. Please specify the job name associated with this deployment, or I will assume the job name is 'testRepo_deploy_alpha'.\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "get_job_build_and_logs for Jenkins job_name'testRepo_deploy_alpha' repo'testRepo' project'alpha' last_build_onlytrue include_logstrue"
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: ConnectionError(MaxRetryError(\\\"HTTPConnectionPool(host'localhost', port8080): Max retries exceeded with url: /job/testRepo_deploy_alpha/lastBuild/stop (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7a99caf60590>: Failed to establish a new connection: [Errno 111] Connection refused'))\\\"))\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"068d3ee6-b66b-4752-8e29-4efe2be133b2\", \"tool_call_id\": \"call_VLEf2UpCafQnjVmh71J7tiuE\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Plan A: Retry Jenkins check with jenkins_agent but fix the connection \u2014 supply Jenkins base URL (host:port), job_name (currently 'testRepo_deploy_alpha' or a different name if known), and Jenkins credentials/API token so jenkins_agent can run get_job_build_and_logs for the last build and include logs.\", \n \"Plan B: If Jenkins is unavailable, check CI status in GitHub Actions using github_agent \u2014 provide the repository owner (repo 'testRepo' owner/org), a GitHub PAT, and the workflow/job name or a 'deploy' filter so github_agent can fetch the latest workflow run and logs for project 'alpha'.\", \n \"Plan C: Verify the deployment directly in the cluster using kubernetes_agent \u2014 provide kubeconfig or cluster access info and the namespace (or confirm default) so kubernetes_agent can check Deployment/ReplicaSet/Pod status for 'alpha' and fetch recent logs.\", \n \"Plan D: Inspect the local container 'container123' logs with docker_agent to infer whether deployment completed on that host \u2014 provide Docker host access (socket or host:port and any needed credentials) so docker_agent can fetch container logs and status before we stop it.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Retry Jenkins check with jenkins_agent but fix the connection \u2014 supply Jenkins base URL (host:port), job_name (currently 'testRepo_deploy_alpha' or a different name if known), and Jenkins credentials/API token so jenkins_agent can run get_job_build_and_logs for the last build and include logs."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "jenkins_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"get_job_info\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": \\\"testRepo_deploy_alpha\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "get_job_info for Jenkins job_name'testRepo_deploy_alpha' jenkins_base_url'http://localhost:8080' jenkins_user'{{JENKINS_USER}}' jenkins_api_token'{{JENKINS_API_TOKEN}}' last_build_onlytrue include_logstrue"
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: ConnectionError(MaxRetryError(\\\"HTTPConnectionPool(host'localhost', port8080): Max retries exceeded with url: /job/testRepo_deploy_alpha/lastBuild/api/json (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7a99cafc6b40>: Failed to establish a new connection: [Errno 111] Connection refused'))\\\"))\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"2aaaa5fe-015e-4ddd-adae-96da5eaf0224\", \"tool_call_id\": \"call_zXIAq3yj94WSLrp5rL5hiA7N\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Plan A: Retry Jenkins check with jenkins_agent but fix connection parameters \u2014 provide the correct jenkins_base_url (host:port, not localhost:8080 if unreachable), confirm network reachability from our control host, and supply jenkins_user and jenkins_api_token plus job_name ('testRepo_deploy_alpha' or the actual job). Agent will run get_job_info and fetch last build + logs.\", \n \"Plan B: Check CI/CD on GitHub Actions using github_agent \u2014 provide repository owner/org for 'testRepo', a GitHub PAT with repo/read:org scopes, and the workflow/job name or a 'deploy' filter for project 'alpha'. Agent will fetch latest workflow run status and logs.\", \n \"Plan C: Verify deployment in the cluster with kubernetes_agent \u2014 provide kubeconfig or cluster API access (and namespace if non-default). Agent will check Deployment/ReplicaSet/Pods for 'alpha' and gather pod logs to confirm deployment completion.\", \n \"Plan D: Inspect the running container directly with docker_agent \u2014 provide Docker host access (docker socket path or host:port and credentials if remote) so the agent can fetch container 'container123' status and recent logs to determine if the deployment finished before stopping it.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Retry Jenkins check with jenkins_agent but fix connection parameters \u2014 provide the correct jenkins_base_url (host:port, not localhost:8080 if unreachable), confirm network reachability from our control host, and supply jenkins_user and jenkins_api_token plus job_name ('testRepo_deploy_alpha' or the actual job). Agent will run get_job_info and fetch last build + logs."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "jenkins_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"get_job_info\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Name of the Jenkins job, e.g., 'testRepo_deploy_alpha'\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\" : \"get_job_info\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"job_name\",\n            \"parameter_value\" : \"testRepo_deploy_alpha\"\n        },\n        {\n            \"parameter_name\" : \"jenkins_base_url\",\n            \"parameter_value\" : \"http://<JENKINS_HOST>:<PORT>\"\n        },\n        {\n            \"parameter_name\" : \"jenkins_user\",\n            \"parameter_value\" : \"{{JENKINS_USER}}\"\n        },\n        {\n            \"parameter_name\" : \"jenkins_api_token\",\n            \"parameter_value\" : \"{{JENKINS_API_TOKEN}}\"\n        },\n        {\n            \"parameter_name\" : \"last_build_only\",\n            \"parameter_value\" : \"true\"\n        },\n        {\n            \"parameter_name\" : \"include_logs\",\n            \"parameter_value\" : \"true\"\n        }\n    ]\n}"
+    }
+]

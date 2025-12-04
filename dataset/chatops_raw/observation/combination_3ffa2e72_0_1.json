@@ -1,0 +1,62 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI need to review the latest activity logs for the repository owned by 'chatopsFdse' called 'testRepo' to identify recent changes and updates."
+    },
+    {
+        "Human Message": "Current subtask is:\nVerify where the repo is hosted and that you have access: open https://github.com/chatopsFdse/testRepo (or the actual host) and confirm your account/API token can read repository events/activity."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_get_a_repo\\\",\\n  \\\"parameters\\\": {\\n    \\\"owner\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The account owner of the repository, e.g., 'chatopsFdse'.\\\"\\n    },\\n    \\\"repo\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the repository, e.g., 'testRepo'.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "[\n  \"Execute github_get_a_repo with owner'chatopsFdse' and repo'testRepo' using github_agent. Provide a GitHub API token (or account credentials) with read access (repo or public_repo scope). This verifies the repository host and whether the token/account can read the repo metadata.\",\n  \"If the github_get_a_repo call returns 404 or access denied, check alternate host GitLab: execute gitlab_get_project with namespace'chatopsFdse' and project'testRepo' using gitlab_agent and a GitLab API token to see if the repo is hosted on GitLab instead.\",\n  \"If the GitHub repo exists and access is confirmed, fetch recent activity: execute github_list_repo_events (or github_list_commits, github_list_pulls, github_list_issues) with owner'chatopsFdse', repo'testRepo', auth token, and appropriate per_page/date filters to retrieve commits, PRs, and issue activity for analysis.\",\n  \"If automated API access is not possible (token missing/insufficient scope), open https://github.com/chatopsFdse/testRepo in a browser to manually verify visibility and check Insights -> Commits / Pulse and the repo's recent commits, PRs, and issues; if needed, create a GitHub token with the required scopes and retry the API calls.\"\n]"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\\r\\\\n  \\\"message\\\": \\\"Not Found\\\",\\\\r\\\\n  \\\"documentation_url\\\": \\\"https://docs.github.com/rest\\\",\\\\r\\\\n  \\\"status\\\": \\\"404\\\"\\\\r\\\\n}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"499a9f4e-e775-4edd-8f6d-6614629fc0ad\", \"tool_call_id\": \"call_g74uwlYX4TZJqtBU1bn8nSK3\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Check GitLab hosting \u2014 ask gitlab_agent to execute gitlab_get_project with namespace'chatopsFdse' and project'testRepo' using a GitLab API token (or try unauthenticated if public). If found, fetch project events/commits to review recent activity.\",\n  \"Plan B: Retry GitHub with authentication \u2014 ask github_agent to execute github_get_a_repo with owner'chatopsFdse' and repo'testRepo' providing a GitHub Personal Access Token with repo or public_repo scope (also verify exact owner/repo spelling and org vs user). If repo is accessible, then call github_list_repo_events / github_list_commits / github_list_pulls to gather activity.\",\n  \"Plan C: Manual verification / request user input \u2014 open https://github.com/chatopsFdse/testRepo in a browser to confirm visibility; if it is private or 404, ask you to (a) confirm the correct host (GitHub vs GitLab), (b) confirm the exact owner/repo name, and (c) provide or grant a read-scoped API token or add the service account so I can access activity logs. Once provided, proceed with API calls to collect activity.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Check GitLab hosting \u2014 ask gitlab_agent to execute gitlab_get_project with namespace'chatopsFdse' and project'testRepo' using a GitLab API token (or try unauthenticated if public). If found, fetch project events/commits to review recent activity."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_project\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": \\\"chatopsFdse/testRepo\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute gitlab_get_project with id'chatopsFdse/testRepo' using gitlab_agent. Include a GitLab API token if the project is private (or run unauthenticated if public)."
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"404 Project Not Found\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"caf917e8-42f5-4fb9-925b-1584f674d5b8\", \"tool_call_id\": \"call_neUdPxOL9UbRe893O64Mniro\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Retry GitHub with authentication \u2014 ask github_agent to execute github_get_a_repo with owner'chatopsFdse' and repo'testRepo' providing a GitHub Personal Access Token with repo or public_repo scope. If successful, follow up by calling github_list_commits / github_list_pulls / github_list_issues to gather recent activity.\",\n  \"Plan B: Request clarification and access from the user \u2014 ask the user to confirm the exact host (github.com, gitlab.com, GitHub Enterprise, or other), verify the owner/repo spelling, and either (a) provide a read-scoped API token for the correct host or (b) add the service account so I can access the repository. Once provided, retry the appropriate API calls.\",\n  \"Plan C: Search for the repository name and owner on GitHub to detect typos or different ownership \u2014 ask github_agent to execute github_search_repositories with query'testRepo chatopsFdse' (or user:chatopsFdse repo:testRepo) using a token if needed; if a match is found, use the discovered owner/repo to fetch repo metadata and activity.\"\n]"
+    }
+]

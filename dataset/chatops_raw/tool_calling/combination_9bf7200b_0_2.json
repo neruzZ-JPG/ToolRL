@@ -1,0 +1,206 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nRetrieve the list of all pods in the 'production' namespace to monitor their status and identify any issues."
+    },
+    {
+        "Human Message": "Current subtask is:\nStart by determining the command to list resources within a specific namespace in your container orchestration tool. Think about which command displays pods and how to specify the 'production' namespace. What is the initial command you'd try?"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use the Kubernetes agent to run 'kubectl get pods -n production' to retrieve the list of pods and their current statuses.\",\n  \"Plan B: Use the Kubernetes agent to run 'kubectl get pods -n production -o wide' to include additional fields like READY, NODE, and AGE for easier monitoring.\",\n  \"Plan C: Use the Kubernetes agent to run a formatted report (for example, 'kubectl get pods -n production -o json' or a jsonpath) to list each pod with its status and container readiness, highlighting any pods in Pending, CrashLoopBackOff, or not-ready states.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use the Kubernetes agent to run 'kubectl get pods -n production' to retrieve the list of pods and their current statuses."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan D: Use the Kubernetes agent to run 'kubectl get pods -n production -o wide' to retrieve the list of pods with additional fields such as READY, STATUS, RESTARTS, and AGE for easier monitoring.\",\n  \"Plan E: Use the Kubernetes agent to run 'kubectl get pods -n production -o json' and then parse the JSON to list each pod with its name, phase, readiness, node, and start time.\",\n  \"Plan F: Use the Kubernetes agent to run 'kubectl get pods -n production -o custom-columnsNAME:.metadata.name,STATUS:.status.phase,READY:.status.containerStatuses[*].ready,NODE:.spec.nodeName' to produce a concise table of essential fields.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan D: Use the Kubernetes agent to run 'kubectl get pods -n production -o wide' to retrieve the list of pods with additional fields such as READY, STATUS, RESTARTS, and AGE for easier monitoring."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan G: Use the Kubernetes agent to run 'kubectl get pods -n production -o wide' to retrieve the list of pods with additional fields such as READY, STATUS, RESTARTS, and AGE for easier monitoring.\",\n  \"Plan H: Use the Kubernetes agent to run 'kubectl get pods -n production -o json' and then parse the JSON to list each pod with its name, phase, readiness, node, and start time.\",\n  \"Plan I: Use the Kubernetes agent to run 'kubectl get pods -n production -o custom-columnsNAME:.metadata.name,STATUS:.status.phase,READY:.status.containerStatuses[*].ready,NODE:.spec.nodeName,AGE:.metadata.creationTimestamp' to produce a concise table of essential fields.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan G: Use the Kubernetes agent to run 'kubectl get pods -n production -o wide' to retrieve the list of pods with additional fields such as READY, STATUS, RESTARTS, and AGE for easier monitoring."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan J: Since Plan G couldn't be executed due to agent unavailability, switch to querying the Kubernetes API directly by running 'kubectl get pods -n production -o json' and then parse the JSON to list pod names, statuses, and readiness.\",\n  \"Plan K: Retrieve deeper diagnostics by running 'kubectl describe pods -n production' to gather events and container statuses for each pod, which helps identify issues causing pods to fail or stay Pending.\",\n  \"Plan L: Produce a concise summary with a custom-columns output: 'kubectl get pods -n production -o custom-columnsNAME:.metadata.name,STATUS:.status.phase,READY:.status.containerStatuses[*].ready,NODE:.spec.nodeName,AGE:.metadata.creationTimestamp' to quickly monitor essential fields.\" \n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan J: Since Plan G couldn't be executed due to agent unavailability, switch to querying the Kubernetes API directly by running 'kubectl get pods -n production -o json' and then parse the JSON to list pod names, statuses, and readiness."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan M: Use the Jenkins agent to trigger a pipeline that executes 'kubectl get pods -n production -o json' in the cluster and returns the JSON results for parsing.\",\n  \"Plan N: Use the Jenkins agent to run 'kubectl describe pods -n production' to collect detailed status and events for troubleshooting.\",\n  \"Plan O: Provide a ready-to-run script template that uses 'kubectl get pods -n production -o json' and a jq command to extract name, status, and readiness, so once an agent becomes available you can run it\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan M: Use the Jenkins agent to trigger a pipeline that executes 'kubectl get pods -n production -o json' in the cluster and returns the JSON results for parsing."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "jenkins_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"build_job\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Name of the Jenkins pipeline job to trigger (the one that will execute kubectl in the cluster)\\\"\\n    },\\n    \\\"json\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"JSON payload with pipeline parameters, e.g., {\\\\\\\"command\\\\\\\": \\\\\\\"kubectl get pods -n production -o json\\\\\\\"}\\\"\\n    },\\n    \\\"token\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Optional Jenkins API token for authentication\\\"\\n    },\\n    \\\"Jenkins-Crumb\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Optional CSRF protection token header value\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"build_job\",\n  \"parameters\": {\n    \"name\": \"kubectl_get_pods_json_pipeline\",\n    \"json\": \"{\\\"command\\\": \\\"kubectl get pods -n production -o json\\\"}\",\n    \"token\": \"\",\n    \"Jenkins-Crumb\": \"\"\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: ConnectionError(MaxRetryError(\\\"HTTPConnectionPool(host'localhost', port8080): Max retries exceeded with url: /job/kubectl_get_pods_json_pipeline/build?json%7B%22command%22%3A%20%22kubectl%20get%20pods%20-n%20production%20-o%20json%22%7D (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7ca28d3fe630>: Failed to establish a new connection: [Errno 111] Connection refused'))\\\"))\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"6b0585ab-f13f-4ab9-97b5-9655973f3fad\", \"tool_call_id\": \"call_axPlpicC8jAYuHSreQZ8pyxw\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan M2: Use the kubernetes_agent to execute 'kubectl get pods -n production -o json' and parse the results to extract pod names, statuses, and readiness.\",\n  \"Plan N2: Use the kubernetes_agent to execute 'kubectl get pods -n production -o wide' to capture additional fields like READY, STATUS, RESTARTS, and AGE.\",\n  \"Plan O2: Use the kubernetes_agent to execute 'kubectl describe pods -n production' to gather detailed events and status information for troubleshooting.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan M2: Use the kubernetes_agent to execute 'kubectl get pods -n production -o json' and parse the results to extract pod names, statuses, and readiness."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan P3: Use the docker_agent to run a kubectl container that has access to the cluster and execute 'kubectl get pods -n production -o json', then return the parsed results.\",\n  \"Plan Q3: Use the github_agent to trigger a CI workflow that runs 'kubectl get pods -n production -o json' and returns the JSON payload.\",\n  \"Plan R3: Use the gitlab_agent to trigger a CI job that runs 'kubectl get pods -n production -o json' and returns the JSON payload.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan P3: Use the docker_agent to run a kubectl container that has access to the cluster and execute 'kubectl get pods -n production -o json', then return the parsed results."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan S: Use the docker_agent to spin up a kubectl container with cluster access and run 'kubectl get pods -n production -o json', then parse to extract pod names, statuses, and readiness.\",\n  \"Plan T: Use the Jenkins agent to trigger a pipeline that runs 'kubectl get pods -n production -o json' and returns the JSON results for parsing.\",\n  \"Plan U: Query the Kubernetes API directly by fetching the Pods in the production namespace via an API call (GET /api/v1/pods?fieldSelectormetadata.namespaceproduction) and parse the response for name, phase, and readiness.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan S: Use the docker_agent to spin up a kubectl container with cluster access and run 'kubectl get pods -n production -o json', then parse to extract pod names, statuses, and readiness."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"create_a_container\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Optional container name. Must match /^[a-zA-Z0-9][a-zA-Z0-9_.-]+$/\\\"\\n    },\\n    \\\"body\\\": {\\n      \\\"type\\\": \\\"object\\\",\\n      \\\"description\\\": \\\"Container configuration payload. Required fields to run kubectl and access the cluster: Image (string) - a kubectl-enabled image (e.g., bitnami/kubectl:latest); Cmd (array of strings) - the command to execute, e.g., [\\\\\\\"kubectl\\\\\\\", \\\\\\\"get\\\\\\\", \\\\\\\"pods\\\\\\\", \\\\\\\"-n\\\\\\\", \\\\\\\"production\\\\\\\", \\\\\\\"-o\\\\\\\", \\\\\\\"json\\\\\\\"]; HostConfig (object) - host configuration including Bind mounts for kubeconfig to permit cluster access, e.g., {\\\\\\\"Binds\\\\\\\": [\\\\\\\"<path_to_kubeconfig>:/root/.kube/config\\\\\\\"]}; Env (array of strings) - optional environment variables; Tty (boolean) - optional; AttachStdout/AttachStdin (boolean) - optional to capture output.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"create_a_container\",\n  \"parameters\": {\n    \"name\": \"kubectl_json_pods\",\n    \"body\": {\n      \"Image\": \"bitnami/kubectl:latest\",\n      \"Cmd\": [\"kubectl\", \"get\", \"pods\", \"-n\", \"production\", \"-o\", \"json\"],\n      \"HostConfig\": {\n        \"Binds\": [\"/home/ci/.kube/config:/root/.kube/config\"]\n      },\n      \"Env\": [],\n      \"Tty\": false,\n      \"AttachStdout\": true,\n      \"AttachStdin\": false\n    }\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"No such image: bitnami/kubectl:latest\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"d8a8b747-bedd-4a3e-97a9-c027807c6253\", \"tool_call_id\": \"call_8bfT5GSvTVrCi7zoyQhYS3wX\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan S2: Use the docker_agent to spin up a kubectl container with cluster access using an alternative image that is known to exist, e.g., 'lachlanevenson/k8s-kubectl:latest', then run 'kubectl get pods -n production -o json' and parse.\",\n  \"Plan T2: If container-based approach continues to fail, fall back to using a local kubectl binary on the host (via docker_agent if available) to run 'kubectl get pods -n production -o json' and parse the output.\",\n  \"Plan U2: Query the Kubernetes API directly by calling the API endpoint to list pods in the production namespace with proper authentication, then parse the JSON for pod names, statuses, and readiness.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan S2: Use the docker_agent to spin up a kubectl container with cluster access using an alternative image that is known to exist, e.g., 'lachlanevenson/k8s-kubectl:latest', then run 'kubectl get pods -n production -o json' and parse."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"create_a_container\\\",\\n  \\\"parameters\\\": {\\n    \\\"body\\\": {\\n      \\\"type\\\": \\\"object\\\",\\n      \\\"description\\\": \\\"Container configuration to run kubectl against the target cluster. Include at least: Image: lachlanevenson/k8s-kubectl:latest; Cmd: [\\\\\\\"kubectl\\\\\\\", \\\\\\\"get\\\\\\\", \\\\\\\"pods\\\\\\\", \\\\\\\"-n\\\\\\\", \\\\\\\"production\\\\\\\", \\\\\\\"-o\\\\\\\", \\\\\\\"json\\\\\\\"]; optional Env: [\\\\\\\"KUBECONFIG/root/.kube/config\\\\\\\"]; optional HostConfig.Binds: [\\\\\\\"/path/to/kubeconfig:/root/.kube/config\\\\\\\"] to mount kubeconfig for cluster access.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"create_a_container\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"name\",\n      \"parameter_value\": \"kubectl_json_pods\"\n    },\n    {\n      \"parameter_name\": \"body\",\n      \"parameter_value\": \"{\\\"Image\\\":\\\"lachlanevenson/k8s-kubectl:latest\\\",\\\"Cmd\\\":[\\\"kubectl\\\",\\\"get\\\",\\\"pods\\\",\\\"-n\\\",\\\"production\\\",\\\"-o\\\",\\\"json\\\"],\\\"HostConfig\\\":{\\\"Binds\\\":[\\\"/home/ci/.kube/config:/root/.kube/config\\\"]},\\\"Env\\\":[\\\"KUBECONFIG/root/.kube/config\\\"],\\\"Tty\\\":false,\\\"AttachStdout\\\":true,\\\"AttachStdin\\\":false}\"\n    }\n  ]\n}"
+    }
+]

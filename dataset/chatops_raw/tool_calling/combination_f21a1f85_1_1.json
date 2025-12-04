@@ -1,0 +1,53 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nPlease retrieve the latest merge requests for group 'fdseChatops' with the label 'bugfix' that are approved and assigned to user ID 102. Then, check the branches in project ID 68456825 to find the source branch names for these requests."
+    },
+    {
+        "Human Message": "Current subtask is:\nConfirm the GitLab instance URL for \u2018fdseChatops\u2019 and obtain a personal access token with read_api/api scope; export them as environment variables GITLAB_BASE_URL and GITLAB_TOKEN for subsequent API requests."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute the following with gitlab_agent:\nTool: confirm_gitlab_url_and_pat_instructions\nParameters:\n{\n  \"group_name\": \"fdseChatops\",\n  \"required_token_scopes\": [\"read_api\"],\n  \"env_var_names\": [\"GITLAB_BASE_URL\", \"GITLAB_TOKEN\"],\n  \"token_creation_mode\": \"manual\" \n}\n\n[\n  \"Plan A: Have gitlab_agent confirm the GitLab base URL for group 'fdseChatops' by querying the Groups API (returns GITLAB_BASE_URL). Then gitlab_agent provides step-by-step instructions and example commands for the user to create a personal access token with scope 'read_api' in their GitLab account and how to export GITLAB_BASE_URL and GITLAB_TOKEN as environment variables. After the user creates the token, gitlab_agent verifies it by making a simple read_api call.\",\n  \"Plan B: If the user can provide an admin token/credentials, have gitlab_agent create an impersonation/personal access token for the target user via the Admin API (token with 'read_api' scope), set GITLAB_TOKEN automatically, and confirm GITLAB_BASE_URL by querying the group. This fully automates token provisioning but requires admin privileges and the admin token as an additional parameter.\",\n  \"Plan C: Ask the user to supply GITLAB_BASE_URL and an already-created GITLAB_TOKEN with 'read_api' scope. gitlab_agent will then verify the token by calling a test endpoint (e.g., GET /api/v4/user) and confirm readiness for subsequent API requests.\"\n]"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"404 Group Not Found\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"48fedbc8-286e-4bd9-9552-730cf6bf5e31\", \"tool_call_id\": \"call_Qw4xnx1I4W1deesT1B4EaPp8\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Ask the user to provide the correct GITLAB_BASE_URL and an existing personal access token (GITLAB_TOKEN) with read_api scope. Once provided, gitlab_agent will verify the token by calling GET /api/v4/user and then confirm and echo the exact export commands to set GITLAB_BASE_URL and GITLAB_TOKEN as environment variables.\",\n  \"Plan B: Ask the user to confirm the exact group path/namespace for 'fdseChatops' (it may be a subgroup or differently cased). With GITLAB_BASE_URL and a token (user or admin) provided, gitlab_agent will search groups via GET /api/v4/groups?searchfdseChatops to locate the group (previous query returned 404), return the resolved group ID/URL, and then provide step\u2011by\u2011step instructions for creating a PAT and exporting the env vars. After the user creates the token, gitlab_agent will verify it.\",\n  \"Plan C: If the user can provide an admin token, gitlab_agent will locate the group automatically and can optionally create an impersonation token for the target user via the Admin API (requires admin privileges). Parameters needed: GITLAB_BASE_URL and ADMIN_TOKEN. gitlab_agent will then set/confirm GITLAB_TOKEN and export the environment variables. This fully automates provisioning but requires admin credentials.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Ask the user to provide the correct GITLAB_BASE_URL and an existing personal access token (GITLAB_TOKEN) with read_api scope. Once provided, gitlab_agent will verify the token by calling GET /api/v4/user and then confirm and echo the exact export commands to set GITLAB_BASE_URL and GITLAB_TOKEN as environment variables."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_agent\\\",\\n  \\\"parameters\\\": {\\n    \\\"GITLAB_BASE_URL\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The base URL of your GitLab instance (e.g., https://gitlab.com).\\\"\\n    },\\n    \\\"GITLAB_TOKEN\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Your personal access token with read_api scope.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\" : \"gitlab_agent\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"GITLAB_BASE_URL\",\n            \"parameter_value\" : \"<PROVIDE_GITLAB_BASE_URL_e.g._https://gitlab.com>\"\n        },\n        {\n            \"parameter_name\" : \"GITLAB_TOKEN\",\n            \"parameter_value\" : \"<PROVIDE_PERSONAL_ACCESS_TOKEN_with_read_api_scope>\"\n        }\n    ]\n}"
+    }
+]

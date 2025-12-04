@@ -1,0 +1,152 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nIdentify all merge requests in the project with ID 68456825 that are pending review and have the milestone 'v2.0 Release' assigned, to coordinate the final approval process before merging."
+    },
+    {
+        "Human Message": "Current subtask is:\nConfirm how \u201cpending review\u201d is defined in this project (e.g., a specific label like \u201cNeeds review,\u201d required approvals not met, or reviewer assignment), so you know the exact filter criteria to use alongside the milestone when querying."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use gitlab_agent to query the project's label list and the project's merge request approval settings to get the canonical definition. Required info: GitLab API token (api scope) and project ID 68456825. Action: call endpoints to list labels and to get approval configuration for the project.\",\n  \"Plan B: Use gitlab_agent to sample a set of recent open merge requests in project 68456825 to infer what indicates 'pending review' (common labels like 'Needs review', presence/absence of approvers, or reviewer assignments). Required info: GitLab API token and parameters (stateopened, per_page50).\",\n  \"Plan C: Ask a project maintainer/owner to confirm the project's definition of 'pending review' directly (is it a specific label name, 'required approvals not met', 'no reviewer assigned', or a combination?). Required info: contact or a short explicit answer from maintainer.\",\n  \"Plan D: If automated GitLab access is not possible, request that the user provide either the exact filter they expect to use (label name or approval rule) or export/screenshot of the project's MR list/approval settings; proceed after receiving that input.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use gitlab_agent to query the project's label list and the project's merge request approval settings to get the canonical definition. Required info: GitLab API token (api scope) and project ID 68456825. Action: call endpoints to list labels and to get approval configuration for the project."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Call gitlab_agent tool \"list_project_labels\" with parameters: {\"project_id\": 68456825, \"private_token\": \"<GITLAB_API_TOKEN (api scope)>\", \"per_page\": 100}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 200, 'content': b'[{\\\"id\\\":43614332,\\\"name\\\":\\\"dark-mode\\\",\\\"description\\\":null,\\\"description_html\\\":\\\"\\\",\\\"text_color\\\":\\\"#FFFFFF\\\",\\\"color\\\":\\\"#6699cc\\\",\\\"subscribed\\\":false,\\\"priority\\\":null,\\\"is_project_label\\\":true},{\\\"id\\\":43614331,\\\"name\\\":\\\"feature\\\",\\\"description\\\":null,\\\"description_html\\\":\\\"\\\",\\\"text_color\\\":\\\"#FFFFFF\\\",\\\"color\\\":\\\"#6699cc\\\",\\\"subscribed\\\":false,\\\"priority\\\":null,\\\"is_project_label\\\":true},{\\\"id\\\":43614205,\\\"name\\\":\\\"security\\\",\\\"description\\\":null,\\\"description_html\\\":\\\"\\\",\\\"text_color\\\":\\\"#FFFFFF\\\",\\\"color\\\":\\\"#6699cc\\\",\\\"subscribed\\\":false,\\\"priority\\\":null,\\\"is_project_label\\\":true},{\\\"id\\\":43614207,\\\"name\\\":\\\"staging\\\",\\\"description\\\":null,\\\"description_html\\\":\\\"\\\",\\\"text_color\\\":\\\"#FFFFFF\\\",\\\"color\\\":\\\"#6699cc\\\",\\\"subscribed\\\":false,\\\"priority\\\":null,\\\"is_project_label\\\":true},{\\\"id\\\":43614208,\\\"name\\\":\\\"triage-required\\\",\\\"description\\\":null,\\\"description_html\\\":\\\"\\\",\\\"text_color\\\":\\\"#FFFFFF\\\",\\\"color\\\":\\\"#6699cc\\\",\\\"subscribed\\\":false,\\\"priority\\\":null,\\\"is_project_label\\\":true},{\\\"id\\\":43614206,\\\"name\\\":\\\"vulnerability\\\",\\\"description\\\":null,\\\"description_html\\\":\\\"\\\",\\\"text_color\\\":\\\"#FFFFFF\\\",\\\"color\\\":\\\"#6699cc\\\",\\\"subscribed\\\":false,\\\"priority\\\":null,\\\"is_project_label\\\":true}]'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"627d3a1d-ed33-4e5d-9c4d-d8006bb3a3b0\", \"tool_call_id\": \"call_RRNgsUR61T3mk4sSkoBBdVzm\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Query the project's approval configuration via gitlab_agent to determine canonical approval rules (required approvals, protected approvers, whether approvals are enforced). Required info: GitLab API token (api scope) and project ID 68456825. Action: call the project approval-settings endpoint.\",\n  \"Plan B: Use gitlab_agent to sample recent open merge requests (stateopened, per_page50) for project 68456825 to inspect MR labels, the presence/absence of approvers, and approved_by fields to infer what indicates 'pending review'. Required info: GitLab API token and project ID.\",\n  \"Plan C: Ask a project maintainer/owner to explicitly confirm how the project defines 'pending review' (specific label name, approvals not met, no reviewer assigned, or combination). Required info: a short confirmation from the maintainer.\",\n  \"Plan D: Combine Plans A and B (fetch approval settings and sample MRs) to cross-validate automated rules vs. actual MR usage. Required info: GitLab API token and project ID 68456825.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Query the project's approval configuration via gitlab_agent to determine canonical approval rules (required approvals, protected approvers, whether approvals are enforced). Required info: GitLab API token (api scope) and project ID 68456825. Action: call the project approval-settings endpoint."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_project\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": 68456825\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Call gitlab_agent tool \"get_project_approvals\" with parameters: {\"project_id\": 68456825, \"private_token\": \"<GITLAB_API_TOKEN (api scope)>\"}"
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: 1 validation error for Http_request\\nbody\\n  Field required [typemissing, input_value{'url': 'https://gitlab.c...JR4\\\"}', 'method': 'GET'}, input_typedict]\\n    For further information visit https://errors.pydantic.dev/2.9/v/missing\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"99e228f2-8781-442d-9082-d5aee8919fe9\", \"tool_call_id\": \"call_wwR457rVzfqaklk4m2PLJ9Nd\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Retry querying the project's canonical approval settings via gitlab_agent using the project approval-settings endpoint (GET /projects/:id/approvals). Required info: GitLab API token (api scope) and project ID 68456825. Action: call gitlab_agent with a properly formed http_request including full body (url, methodGET, headers with Private-Token).\",\n  \"Plan B: Query the project's approval rules (approval rules/conditions) via gitlab_agent (GET /projects/:id/approval_rules or equivalent endpoint) to capture required approvers and rule names. Required info: GitLab API token and project ID 68456825. Action: call gitlab_agent to list approval rules.\",\n  \"Plan C: Sample recent open merge requests in project 68456825 via gitlab_agent (GET /projects/:id/merge_requests?stateopened&per_page50) and inspect each MR's labels, approved_by, and reviewers to infer what the team uses to indicate 'pending review'. Required info: GitLab API token and project ID 68456825.\",\n  \"Plan D: Ask a project maintainer/owner to confirm the project's canonical definition of 'pending review' (e.g., exact label name, 'required approvals not met', 'no reviewer assigned', or a combination). Required info: a short confirmation from the maintainer; proceed according to their answer.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Retry querying the project's canonical approval settings via gitlab_agent using the project approval-settings endpoint (GET /projects/:id/approvals). Required info: GitLab API token (api scope) and project ID 68456825. Action: call gitlab_agent with a properly formed http_request including full body (url, methodGET, headers with Private-Token)."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_agent\\\",\\n  \\\"parameters\\\": {\\n    \\\"http_request\\\": {\\n      \\\"url\\\": \\\"https://gitlab.com/api/v4/projects/68456825/approvals\\\",\\n      \\\"method\\\": \\\"GET\\\",\\n      \\\"headers\\\": {\\n        \\\"Private-Token\\\": \\\"your_api_token_here\\\"\\n      }\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Call gitlab_agent tool \"gitlab_agent\" with parameters: {\"http_request\": {\"url\": \"https://gitlab.com/api/v4/projects/68456825/approvals\", \"method\": \"GET\", \"headers\": {\"Private-Token\": \"<GITLAB_API_TOKEN (api scope)>\"} }}"
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: 1 validation error for Http_request\\nbody\\n  Field required [typemissing, input_value{'url': 'https://gitlab.c...vJAFLGxPt6rtWwHdbJR4\\\"}'}, input_typedict]\\n    For further information visit https://errors.pydantic.dev/2.9/v/missing\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"881d9e38-7d55-4360-85ab-743a955e9f12\", \"tool_call_id\": \"call_u8vZqFANuDe6Mxq4ikt6WFFm\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Retry querying the project's canonical approval settings via gitlab_agent using GET /projects/68456825/approvals but send a properly formed request payload (include url, methodGET, headers with Private-Token, and an explicit body: '' to satisfy the http_request validator). Required info: GitLab API token (api scope) and project ID 68456825. Action: call gitlab_agent with http_request {url: 'https://gitlab.com/api/v4/projects/68456825/approvals', method: 'GET', headers: {'Private-Token': '<GITLAB_API_TOKEN>'}, body: ''}.\",\n  \"Plan B: Query the project's approval rules via gitlab_agent (GET /projects/68456825/approval_rules or GET /projects/:id/approval_rules) to enumerate rule names, required_approvals and protected_approvers; this identifies enforced approval policies. Required info: GitLab API token and project ID 68456825. Action: call gitlab_agent to list approval rules.\",\n  \"Plan C: Sample recent open merge requests in project 68456825 via gitlab_agent (GET /projects/68456825/merge_requests?stateopened&per_page50) and inspect each MR's labels, approved_by, reviewers, and approvals_required fields to infer the team convention for 'pending review'. Required info: GitLab API token and project ID 68456825. Action: call gitlab_agent to list MRs and parse fields.\",\n  \"Plan D: Ask a project maintainer/owner to confirm the project's canonical definition of 'pending review' directly (exact label name if any, whether 'required approvals not met' is enforced, whether absence of reviewer counts). Required info: maintainer confirmation (short answer). Action: proceed using their stated criteria.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Retry querying the project's canonical approval settings via gitlab_agent using GET /projects/68456825/approvals but send a properly formed request payload (include url, methodGET, headers with Private-Token, and an explicit body: '' to satisfy the http_request validator). Required info: GitLab API token (api scope) and project ID 68456825. Action: call gitlab_agent with http_request {url: 'https://gitlab.com/api/v4/projects/68456825/approvals', method: 'GET', headers: {'Private-Token': '<GITLAB_API_TOKEN>'}, body: ''}."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_agent\\\",\\n  \\\"parameters\\\": {\\n    \\\"url\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The API endpoint URL for the request, including project ID and specific path.\\\"\\n    },\\n    \\\"method\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"HTTP method used for the request, e.g., GET.\\\"\\n    },\\n    \\\"headers\\\": {\\n      \\\"type\\\": \\\"dict\\\",\\n      \\\"description\\\": \\\"HTTP headers for authentication, including 'Private-Token'.\\\"\\n    },\\n    \\\"body\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The request payload body, empty string for GET request.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Call gitlab_agent tool \"gitlab_agent\" with parameters: {\"url\":\"https://gitlab.com/api/v4/projects/68456825/approvals\",\"method\":\"GET\",\"headers\":{\"Private-Token\":\"<GITLAB_API_TOKEN (api scope)>\"},\"body\":\"\"}"
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: 1 validation error for Http_request\\nheaders\\n  Input should be a valid string [typestring_type, input_value{'Private-Token': 'glpat-vJAFLGxPt6rtWwHdbJR4'}, input_typedict]\\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"a742c849-2434-4169-ab3b-f934283d8b04\", \"tool_call_id\": \"call_H7K6HVOBoPSMDpXViS1gAyAg\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Retry the approvals endpoint but send headers as a single string (to satisfy the http_request validator) and include an explicit empty body. Required info: GitLab API token (api scope). Action: call gitlab_agent with {url: 'https://gitlab.com/api/v4/projects/68456825/approvals', method: 'GET', headers: 'Private-Token: <GITLAB_API_TOKEN>', body: ''}.\",\n  \"Plan B: Query the project's approval rules endpoint instead (GET /projects/68456825/approval_rules) in case it returns the rule-level required_approvals and rule names. Required info: GitLab API token (api scope). Action: call gitlab_agent with {url: 'https://gitlab.com/api/v4/projects/68456825/approval_rules', method: 'GET', headers: 'Private-Token: <GITLAB_API_TOKEN>', body: ''}.\",\n  \"Plan C: If API calls continue failing, infer 'pending review' from live MRs by listing recent open merge requests and inspecting labels, approved_by, reviewers, and approvals_required fields. Required info: GitLab API token (api scope). Action: call gitlab_agent with {url: 'https://gitlab.com/api/v4/projects/68456825/merge_requests?stateopened&per_page50', method: 'GET', headers: 'Private-Token: <GITLAB_API_TOKEN>', body: ''} and analyze the MR fields to determine the convention.\",\n  \"Plan D: Ask the project maintainer/owner to confirm the canonical meaning of 'pending review' (exact label name if used, whether 'required approvals not met' is enforced, whether lack of assigned reviewer qualifies). Required info: a short explicit confirmation from a maintainer; no API token required. Action: proceed using the maintainer-provided definition.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Retry the approvals endpoint but send headers as a single string (to satisfy the http_request validator) and include an explicit empty body. Required info: GitLab API token (api scope). Action: call gitlab_agent with {url: 'https://gitlab.com/api/v4/projects/68456825/approvals', method: 'GET', headers: 'Private-Token: <GITLAB_API_TOKEN>', body: ''}."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_agent\\\",\\n  \\\"parameters\\\": {\\n    \\\"url\\\": \\\"https://gitlab.com/api/v4/projects/68456825/approvals\\\",\\n    \\\"method\\\": \\\"GET\\\",\\n    \\\"headers\\\": \\\"Private-Token: <GITLAB_API_TOKEN>\\\",\\n    \\\"body\\\": \\\"\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\" : \"gitlab_agent\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"url\",\n            \"parameter_value\" : \"https://gitlab.com/api/v4/projects/68456825/approvals\"\n        },\n        {\n            \"parameter_name\" : \"method\",\n            \"parameter_value\" : \"GET\"\n        },\n        {\n            \"parameter_name\" : \"headers\",\n            \"parameter_value\" : \"Private-Token: <GITLAB_API_TOKEN (api scope)>\"\n        },\n        {\n            \"parameter_name\" : \"body\",\n            \"parameter_value\" : \"\"\n        }\n    ]\n}"
+    }
+]

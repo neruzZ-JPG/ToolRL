@@ -1,0 +1,71 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI need to set up a container named 'web-server-01' running on linux/amd64 with the image 'nginx:latest', and it should expose port 80. Afterward, I want to create a Kubernetes deployment named 'nginx-deployment' with 3 replicas using the same nginx image, and configure it to be accessible via a service with type 'loadbalancer'. Finally, I want to check out the status of the deployment and ensure the service is correctly routing traffic."
+    },
+    {
+        "Human Message": "Current subtask is:\nStart by researching how to create a Docker container with the specified image and port exposure. Think about how containerization relates to deploying in Kubernetes, and consider the initial commands or manifests you'll need for the container setup before moving to Kubernetes."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use the docker_agent to create and run a detached container named web-server-01 on linux/amd64 with the nginx:latest image and port 80 exposed. Command: docker run -d --name web-server-01 --platform linux/amd64 -p 80:80 nginx:latest. Verify with docker ps and curl localhost to confirm availability.\",\n  \"Plan B: Provide an alternative container setup using docker-compose for reproducibility. Create a docker-compose.yml with a service web-server-01 using image nginx:latest, ports 80:80, and deploy with docker-compose up -d. This helps when validating locally before Kubernetes.\",\n  \"Plan C: Prepare Kubernetes manifests for the next stage: a Deployment nginx-deployment with 3 replicas using nginx:latest and a LoadBalancer Service exposing port 80. Plan to apply the manifests after the container is confirmed running (deployments.yaml and service.yaml). Provide example YAML structure for reference.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use the docker_agent to create and run a detached container named web-server-01 on linux/amd64 with the nginx:latest image and port 80 exposed. Command: docker run -d --name web-server-01 --platform linux/amd64 -p 80:80 nginx:latest. Verify with docker ps and curl localhost to confirm availability."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"create_a_container\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Assign the specified name to the container. Must match `/\\\\\\\\?[a-zA-Z0-9][a-zA-Z0-9_.-]+$/`.\\\"\\n    },\\n    \\\"platform\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Platform in the format `os[/arch[/variant]]` (e.g., `linux/amd64`).\\\"\\n    },\\n    \\\"body\\\": {\\n      \\\"type\\\": \\\"object\\\",\\n      \\\"description\\\": \\\"Container configuration payload (ContainerConfig). Example fields: Image: 'nginx:latest', ExposedPorts: {'80/tcp': {}}, HostConfig: {'PortBindings': {'80/tcp': [{'HostPort': '80'}]}}\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"create_a_container\",\n  \"parameters\": {\n    \"name\": \"web-server-01\",\n    \"platform\": \"linux/amd64\",\n    \"body\": {\n      \"Image\": \"nginx:latest\",\n      \"ExposedPorts\": {\n        \"80/tcp\": {}\n      },\n      \"HostConfig\": {\n        \"PortBindings\": {\n          \"80/tcp\": [\n            {\n              \"HostPort\": \"80\"\n            }\n          ]\n        }\n      }\n    }\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"No such image: nginx:latest\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"a5e60fcf-bc69-49b2-9f7b-85aa7cd4381f\", \"tool_call_id\": \"call_0ZKqG0bNcVMNurnGuKDCGv3Z\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Pull the nginx image and run the container. Steps: docker pull nginx:latest; docker run -d --name web-server-01 --platform linux/amd64 -p 80:80 nginx:latest; docker ps; curl http://localhost/ to verify.\",\n  \"Plan B: Use docker-compose for reproducibility. Steps: create a docker-compose.yml with a service named web-server-01 using image nginx:latest, ports 80:80; run docker-compose up -d; then docker ps and curl localhost to verify.\",\n  \"Plan C: Proceed directly to Kubernetes. Steps: create a Deployment nginx-deployment with 3 replicas using nginx:latest and a LoadBalancer Service exposing port 80; apply manifests with kubectl; verify with kubectl get deploy nginx-deployment, kubectl get svc, and test access via the service's external IP.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Pull the nginx image and run the container. Steps: docker pull nginx:latest; docker run -d --name web-server-01 --platform linux/amd64 -p 80:80 nginx:latest; docker ps; curl http://localhost/ to verify."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"create_a_container\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Assign the specified name to the container. Must match /?^[a-zA-Z0-9][a-zA-Z0-9_.-]+$/\\\"\\n    },\\n    \\\"platform\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Platform in the format os[/arch[/variant]] used for image lookup. Example: linux/amd64\\\"\\n    },\\n    \\\"body\\\": {\\n      \\\"type\\\": \\\"object\\\",\\n      \\\"description\\\": \\\"Container configuration (ContainerConfig) including Image, ExposedPorts, HostConfig (PortBindings), Cmd, etc. For this task: Image nginx:latest, ExposedPorts {\\\\\\\"80/tcp\\\\\\\": {}}, HostConfig {\\\\\\\"PortBindings\\\\\\\": {\\\\\\\"80/tcp\\\\\\\": [{\\\\\\\"HostPort\\\\\\\": \\\\\\\"80\\\\\\\"}]}}\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"create_a_container\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"name\",\n            \"parameter_value\": \"web-server-01\"\n        },\n        {\n            \"parameter_name\": \"platform\",\n            \"parameter_value\": \"linux/amd64\"\n        },\n        {\n            \"parameter_name\": \"body\",\n            \"parameter_value\": \"{\\\"Image\\\":\\\"nginx:latest\\\",\\\"ExposedPorts\\\":{\\\"80/tcp\\\":{}},\\\"HostConfig\\\":{\\\"PortBindings\\\":{\\\"80/tcp\\\":[{\\\"HostPort\\\":\\\"80\\\"}]}}}\"\n        }\n    ]\n}"
+    }
+]

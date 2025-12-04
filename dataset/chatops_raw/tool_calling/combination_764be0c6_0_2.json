@@ -1,0 +1,80 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nCreate a new private organization repository named 'EcoFriendlyApp' with a description about sustainable living, and initialize it with a README file."
+    },
+    {
+        "Human Message": "Current subtask is:\nConfirm with the requester the exact GitHub organization to use and ensure you have permissions (Owner/Maintainer) to create private repositories there."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Use github_agent tool \"confirm_organization_and_permissions\" with parameters:\n{\n  \"requester\": \"user\",\n  \"repo_name\": \"EcoFriendlyApp\",\n  \"visibility\": \"private\",\n  \"prompt\": \"Please confirm the exact GitHub organization (organization name/slug, case-sensitive) where I should create the private repository 'EcoFriendlyApp'. Also confirm that I (or the account/token I'll use) have Owner or Maintainer permissions in that organization to create private repositories. If I do not have those permissions, please either grant me Owner/Maintainer role or provide a GitHub personal access token or an organization invitation with the needed permissions so I can proceed. Reply with the organization slug and the permission status.\"\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\\r\\\\n  \\\"message\\\": \\\"Not Found\\\",\\\\r\\\\n  \\\"documentation_url\\\": \\\"https://docs.github.com/rest\\\",\\\\r\\\\n  \\\"status\\\": \\\"404\\\"\\\\r\\\\n}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"f399186f-7198-49a0-9727-e2535a9a2abf\", \"tool_call_id\": \"call_Y8b5OEPHHOtWTObSLgnAXtNO\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Please confirm the exact GitHub organization slug (case-sensitive) where I should create 'EcoFriendlyApp' and ensure I have Owner or Maintainer rights. Provide one of the following: (A) grant my account Owner/Maintainer role in that organization, or (B) paste a GitHub Personal Access Token (PAT) I can use. If providing a PAT, include whether this is GitHub.com or GitHub Enterprise and the API base URL; the PAT must have scopes: repo (full control of private repos) and admin:org (or equivalent org-level scope). Once I have the org slug and valid permissions/token, I will create the private repo initialized with a README.\", \n \"If you cannot or will not share permissions or a PAT, I can instead provide exact step-by-step instructions and a ready-to-use README file content for you (or an org admin) to create the private repository. Reply with 'SELF' and I will return the precise creation steps and README text you can paste into GitHub.\", \n \"We hit a 404 when attempting to verify org/permissions. If you believe the org exists and you granted access, please provide the organization URL (https://github.com/ORG_SLUG or your Enterprise API base URL) and confirm which account/token was used to grant access (or the username I should expect an invitation for). I will re-run the check after you confirm the org URL and token/account status to determine next actions.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlease confirm the exact GitHub organization slug (case-sensitive) where I should create 'EcoFriendlyApp' and ensure I have Owner or Maintainer rights. Provide one of the following: (A) grant my account Owner/Maintainer role in that organization, or (B) paste a GitHub Personal Access Token (PAT) I can use. If providing a PAT, include whether this is GitHub.com or GitHub Enterprise and the API base URL; the PAT must have scopes: repo (full control of private repos) and admin:org (or equivalent org-level scope). Once I have the org slug and valid permissions/token, I will create the private repo initialized with a README."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Use github_agent tool \"confirm_organization_and_permissions\" with parameters:\n{\n  \"requester\": \"user\",\n  \"repo_name\": \"EcoFriendlyApp\",\n  \"visibility\": \"private\",\n  \"required_scopes\": [\"repo\", \"admin:org\"],\n  \"prompt\": \"Please confirm the exact GitHub organization slug (case-sensitive) where I should create the private repository 'EcoFriendlyApp'. Also confirm that the account or token I will use has Owner or Maintainer permissions in that organization so I can create private repositories. Provide one of the following:\\n\\nA) Grant Owner or Maintainer role to the account I will use (please state the GitHub username I should expect an invitation for), OR\\nB) Paste a GitHub Personal Access Token (PAT) I can use. If providing a PAT, indicate whether it is for GitHub.com or GitHub Enterprise and include the API base URL (e.g., https://api.github.com or https://github.mycompany.com/api/v3). The PAT must have the scopes: repo (full control of private repos) and admin:org (or equivalent org-level scope).\\n\\nIf you cannot or will not provide permissions or a PAT, reply with the word 'SELF' and I will return precise step-by-step instructions and README content you (or an org admin) can use to create the private repo.\",\n  \"timeout_seconds\": 300\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\\r\\\\n  \\\"message\\\": \\\"Not Found\\\",\\\\r\\\\n  \\\"documentation_url\\\": \\\"https://docs.github.com/rest\\\",\\\\r\\\\n  \\\"status\\\": \\\"404\\\"\\\\r\\\\n}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"8e8acf09-6cf8-4aa6-8ccb-9dac53018db5\", \"tool_call_id\": \"call_5aeZ6njHomkxjO3r1QfC2ZMx\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"Plan A: Grant me (or the account/token you'll provide) Owner or Maintainer in the target GitHub organization. Reply with the exact organization slug (case-sensitive) and the GitHub username you invited (or state that you granted permissions to the token you'll share). I will then verify permissions and create the private 'EcoFriendlyApp' repo initialized with a README.\", \n \"Plan B: Provide a GitHub Personal Access Token (PAT) that I can use. Reply with the exact organization slug (case-sensitive), whether this is github.com or GitHub Enterprise, the API base URL (e.g., https://api.github.com or https://github.mycompany.com/api/v3), and the PAT itself. The PAT must include scopes: repo and admin:org (or equivalent). I will use the PAT to create the private 'EcoFriendlyApp' repo with a README and then notify you; you may revoke the token afterward.\", \n \"Plan C: If you cannot grant permissions or share a PAT, reply with the single word 'SELF'. I will return precise, step-by-step instructions and a ready-to-paste README file content so you or an org admin can create the private 'EcoFriendlyApp' repository yourself.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Grant me (or the account/token you'll provide) Owner or Maintainer in the target GitHub organization. Reply with the exact organization slug (case-sensitive) and the GitHub username you invited (or state that you granted permissions to the token you'll share). I will then verify permissions and create the private 'EcoFriendlyApp' repo initialized with a README."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"github_create_an_org_repo\\\",\\n  \\\"parameters\\\": {\\n    \\\"org\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The organization name (slug) where the repository will be created.\\\"\\n    },\\n    \\\"name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the repository to be created.\\\"\\n    },\\n    \\\"description\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"A short description of the repository.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"github_create_an_org_repo\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"org\",\n      \"parameter_value\": \"<ORGANIZATION_SLUG (case-sensitive) \u2014 provide after granting Owner/Maintainer to the account or token>\"\n    },\n    {\n      \"parameter_name\": \"name\",\n      \"parameter_value\": \"EcoFriendlyApp\"\n    },\n    {\n      \"parameter_name\": \"description\",\n      \"parameter_value\": \"EcoFriendlyApp \u2014 repository for an application promoting sustainable living and eco-friendly habits. Initialized with a README.\"\n    }\n  ]\n}"
+    }
+]

@@ -1,0 +1,116 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI need to check the details of the image tagged as 'ubuntu:20.04' stored locally to ensure it's the correct version before deploying a container."
+    },
+    {
+        "Human Message": "Current subtask is:\nStart by listing all local images and locate 'ubuntu:20.04' in the output. Then, think about how to verify its version details or ID to confirm it's the correct image before proceeding."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Execute a docker_agent task to list all local images and filter for the ubuntu:20.04 tag to locate the exact image and return its image ID and repo digest for verification.\",\n  \"If the ubuntu:20.04 image is found, run a detailed inspection to retrieve metadata (Created date, Architecture, OS, and Digest) and compare with known-good values to confirm it's the correct image.\",\n  \"If ubuntu:20.04 is not found or the metadata does not match, consider pulling or reassembling the correct image from a trusted local source and re-run the verification steps.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nExecute a docker_agent task to list all local images and filter for the ubuntu:20.04 tag to locate the exact image and return its image ID and repo digest for verification."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"list_images\\\",\\n  \\\"parameters\\\": {\\n    \\\"filters\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"JSON-encoded filters for image listing. Use {\\\\\\\"reference\\\\\\\":[\\\\\\\"ubuntu:20.04\\\\\\\"]} to filter by the ubuntu:20.04 tag.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"list_images\",\n  \"parameters\": {\n    \"filters\": \"{\\\"reference\\\":[\\\"ubuntu:20.04\\\"]}\"\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 200, 'content': b'[{\\\"Containers\\\":-1,\\\"Created\\\":1744108968,\\\"Id\\\":\\\"sha256:b7bab04fd9aa0c771e5720bf0cc7cbf993fd6946645983d9096126e5af45d713\\\",\\\"Labels\\\":{\\\"org.opencontainers.image.ref.name\\\":\\\"ubuntu\\\",\\\"org.opencontainers.image.version\\\":\\\"20.04\\\"},\\\"ParentId\\\":\\\"\\\",\\\"RepoDigests\\\":[],\\\"RepoTags\\\":[\\\"ubuntu:20.04\\\"],\\\"SharedSize\\\":-1,\\\"Size\\\":72813617}]\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"b3a1b7a0-101a-43c4-b33f-0df2fe698705\", \"tool_call_id\": \"call_fCyamv2QEtMJF4lwTtK2IKqF\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use docker inspect on the image ID sha256:b7bab04fd9aa0c771e5720bf0cc7cbf993fd6946645983d9096126e5af45d713 to retrieve RepoDigests and full metadata (Created, Architecture, OS) to verify the exact image version.\",\n  \"Plan B: If RepoDigests remains empty after inspection, run docker images --digests ubuntu:20.04 or inspect again to obtain a digest; if still unavailable, consider pulling the image from a trusted local registry to obtain a verified digest and re-check.\",\n  \"Plan C: Compare the retrieved metadata and digest against known-good values; if they match, confirm verification and proceed to deployment; if they do not, halt deployment and escalate for a correct image.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use docker inspect on the image ID sha256:b7bab04fd9aa0c771e5720bf0cc7cbf993fd6946645983d9096126e5af45d713 to retrieve RepoDigests and full metadata (Created, Architecture, OS) to verify the exact image version."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Use docker_agent to run docker inspect on image ID sha256:b7bab04fd9aa0c771e5720bf0cc7cbf993fd6946645983d9096126e5af45d713 to retrieve RepoDigests and full metadata (Created, Architecture, OS) for verification.\",\n  \"Plan B: If Plan A cannot be executed due to service unavailability, attempt to obtain the digest and metadata by an alternative local method (e.g., querying a trusted local registry or parsing a cached image manifest) and perform verification against the known-good values.\",\n  \"Plan C: If neither Plan A nor Plan B yields a match or valid digest, halt deployment and escalate to obtain the correct ubuntu:20.04 image from a verified source before re-running verification.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Use docker_agent to run docker inspect on image ID sha256:b7bab04fd9aa0c771e5720bf0cc7cbf993fd6946645983d9096126e5af45d713 to retrieve RepoDigests and full metadata (Created, Architecture, OS) for verification."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent is not available."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A cannot be executed because the required work_agent is not available; attempt to run docker inspect on image ID sha256:b7bab04fd9aa0c771e5720bf0cc7cbf993fd6946645983d9096126e5af45d713 via an alternative local method or later when the agent becomes available to retrieve RepoDigests and metadata.\",\n  \"Plan B: Use an alternative approach to retrieve metadata and digest from the local system, e.g., querying a cached image manifest or a trusted local registry, then compare Created, Architecture, OS, and Digest to known-good values.\",\n  \"Plan C: If neither Plan A nor Plan B yields a valid digest/metadata, stop deployment and obtain the ubuntu:20.04 image from a verified source, then re-run verification steps.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A cannot be executed because the required work_agent is not available; attempt to run docker inspect on image ID sha256:b7bab04fd9aa0c771e5720bf0cc7cbf993fd6946645983d9096126e5af45d713 via an alternative local method or later when the agent becomes available to retrieve RepoDigests and metadata."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"get_image_details\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Image name or ID to inspect. For this task, use sha256:b7bab04fd9aa0c771e5720bf0cc7cbf993fd6946645983d9096126e5af45d713\\\"\\n    }\\n    }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n  \"tool_name\": \"get_image_details\",\n  \"parameters\": {\n    \"name\": \"sha256:b7bab04fd9aa0c771e5720bf0cc7cbf993fd6946645983d9096126e5af45d713\"\n  }\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 200, 'content': b'{\\\"Id\\\":\\\"sha256:b7bab04fd9aa0c771e5720bf0cc7cbf993fd6946645983d9096126e5af45d713\\\",\\\"RepoTags\\\":[\\\"ubuntu:20.04\\\"],\\\"RepoDigests\\\":[\\\"ubuntu@sha256:8feb4d8ca5354def3d8fce243717141ce31e2c428701f6682bd2fafe15388214\\\"],\\\"Parent\\\":\\\"\\\",\\\"Comment\\\":\\\"\\\",\\\"Created\\\":\\\"2025-04-08T10:42:48.947155373Z\\\",\\\"DockerVersion\\\":\\\"24.0.7\\\",\\\"Author\\\":\\\"\\\",\\\"Config\\\":{\\\"Hostname\\\":\\\"\\\",\\\"Domainname\\\":\\\"\\\",\\\"User\\\":\\\"\\\",\\\"AttachStdin\\\":false,\\\"AttachStdout\\\":false,\\\"AttachStderr\\\":false,\\\"Tty\\\":false,\\\"OpenStdin\\\":false,\\\"StdinOnce\\\":false,\\\"Env\\\":[\\\"PATH/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\\\"],\\\"Cmd\\\":[\\\"/bin/bash\\\"],\\\"Image\\\":\\\"sha256:a4f4aac46bc2829ab75a33c79ebe803110dd26e79bbd1dce17875492019b230c\\\",\\\"Volumes\\\":null,\\\"WorkingDir\\\":\\\"\\\",\\\"Entrypoint\\\":null,\\\"OnBuild\\\":null,\\\"Labels\\\":{\\\"org.opencontainers.image.ref.name\\\":\\\"ubuntu\\\",\\\"org.opencontainers.image.version\\\":\\\"20.04\\\"}},\\\"Architecture\\\":\\\"amd64\\\",\\\"Os\\\":\\\"linux\\\",\\\"Size\\\":72813617,\\\"GraphDriver\\\":{\\\"Data\\\":{\\\"MergedDir\\\":\\\"/var/snap/docker/common/var-lib-docker/overlay2/6e5d013b2dd800cc6240299988cc3a6d8633195bc27764675ff27a104099a578/merged\\\",\\\"UpperDir\\\":\\\"/var/snap/docker/common/var-lib-docker/overlay2/6e5d013b2dd800cc6240299988cc3a6d8633195bc27764675ff27a104099a578/diff\\\",\\\"WorkDir\\\":\\\"/var/snap/docker/common/var-lib-docker/overlay2/6e5d013b2dd800cc6240299988cc3a6d8633195bc27764675ff27a104099a578/work\\\"},\\\"Name\\\":\\\"overlay2\\\"},\\\"RootFS\\\":{\\\"Type\\\":\\\"layers\\\",\\\"Layers\\\":[\\\"sha256:470b66ea5123c93b0d5606e4213bf9e47d3d426b640d32472e4ac213186c4bb6\\\"]},\\\"Metadata\\\":{\\\"LastTagTime\\\":\\\"0001-01-01T00:00:00Z\\\"}}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"2bc667e2-1dce-4904-a383-dea16a7c401e\", \"tool_call_id\": \"call_1UKcAoLOTb5Vd6nuaozBnQlN\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "SUCCESS, Verification complete. The image with ID sha256:b7bab04fd9aa0c771e5720bf0cc7cbf993fd6946645983d9096126e5af45d713 is ubuntu:20.04. RepoTags: ubuntu:20.04; RepoDigests: ubuntu@sha256:8feb4d8ca5354def3d8fce243717141ce31e2c428701f6682bd2fafe15388214. Created: 2025-04-08T10:42:48.947155373Z; Architecture: amd64; OS: linux; Size: 72813617 bytes. You may proceed to deploy the container."
+    }
+]

@@ -1,0 +1,80 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nCan you fetch merge requests assigned to user fdseChatops in project 68456825 that are currently in the 'assigned' state and have labels related to 'frontend' or 'UI' to prioritize our review process?"
+    },
+    {
+        "Human Message": "Current subtask is:\nFirst, confirm we\u2019re using GitLab and map \u201cassigned\u201d to the correct API filter (stateopen plus assignee filter). Open the GitLab Merge Requests API docs to identify the endpoint and parameters (assignee_username, state, labels) and ensure you have a read_api token and project ID."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_project_merge_requests_list\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The ID or URL-encoded path of the project.\\\"\\n    },\\n    \\\"state\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The state of the merge requests (e.g., 'opened', 'closed', 'merged').\\\"\\n    },\\n    \\\"assignee_username\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The username of the assignee to filter merge requests assigned to a specific user.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "[\n  \"Execute gitlab_get_project_merge_requests_list with parameters: id\\\"68456825\\\", state\\\"opened\\\", assignee_username\\\"fdseChatops\\\" to confirm that 'assigned' maps to stateopen + assignee filter. Note: this requires a GitLab read-only API token (provide as private_token or Authorization header) to actually call the API.\",\n  \"If label filtering is needed and GitLab's labels parameter behaves as AND, run two separate calls: gitlab_get_project_merge_requests_list with labels\\\"frontend\\\" and then with labels\\\"UI\\\" (same id/state/assignee) and union the results to achieve an OR semantics.\",\n  \"Alternatively, check GitLab API docs for an 'any' or similar parameter (or support for comma-separated OR). If supported, call gitlab_get_project_merge_requests_list with labels\\\"frontend,UI\\\" plus the appropriate flag (e.g., anytrue) to retrieve MRs with either label in one request.\",\n  \"After obtaining results, aggregate and prioritize MRs assigned to fdseChatops that have labels related to frontend/UI and report them. If you want me to proceed, provide the read-only GitLab API token (or confirm the agent has one) and indicate whether to run separate queries per label or attempt a single query with comma-separated labels.\"\n]"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 200, 'content': b'[]'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"28d27bda-b05f-4d8e-a786-f6d695be54fc\", \"tool_call_id\": \"call_rEfENKCSwXSj0rbxfrEeY8G6\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Run two GitLab API calls using gitlab_get_project_merge_requests_list with id\\\"68456825\\\", state\\\"opened\\\", assignee_username\\\"fdseChatops\\\" and labels\\\"frontend\\\" then labels\\\"UI\\\", union the results to achieve OR semantics. Requires a GitLab read-only API token (private_token or Authorization header).\",\n  \"Plan B: Attempt a single GitLab API call with gitlab_get_project_merge_requests_list using id\\\"68456825\\\", state\\\"opened\\\", assignee_username\\\"fdseChatops\\\", labels\\\"frontend,UI\\\" and anytrue (if supported by the GitLab instance) to get OR semantics in one request; if the API rejects 'anytrue' or comma-separated labels, fall back to Plan A. Requires a GitLab read-only API token.\",\n  \"Plan C: Retrieve all open merge requests assigned to fdseChatops with gitlab_get_project_merge_requests_list using id\\\"68456825\\\", state\\\"opened\\\", assignee_username\\\"fdseChatops\\\" (note: previous call returned an empty array), then perform client-side label filtering for labels containing substrings like 'frontend' or 'UI' to capture related labels (e.g., 'frontend-bug', 'UI/ux'). Requires a GitLab read-only API token.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Run two GitLab API calls using gitlab_get_project_merge_requests_list with id\"68456825\", state\"opened\", assignee_username\"fdseChatops\" and labels\"frontend\" then labels\"UI\", union the results to achieve OR semantics. Requires a GitLab read-only API token (private_token or Authorization header)."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_project_merge_requests_list\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The ID of the project to retrieve merge requests from.\\\"\\n    },\\n    \\\"state\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Filter merge requests by their state (e.g., 'opened', 'closed', 'merged').\\\"\\n    },\\n    \\\"assignee_username\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Filter merge requests assigned to a specific username.\\\"\\n    },\\n    \\\"labels\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Filter merge requests by specific labels.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "Execute gitlab_get_project_merge_requests_list with parameters: id\"68456825\", state\"opened\", assignee_username\"fdseChatops\", labels\"frontend\". Use a GitLab read-only API token as private_token or Authorization: Bearer <token> header."
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 200, 'content': b'[]'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"f219e3d7-6c55-48c4-9867-c3c6ed6b4f40\", \"tool_call_id\": \"call_HIffG6DwIQNychwQdq6EVZMf\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Plan A: Execute gitlab_get_project_merge_requests_list with id\\\"68456825\\\", state\\\"opened\\\", assignee_username\\\"fdseChatops\\\", labels\\\"UI\\\" (we already ran labels\\\"frontend\\\" and got an empty result). Union the results from both label queries to achieve OR semantics. Requires a GitLab read-only API token (private_token or Authorization: Bearer <token>).\",\n  \"Plan B: Execute gitlab_get_project_merge_requests_list with id\\\"68456825\\\", state\\\"opened\\\", assignee_username\\\"fdseChatops\\\" (no labels) to retrieve all open MRs assigned to fdseChatops, then perform client-side filtering for labels that contain substrings like 'frontend' or 'UI' (case-insensitive) to capture label variants (e.g., 'frontend-bug', 'UI/ux'). Requires a GitLab read-only API token.\",\n  \"Plan C: Execute gitlab_get_project_merge_requests_list with id\\\"68456825\\\", state\\\"opened\\\", assignee_username\\\"fdseChatops\\\", labels\\\"frontend,UI\\\" and include anytrue if supported by the GitLab instance to attempt an OR label query in a single request. Requires a GitLab read-only API token.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nPlan A: Execute gitlab_get_project_merge_requests_list with id\"68456825\", state\"opened\", assignee_username\"fdseChatops\", labels\"UI\" (we already ran labels\"frontend\" and got an empty result). Union the results from both label queries to achieve OR semantics. Requires a GitLab read-only API token (private_token or Authorization: Bearer <token>)."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_project_merge_requests_list\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": \\\"68456825\\\",\\n    \\\"state\\\": \\\"opened\\\",\\n    \\\"assignee_username\\\": \\\"fdseChatops\\\",\\n    \\\"labels\\\": \\\"UI\\\"\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"gitlab_get_project_merge_requests_list\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"id\",\n            \"parameter_value\": \"68456825\"\n        },\n        {\n            \"parameter_name\": \"state\",\n            \"parameter_value\": \"opened\"\n        },\n        {\n            \"parameter_name\": \"assignee_username\",\n            \"parameter_value\": \"fdseChatops\"\n        },\n        {\n            \"parameter_name\": \"labels\",\n            \"parameter_value\": \"UI\"\n        }\n    ]\n}"
+    }
+]

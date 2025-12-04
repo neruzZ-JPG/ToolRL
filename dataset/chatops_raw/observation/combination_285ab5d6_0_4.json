@@ -1,0 +1,125 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"query the average lifespan of a Beagle dog using query_dog_info\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nI want to stop the container named 'web_server_01' after completing deployment tasks at the IP address 192.168.1.50, and then check the list of followers for the user 'chatopsFdse' on GitHub to confirm team members involved in the project."
+    },
+    {
+        "Human Message": "Current subtask is:\nSSH into 192.168.1.50 using your deployment credentials to access the host before managing the 'web_server_01' container."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"SSH into 192.168.1.50 using the deployment username and either a password or an SSH private key (and SSH port if non-standard). Command to run after login: docker stop web_server_01 && docker ps -a | grep web_server_01. Provide the deployment credentials (username + password or username + private key) and SSH port if not 22.\",\n  \"Trigger a Jenkins job that executes an SSH command on 192.168.1.50 to stop the container. Provide Jenkins URL, job name (or permission to create/run a one-off job), and Jenkins credentials. The job will run: ssh <user>@192.168.1.50 'docker stop web_server_01 && docker ps -a | grep web_server_01'.\",\n  \"Use the Docker remote API on 192.168.1.50 (e.g. tcp://192.168.1.50:2375 or TLS-protected endpoint) to stop the container and verify status. Provide the Docker API endpoint and any required TLS certificates/credentials to allow remote Docker API access.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nSSH into 192.168.1.50 using the deployment username and either a password or an SSH private key (and SSH port if non-standard). Command to run after login: docker stop web_server_01 && docker ps -a | grep web_server_01. Provide the deployment credentials (username + password or username + private key) and SSH port if not 22."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{}\\n\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "docker_agent: run_ssh_command with parameters:\n- host192.168.1.50\n- port22\n- username<deployment_username>\n- auth_method<password|private_key>\n- password<deployment_password> (if auth_methodpassword)\n- private_key<private_key_PEM_contents> (if auth_methodprivate_key)\n- command\"docker stop web_server_01 && docker ps -a | grep web_server_01\""
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: 1 validation error for Http_request\\nbody\\n  Input should be a valid string [typestring_type, input_value{}, input_typedict]\\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"401d9312-77f0-496d-9a06-2b4608713e6a\", \"tool_call_id\": \"call_4gAddCiUQ7b7DSXAWSbshugP\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Retry via docker_agent: call run_ssh_command with all parameters as plain strings \u2014 host'192.168.1.50', port'22' (or provided port), username'<deployment_username>', auth_method'password' or 'private_key', password'<deployment_password>' (if using password) or private_key'<private_key_PEM_contents>' (if using key), command'docker stop web_server_01 && docker ps -a | grep web_server_01'. Ensure the agent receives a string body for the HTTP request.\",\n  \"Use jenkins_agent to run an SSH step: provide Jenkins URL, job name (or permission to create one), Jenkins credentials (user/api-token), and the shell command to run on the host: ssh -o StrictHostKeyCheckingno <deployment_username>@192.168.1.50 'docker stop web_server_01 && docker ps -a | grep web_server_01'.\",\n  \"Ask the user to supply deployment credentials and confirm SSH port: request username plus either password or the private key PEM and SSH port if not 22; once provided, I will perform the SSH and container stop locally and return the command output.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nRetry via docker_agent: call run_ssh_command with all parameters as plain strings \u2014 host'192.168.1.50', port'22' (or provided port), username'<deployment_username>', auth_method'password' or 'private_key', password'<deployment_password>' (if using password) or private_key'<private_key_PEM_contents>' (if using key), command'docker stop web_server_01 && docker ps -a | grep web_server_01'. Ensure the agent receives a string body for the HTTP request."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{}\\n\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "docker_agent: run_ssh_command with parameters:\n- host\"192.168.1.50\"\n- port\"22\"\n- username\"<deployment_username>\"\n- auth_method\"password\"\n- password\"<deployment_password>\"\n- command\"docker stop web_server_01 && docker ps -a | grep web_server_01\""
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 204, 'content': b''}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"af523d3c-3d96-4387-a28f-6c7540505836\", \"tool_call_id\": \"call_1meaDysmNnNYlOUC3ZdcC6z7\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Verify stop via docker_agent: call run_ssh_command with host\\\"192.168.1.50\\\", port\\\"22\\\", username\\\"<deployment_username>\\\", auth_method\\\"<password|private_key>\\\", password\\\"<deployment_password>\\\" or private_key\\\"<private_key_PEM_contents>\\\" and command\\\"docker inspect -f '{{.State.Running}}' web_server_01\\\". Provide deployment credentials to run this check and return the boolean running state.\",\n  \"Re-run stop with explicit output via docker_agent: call run_ssh_command with host\\\"192.168.1.50\\\", port\\\"22\\\", username\\\"<deployment_username>\\\", auth_method\\\"<password|private_key>\\\", password\\\"<deployment_password>\\\" or private_key\\\"<private_key_PEM_contents>\\\" and command\\\"docker stop web_server_01; echo EXIT:$?; docker ps -a | grep web_server_01 || true\\\". Provide deployment credentials to capture stop output and confirm presence/absence.\",\n  \"Proceed to GitHub follower check now using github_agent: call list_followers (or equivalent) for username\\\"chatopsFdse\\\". Optionally provide a GitHub token if you expect rate limits. Note: GitHub followers may not equal project team members; if you want organization/team membership verification, provide the org name or repository to check collaborators/teams.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nVerify stop via docker_agent: call run_ssh_command with host\"192.168.1.50\", port\"22\", username\"<deployment_username>\", auth_method\"<password|private_key>\", password\"<deployment_password>\" or private_key\"<private_key_PEM_contents>\" and command\"docker inspect -f '{{.State.Running}}' web_server_01\". Provide deployment credentials to run this check and return the boolean running state."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"run_ssh_command\\\",\\n  \\\"parameters\\\": {\\n    \\\"host\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The IP address of the host machine\\\"\\n    },\\n    \\\"port\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The SSH port, typically 22\\\"\\n    },\\n    \\\"username\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The deployment username\\\"\\n    },\\n    \\\"auth_method\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Authentication method: 'password' or 'private_key'\\\"\\n    },\\n    \\\"password\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Password for SSH authentication (if auth_method is 'password')\\\"\\n    },\\n    \\\"private_key\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Private key contents in PEM format (if auth_method is 'private_key')\\\"\\n    },\\n    \\\"command\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The command to check if the container is running\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent."
+    },
+    {
+        "Ai Message": "docker_agent: run_ssh_command with parameters:\n- host\"192.168.1.50\"\n- port\"22\"\n- username\"<deployment_username>\"\n- auth_method\"<password|private_key>\"\n- password\"<deployment_password>\" (if auth_method\"password\")\n- private_key\"<private_key_PEM_contents>\" (if auth_method\"private_key\")\n- command\"docker inspect -f '{{.State.Running}}' web_server_01\""
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 200, 'content': b'[{\\\"Id\\\":\\\"04cf45df2a634ed1b16571649c926aa02ce9637fc9fbd12a654eb9b7cc544fff\\\",\\\"Names\\\":[\\\"/web_server_01\\\"],\\\"Image\\\":\\\"sha256:07ccdb7838758e758a4d52a9761636c385125a327355c0c94a6acff9babff938\\\",\\\"ImageID\\\":\\\"sha256:07ccdb7838758e758a4d52a9761636c385125a327355c0c94a6acff9babff938\\\",\\\"Command\\\":\\\"/docker-entrypoint.sh nginx -g \\\\'daemon off;\\\\'\\\",\\\"Created\\\":1760728272,\\\"Ports\\\":[{\\\"IP\\\":\\\"0.0.0.0\\\",\\\"PrivatePort\\\":80,\\\"PublicPort\\\":80,\\\"Type\\\":\\\"tcp\\\"},{\\\"IP\\\":\\\"::\\\",\\\"PrivatePort\\\":80,\\\"PublicPort\\\":80,\\\"Type\\\":\\\"tcp\\\"}],\\\"Labels\\\":{\\\"maintainer\\\":\\\"NGINX Docker Maintainers <docker-maint@nginx.com>\\\"},\\\"State\\\":\\\"running\\\",\\\"Status\\\":\\\"Up 46 seconds\\\",\\\"HostConfig\\\":{\\\"NetworkMode\\\":\\\"bridge\\\"},\\\"NetworkSettings\\\":{\\\"Networks\\\":{\\\"bridge\\\":{\\\"IPAMConfig\\\":null,\\\"Links\\\":null,\\\"Aliases\\\":null,\\\"MacAddress\\\":\\\"36:ce:90:11:f0:b4\\\",\\\"DriverOpts\\\":null,\\\"GwPriority\\\":0,\\\"NetworkID\\\":\\\"a3a01110c4da9faba8a934789e0f5a667639cd239d50f002c0bfb7323faa17ff\\\",\\\"EndpointID\\\":\\\"b5ead4f017f3bd02203d4d219f9c41cc35758862c262f761d9f94d1cbc0aa11e\\\",\\\"Gateway\\\":\\\"172.17.0.1\\\",\\\"IPAddress\\\":\\\"172.17.0.2\\\",\\\"IPPrefixLen\\\":16,\\\"IPv6Gateway\\\":\\\"\\\",\\\"GlobalIPv6Address\\\":\\\"\\\",\\\"GlobalIPv6PrefixLen\\\":0,\\\"DNSNames\\\":null}}},\\\"Mounts\\\":[]}]\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"d36136da-082a-4ecb-83ec-74bc80bee28b\", \"tool_call_id\": \"call_W7rTMSHqPYCY4RHan9J4Pp09\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Force-stop the container via docker_agent: run SSH command on 192.168.1.50 with the deployment credentials to execute: docker stop -t 10 web_server_01 || docker kill web_server_01; docker ps -a | grep web_server_01 || true. Required: host192.168.1.50, port (default 22), username, auth_method (password|private_key), password or private_key. This will attempt a graceful stop then a kill and return the container status.\",\n  \"Investigate why the container remains running: run SSH commands to collect diagnostics \u2014 docker inspect web_server_01 (or docker inspect -f '{{.State.Running}} {{.State.Status}} {{.HostConfig.RestartPolicy.Name}}' web_server_01), docker logs --tail 100 web_server_01, and check for orchestration/systemd (ps aux | grep -E 'docker-compose|podman|k3s|containerd|systemd' and systemctl list-units --typeservice | grep web_server_01). Required: same SSH credentials. This will identify restart policies or external supervisors re-creating the container.\",\n  \"Request user escalation/confirmation: Ask the user to confirm a forced kill or to provide elevated credentials (root or sudo) if permission issues are preventing stop. If provided, run: sudo docker stop web_server_01 || sudo docker kill web_server_01 and verify with docker inspect. Required: confirmation and/or elevated credentials (username + sudo rights or root key/password).\",\n  \"Proceed to the GitHub follower check now (parallel path): use github_agent to list followers of 'chatopsFdse' to confirm team members involved. Required: GitHub username 'chatopsFdse' (already known) and optionally a GitHub token to avoid rate limits. Note: this does not solve the container stop \u2014 it only completes the GitHub part of the user's request.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nForce-stop the container via docker_agent: run SSH command on 192.168.1.50 with the deployment credentials to execute: docker stop -t 10 web_server_01 || docker kill web_server_01; docker ps -a | grep web_server_01 || true. Required: host192.168.1.50, port (default 22), username, auth_method (password|private_key), password or private_key. This will attempt a graceful stop then a kill and return the container status."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "The work_agent couldnot solve the task."
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Provide deployment SSH credentials (username + password or username + private_key PEM and SSH port if not 22). I will call docker_agent run_ssh_command to execute: docker stop -t 10 web_server_01 || docker kill web_server_01; docker ps -a | grep web_server_01 || true and return the output.\",\n  \"Provide elevated credentials (sudo-capable account or root credentials) or confirm permission to use sudo; I will run diagnostics first: docker inspect -f '{{.State.Running}} {{.HostConfig.RestartPolicy.Name}}' web_server_01 and docker logs --tail 100 web_server_01 to determine why the container remains running, then perform a controlled stop using sudo if required.\",\n  \"If you cannot share host credentials, provide Jenkins access (Jenkins URL, job name or permission to create a job, and Jenkins credentials) and I will create/trigger a Jenkins job that SSHes to 192.168.1.50 to run the force-stop command and return results.\",\n  \"Skip attempting to stop the container and continue with the GitHub follower check for 'chatopsFdse' now (provide a GitHub token if you want to avoid rate limits).\"\n]"
+    }
+]
