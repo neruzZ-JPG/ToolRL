@@ -95,7 +95,15 @@ def run_ppo(config, task_runner_class=None) -> None:
         runner = task_runner_class.options(runtime_env={"nsight": nsight_options}).remote()
     else:
         runner = task_runner_class.remote()
-    ray.get(runner.run.remote(config))
+    # ray.get(runner.run.remote(config))
+    try:
+        print("before runner.run")
+        ray.get(runner.run.remote(config))
+        print("after runner.run")
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        print("runner failed:", e)
+
 
     # [Optional] get the path of the timeline trace file from the configuration, default to None
     # This file is used for performance analysis

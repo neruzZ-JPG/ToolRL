@@ -132,12 +132,12 @@ def compute_score(data_source,
     else:
         raise NotImplementedError(f"Unknown model name: {exp_name}")
     type = extra_info.get("type", None)
-    if type == 'planning':
+    if type == 'observation':
         input_str = extra_info.get("input_str", None)
         if input_str is None:
             raise ValueError("input_str is None")
         return compute_planning_reward(input_str, ground_truth, predict_str, 1, 5)
-    elif type == 'tool_call':
+    elif type == 'tool_calling':
         return compute_tool_call_reward(ground_truth, predict_str, 1, 5)
     else:
         raise NotImplementedError

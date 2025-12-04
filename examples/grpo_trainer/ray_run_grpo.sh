@@ -1,4 +1,8 @@
-nohup python3 -m verl.trainer.main_ppo \
+ray job submit --address="http://127.0.0.1:8265" \
+    --runtime-env=verl/trainer/runtime_env.yaml \
+    --no-wait \
+    -- \
+python3 -m verl.trainer.main_ppo \
     algorithm.adv_estimator=grpo \
     data.train_files=$DATA_DIR/train.parquet \
     data.val_files=$DATA_DIR/test.parquet \
@@ -6,7 +10,6 @@ nohup python3 -m verl.trainer.main_ppo \
     data.val_batch_size=32 \
     data.max_prompt_length=4096 \
     data.max_response_length=1024 \
-    data.filter_overlong_prompts=True \
     actor_rollout_ref.model.path=$BASE_MODEL \
     actor_rollout_ref.model.lora_rank=8 \
     actor_rollout_ref.model.lora_alpha=32 \
@@ -40,6 +43,5 @@ nohup python3 -m verl.trainer.main_ppo \
     trainer.nnodes=1 \
     trainer.save_freq=5 \
     trainer.test_freq=5 \
-    trainer.total_epochs=4 \
-    custom_reward_function.path="./verl/utils/reward_score/chatops.py" \
-    > training_grpo.log 2>&1 &
+    trainer.total_epochs=5 \
+    custom_reward_function.path="./verl/utils/reward_score/chatops.py"
