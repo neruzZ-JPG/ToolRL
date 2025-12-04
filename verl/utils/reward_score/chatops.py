@@ -137,8 +137,8 @@ def compute_score(data_source,
         input_str = extra_info.get("input_str", None)
         if input_str is None:
             raise ValueError("input_str is None")
-        return compute_planning_reward(input_str, ground_truth, predict_str, 1, 5)
+        return compute_planning_reward(input_str, ground_truth, predict_str, -5, 5)
     elif type == 'tool_calling':
-        return compute_tool_call_reward(ground_truth, predict_str, 1, 5)
+        return compute_tool_call_reward(ground_truth, predict_str, -5, 5)
     else:
         raise NotImplementedError

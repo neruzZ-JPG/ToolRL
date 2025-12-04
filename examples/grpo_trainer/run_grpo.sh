@@ -40,5 +40,6 @@ nohup python3 -m verl.trainer.main_ppo \
     trainer.nnodes=1 \
     trainer.save_freq=40 \
     trainer.test_freq=20 \
-    trainer.total_epochs=5
+    trainer.total_epochs=5 \
+    custom_reward_function.path="./verl/utils/reward_score/chatops.py" \
     > training_grpo.log 2>&1 &
