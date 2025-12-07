@@ -2,7 +2,7 @@ import json
 import os
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
-
+import re
 def compute_tool_call_reward(gt, pd, max_possible_reward, min_possible_reward):
     """
     Compute the reward for tool call.
@@ -19,6 +19,7 @@ def compute_tool_call_reward(gt, pd, max_possible_reward, min_possible_reward):
     try:
         pd_json = json.loads(pd)
     except:
+        print(f"pd is not in json format: {pd}")
         return min_possible_reward
     if not isinstance(pd_json, dict):
         return min_possible_reward
@@ -26,7 +27,15 @@ def compute_tool_call_reward(gt, pd, max_possible_reward, min_possible_reward):
         return min_possible_reward
     if "parameters" not in pd_json.keys() or not isinstance(pd_json["parameters"], list):
         return min_possible_reward
+    for para in pd_json["parameters"]:
+        if not isinstance(para, dict):
+            return min_possible_reward
+        if len(para.keys()) != 2:
+            return min_possible_reward
+        if "parameter_name" not in para.keys() or "parameter_value" not in para.keys():
+            return min_possible_reward
 
+    min_possible_reward = (min_possible_reward + max_possible_reward) / 2
     # step2 : check tool calling info
     gt_json = json.loads(gt)
     if pd_json["tool_name"] != gt_json["tool_name"]:
@@ -41,8 +50,10 @@ def compute_tool_call_reward(gt, pd, max_possible_reward, min_possible_reward):
             if param["parameter_value"] == params[param["parameter_name"]]:
                 param_cnt += 1
             else:
-                param_cnt += 0.5
-    return min_possible_reward + (param_cnt / total_param_num) * (max_possible_reward - min_possible_reward)
+                param_cnt += 0.8
+        else:
+            param_cnt -= 0.2
+    return min_possible_reward + (param_cnt / (total_param_num + 0.00001)) * (max_possible_reward - min_possible_reward)
 
 SUCCESS_FLAG = "SUCCESS, "
 FAILURE_FLAG = "FAIL, "
@@ -91,16 +102,21 @@ def compute_planning_reward(input_str, gt, pd, max_possible_reward, min_possible
             return min_possible_reward
     if not format_check_pass:
         return min_possible_reward
-
+    min_possible_reward = (min_possible_reward + max_possible_reward) / 2
     # step2 :  llm judge?
     base_url = "https://vip.apiyi.com/v1"
     api_key = "sk-5PYQRpTeWXyM9ibd96B5737aFdCc47B1B89a3937F6447eEe"
     model_name = "gpt-4.1-nano"
 
     prompt_template = ChatPromptTemplate.from_template(PLANNING_JUDGE_PROMPT)
-    llm = ChatOpenAI(base_url=base_url, api_key=api_key, model=model_name)
+    llm = ChatOpenAI(
+        base_url=base_url, 
+        api_key=api_key, 
+        model=model_name,
+        timeout=10.0,
+        max_retries=3,
+    )
     messages = prompt_template.format_messages(input_str=input_str, pd=pd)
-    
     try:
         response = llm.invoke(messages)
         score = float(response.content)
@@ -111,6 +127,16 @@ def compute_planning_reward(input_str, gt, pd, max_possible_reward, min_possible
     if score > 1:
         return max_possible_reward
     return score * (max_possible_reward - min_possible_reward) + min_possible_reward
+
+def remove_thinking_tags(text):
+    """
+    移除字符串中的<think>...</think>思考标签及其中间内容
+    """
+    # 使用正则表达式移除<think>...</think>标签及内容
+    pattern = r'<think>.*?</think>'
+    cleaned_text = re.sub(pattern, '', text, flags=re.DOTALL)
+    
+    return cleaned_text.strip()
 
 def compute_score(data_source,
                 solution_str,
@@ -132,13 +158,15 @@ def compute_score(data_source,
         predict_str = solution_str.split("<|im_start|>assistant")[-1].split("<|im_end|>")[0].strip()
     else:
         raise NotImplementedError(f"Unknown model name: {exp_name}")
+    predict_str = remove_thinking_tags(predict_str)
+    print(predict_str)
     type = extra_info.get("type", None)
     if type == 'observation':
         input_str = extra_info.get("input_str", None)
         if input_str is None:
             raise ValueError("input_str is None")
-        return compute_planning_reward(input_str, ground_truth, predict_str, -5, 5)
+        return compute_planning_reward(input_str, ground_truth, predict_str, 5, -5)
     elif type == 'tool_calling':
-        return compute_tool_call_reward(ground_truth, predict_str, -5, 5)
+        return compute_tool_call_reward(ground_truth, predict_str, 5, -5)
     else:
         raise NotImplementedError
