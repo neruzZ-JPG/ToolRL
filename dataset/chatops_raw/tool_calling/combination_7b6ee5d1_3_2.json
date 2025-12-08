@@ -1,0 +1,80 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"{\"toolname\" : \"query_dog_info\", \"parameters\" : [{\"parameter_name\" : \"dog_species\", \"parameter_value\" : \"beagle\"}]}\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nExecute a shell command inside the 'analytics' container of the 'data-pipeline' pod to check the status of running processes related to data ingestion."
+    },
+    {
+        "Human Message": "Current subtask is:\nFirst, identify the pod\u2019s namespace and confirm it\u2019s Running: kubectl get pods -A | grep -w data-pipeline"
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"To identify the pod's namespace and check if it is in a Running state, I will first list all pods across all namespaces and filter for the pod named \\\"data-pipeline\\\". Please provide the exact pod name if different, or I will proceed with the provided name.\\n\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n    \"toolname\" : \"get_pods_all_namespaces\",\n    \"parameters\" : []\n}"
+    },
+    {
+        "Ai Message": "\"failed to parse tool parameters\""
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"Check the namespaces and pod states returned to identify the namespace of 'data-pipeline' pod and confirm it is in Running state.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nCheck the namespaces and pod states returned to identify the namespace of 'data-pipeline' pod and confirm it is in Running state."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"First, I will retrieve the list of all namespaces and all pods to locate the 'data-pipeline' pod and check its status.  \\nI'll start by listing the pods across all namespaces.\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n  \"toolname\": \"list_pods_all_namespaces\",\n  \"parameters\": []\n}"
+    },
+    {
+        "Ai Message": "\"[TextContent(type'text', text'{\\\\n  \\\"items\\\": [\\\\n    {\\\\n      \\\"name\\\": \\\"monthly-backup-job-v4x65\\\",\\\\n      \\\"namespace\\\": \\\"backup\\\",\\\\n      \\\"kind\\\": \\\"Pod\\\",\\\\n      \\\"status\\\": \\\"Succeeded\\\",\\\\n      \\\"createdAt\\\": \\\"2025-11-11T11:08:14Z\\\"\\\\n    },\\\\n    {\\\\n      \\\"name\\\": \\\"postgres-0\\\",\\\\n      \\\"namespace\\\": \\\"databases\\\",\\\\n      \\\"kind\\\": \\\"Pod\\\",\\\\n      \\\"status\\\": \\\"Running\\\",\\\\n      \\\"createdAt\\\": \\\"2025-11-10T04:00:39Z\\\"\\\\n    },\\\\n    {\\\\n      \\\"name\\\": \\\"order-processing-546f545747-z6nns\\\",\\\\n      \\\"namespace\\\": \\\"ecommerce\\\",\\\\n      \\\"kind\\\": \\\"Pod\\\",\\\\n      \\\"status\\\": \\\"Running\\\",\\\\n      \\\"createdAt\\\": \\\"2025-11-10T03:27:51Z\\\"\\\\n    },\\\\n    {\\\\n      \\\"name\\\": \\\"coredns-ff8999cc5-qcxsv\\\",\\\\n      \\\"namespace\\\": \\\"kube-system\\\",\\\\n      \\\"kind\\\": \\\"Pod\\\",\\\\n      \\\"status\\\": \\\"Running\\\",\\\\n      \\\"createdAt\\\": \\\"2025-10-14T13:43:00Z\\\"\\\\n    },\\\\n    {\\\\n      \\\"name\\\": \\\"helm-install-traefik-crd-9jq5w\\\",\\\\n      \\\"namespace\\\": \\\"kube-system\\\",\\\\n      \\\"kind\\\": \\\"Pod\\\",\\\\n      \\\"status\\\": \\\"Succeeded\\\",\\\\n      \\\"createdAt\\\": \\\"2025-10-14T13:42:59Z\\\"\\\\n    },\\\\n    {\\\\n      \\\"name\\\": \\\"helm-install-traefik-hhvvp\\\",\\\\n      \\\"namespace\\\": \\\"kube-system\\\",\\\\n      \\\"kind\\\": \\\"Pod\\\",\\\\n      \\\"status\\\": \\\"Succeeded\\\",\\\\n      \\\"createdAt\\\": \\\"2025-10-14T13:42:59Z\\\"\\\\n    },\\\\n    {\\\\n      \\\"name\\\": \\\"local-path-provisioner-698b58967b-jbdcj\\\",\\\\n      \\\"namespace\\\": \\\"kube-system\\\",\\\\n      \\\"kind\\\": \\\"Pod\\\",\\\\n      \\\"status\\\": \\\"Running\\\",\\\\n      \\\"createdAt\\\": \\\"2025-10-14T13:43:00Z\\\"\\\\n    },\\\\n    {\\\\n      \\\"name\\\": \\\"metrics-server-8584b5786c-sp8nk\\\",\\\\n      \\\"namespace\\\": \\\"kube-system\\\",\\\\n      \\\"kind\\\": \\\"Pod\\\",\\\\n      \\\"status\\\": \\\"Running\\\",\\\\n      \\\"createdAt\\\": \\\"2025-10-14T13:43:00Z\\\"\\\\n    },\\\\n    {\\\\n      \\\"name\\\": \\\"svclb-traefik-b3a6a052-657mf\\\",\\\\n      \\\"namespace\\\": \\\"kube-system\\\",\\\\n      \\\"kind\\\": \\\"Pod\\\",\\\\n      \\\"status\\\": \\\"Running\\\",\\\\n      \\\"createdAt\\\": \\\"2025-10-14T13:43:11Z\\\"\\\\n    },\\\\n    {\\\\n      \\\"name\\\": \\\"traefik-5c57d75bc9-f5vhn\\\",\\\\n      \\\"namespace\\\": \\\"kube-system\\\",\\\\n      \\\"kind\\\": \\\"Pod\\\",\\\\n      \\\"status\\\": \\\"Running\\\",\\\\n      \\\"createdAt\\\": \\\"2025-10-14T13:43:11Z\\\"\\\\n    },\\\\n    {\\\\n      \\\"name\\\": \\\"media-processor-54b9c8d74b-s44sg\\\",\\\\n      \\\"namespace\\\": \\\"media\\\",\\\\n      \\\"kind\\\": \\\"Pod\\\",\\\\n      \\\"status\\\": \\\"Pending\\\",\\\\n      \\\"createdAt\\\": \\\"2025-11-11T12:06:27Z\\\"\\\\n    },\\\\n    {\\\\n      \\\"name\\\": \\\"nfs-subdir-external-provisioner-5cb8985d6d-n7bcj\\\",\\\\n      \\\"namespace\\\": \\\"media\\\",\\\\n      \\\"kind\\\": \\\"Pod\\\",\\\\n      \\\"status\\\": \\\"Running\\\",\\\\n      \\\"createdAt\\\": \\\"2025-11-11T12:06:27Z\\\"\\\\n    },\\\\n    {\\\\n      \\\"name\\\": \\\"monitoring-health\\\",\\\\n      \\\"namespace\\\": \\\"monitoring\\\",\\\\n      \\\"kind\\\": \\\"Pod\\\",\\\\n      \\\"status\\\": \\\"Running\\\",\\\\n      \\\"createdAt\\\": \\\"2025-11-10T03:39:39Z\\\"\\\\n    },\\\\n    {\\\\n      \\\"name\\\": \\\"rook-ceph-operator-6b7449d954-nfqrq\\\",\\\\n      \\\"namespace\\\": \\\"rook-ceph\\\",\\\\n      \\\"kind\\\": \\\"Pod\\\",\\\\n      \\\"status\\\": \\\"Pending\\\",\\\\n      \\\"createdAt\\\": \\\"2025-11-11T15:52:15Z\\\"\\\\n    },\\\\n    {\\\\n      \\\"name\\\": \\\"web-server-749cf7ff-4kmmt\\\",\\\\n      \\\"namespace\\\": \\\"staging\\\",\\\\n      \\\"kind\\\": \\\"Pod\\\",\\\\n      \\\"status\\\": \\\"Running\\\",\\\\n      \\\"createdAt\\\": \\\"2025-11-10T03:41:44Z\\\"\\\\n    },\\\\n    {\\\\n      \\\"name\\\": \\\"web-server-749cf7ff-6f9zq\\\",\\\\n      \\\"namespace\\\": \\\"staging\\\",\\\\n      \\\"kind\\\": \\\"Pod\\\",\\\\n      \\\"status\\\": \\\"Running\\\",\\\\n      \\\"createdAt\\\": \\\"2025-11-10T03:41:44Z\\\"\\\\n    },\\\\n    {\\\\n      \\\"name\\\": \\\"web-server-749cf7ff-f44zs\\\",\\\\n      \\\"namespace\\\": \\\"staging\\\",\\\\n      \\\"kind\\\": \\\"Pod\\\",\\\\n      \\\"status\\\": \\\"Running\\\",\\\\n      \\\"createdAt\\\": \\\"2025-11-10T03:41:44Z\\\"\\\\n    }\\\\n  ]\\\\n}', annotationsNone)]\""
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\n  \"The 'data-pipeline' pod is not listed in the pods returned, please confirm the exact pod name or check if the pod is currently deployed and running.\",\n  \"If the pod exists under a different name, provide the correct pod name to proceed.\",\n  \"If the pod does not exist, the user's request cannot be fulfilled as is.\"\n]"
+    },
+    {
+        "Human Message": "Current subtask is:\nThe 'data-pipeline' pod is not listed in the pods returned, please confirm the exact pod name or check if the pod is currently deployed and running."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "kubernetes_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"First, I will list all pods in the default namespace to verify whether the 'data-pipeline' pod exists and its current status.\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n  \"toolname\": \"list_pods\",\n  \"parameters\": [\n    {\n      \"parameter_name\": \"namespace\",\n      \"parameter_value\": \"default\"\n    }\n  ]\n}"
+    }
+]

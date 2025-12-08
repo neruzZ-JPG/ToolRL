@@ -1,0 +1,80 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"{\"toolname\" : \"query_dog_info\", \"parameters\" : [{\"parameter_name\" : \"dog_species\", \"parameter_value\" : \"beagle\"}]}\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nFetch the list of pull requests in 'testRepo' to identify ongoing review processes and their statuses."
+    },
+    {
+        "Human Message": "Current subtask is:\nIdentify where 'testRepo' is hosted (GitHub/GitLab/Bitbucket) and its full path (owner/testRepo) so you can use the correct API endpoint."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "github_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"\\\",\\n  \\\"parameters\\\": {}\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"get_repo_host_and_path\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"repo_name\",\n            \"parameter_value\": \"testRepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"Not Found\\\",\\\"documentation_url\\\":\\\"https://docs.github.com/rest/repos/repos#get-a-repository\\\",\\\"status\\\":\\\"404\\\"}'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"8bc6ace3-2477-400d-840d-6c72a6ef384c\", \"tool_call_id\": \"call_90vZA2cOqEOSd8Up68meyB7Y\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"The repository 'testRepo' is not found on GitHub, try to check its existence and then identify if it is hosted on GitLab.\", \"The repository 'testRepo' might be private or have a different name, get its full correct name and owner information from the user.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nThe repository 'testRepo' is not found on GitHub, try to check its existence and then identify if it is hosted on GitLab."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_repo_file_tree\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": {\\n      \\\"type\\\": \\\"integer\\\",\\n      \\\"description\\\": \\\"ID of the project to check for its repository tree.\\\"\\n    },\\n    \\\"path\\\": {\\n      \\\"type\\\": \\\"string\\\",\\n      \\\"description\\\": \\\"Path within the repository, can be empty or root.\\\"\\n    },\\n    \\\"ref\\\": {\\n      \\\"type\\\": \\\"string\\\",\\n      \\\"description\\\": \\\"Branch or commit SHA to check.\\\"\\n    },\\n    \\\"per_page\\\": {\\n      \\\"type\\\": \\\"string\\\",\\n      \\\"description\\\": \\\"Number of items per page.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"gitlab_get_repo_file_tree\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"id\",\n            \"parameter_value\": \"testRepo\"\n        },\n        {\n            \"parameter_name\": \"path\",\n            \"parameter_value\": \"\"\n        },\n        {\n            \"parameter_name\": \"ref\",\n            \"parameter_value\": \"main\"\n        },\n        {\n            \"parameter_name\": \"per_page\",\n            \"parameter_value\": \"10\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"Error: 1 validation error for Http_request\\nheaders\\n  Input should be a valid string [typestring_type, input_value{'PRIVATE-TOKEN': 'glpat-...mVxbXU3Cw.01.120ws7pth'}, input_typedict]\\n    For further information visit https://errors.pydantic.dev/2.9/v/string_type\\n Please fix your mistakes.\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"101ee584-e0e9-41df-a3ec-bd791f472fd9\", \"tool_call_id\": \"call_a4YHr35TCLN5x7laLuHBsxpN\", \"artifact\": null, \"status\": \"error\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"There was an error with the GitLab API call, likely due to an invalid or missing private token in the request headers. Plan A: Fix the request headers by providing the correct private token for GitLab API access and retry checking the repository on GitLab. Plan B: Confirm with the user if 'testRepo' is hosted on GitLab and verify the exact repository identifier or URL for accurate querying.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nThere was an error with the GitLab API call, likely due to an invalid or missing private token in the request headers. Plan A: Fix the request headers by providing the correct private token for GitLab API access and retry checking the repository on GitLab. Plan B: Confirm with the user if 'testRepo' is hosted on GitLab and verify the exact repository identifier or URL for accurate querying."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "gitlab_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"gitlab_get_repo_file_tree\\\",\\n  \\\"parameters\\\": {\\n    \\\"id\\\": {\\n      \\\"type\\\": \\\"int\\\",\\n      \\\"description\\\": \\\"The project ID or URL-encoded path of the repository on GitLab\\\"\\n    },\\n    \\\"path\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The directory path within the repository to list files from\\\"\\n    },\\n    \\\"ref\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The branch or tag name to specify which version of the repository to check\\\"\\n    },\\n    \\\"per_page\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The number of items to return per page (pagination control)\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\": \"gitlab_get_repo_file_tree\",\n    \"parameters\": [\n        {\n            \"parameter_name\": \"id\",\n            \"parameter_value\": \"owner/testRepo\"\n        },\n        {\n            \"parameter_name\": \"path\",\n            \"parameter_value\": \"\"\n        },\n        {\n            \"parameter_name\": \"ref\",\n            \"parameter_value\": \"main\"\n        },\n        {\n            \"parameter_name\": \"per_page\",\n            \"parameter_value\": \"10\"\n        }\n    ]\n}"
+    }
+]

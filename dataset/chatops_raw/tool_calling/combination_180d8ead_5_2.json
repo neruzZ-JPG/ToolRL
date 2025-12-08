@@ -1,0 +1,80 @@
+[
+    {
+        "System Message": "You're a professional Devops engineer, leading a team with several devops agents each of whom is in charge of one devops tools such as github. \nYour main goal is to analyze the user's request, decompose it into subtasks and lead your team to finish the request step by step.\n#####\nThere are the agents:\n[\n    {\n        \"name\" : \"docker_agent\",\n        \"description\" : \"docker agent for docker tasks\",\n        \"url\" : \"http://localhost:8000\"\n    },\n    {\n        \"name\" : \"github_agent\",\n        \"description\" : \"github agent for github tasks\",\n        \"url\" : \"http://localhost:8001\"\n    },\n    {\n        \"name\" : \"gitlab_agent\",\n        \"description\" : \"gitlab agent for gitlab tasks\",\n        \"url\" : \"http://localhost:8002\"\n    },\n\n    {\n        \"name\" : \"jenkins_agent\",\n        \"description\" : \"jenkins agent for jenkins tasks\",\n        \"url\" : \"http://localhost:8003\"\n    },\n    {\n        \"name\" : \"kubernetes_agent\",\n        \"description\" : \"kubernetes agent for kubernetes/k8s tasks\",\n        \"url\" : \"http://localhost:8004\"\n    }\n]\n#####\nGo through these 3 steps to solve a subtask:\n1. QUERY_EXECUTABLE \nuery the agents if the task is executable.If so, what information do they need to finish it.\n- Not all agents should participate in this task, choose the most suitable one.\n- Respond with the name of the agent, and only the name of it.\n- For example, if your task is to get information about a dog, and there's a 'pet_agent' in the agent list. Although there might be a lot of information of the agent in the list, you only need to respond with its name: pet_agent.\n2. EXECUTE\nYour agent have told you all the information needed to finish your task, including the tool name and the required parameters. Now all you need to do is to provide the tool name as well as all the necessary parameters to your agent.\n- For example, if the task is \"How long does a Beagle live?\".Pet_agent tells you that the task can be finished with one of his tools called \"query_dog_info\", and you need to provide the species of the dog you want to query about. Then you may pass the task as \"{\"toolname\" : \"query_dog_info\", \"parameters\" : [{\"parameter_name\" : \"dog_species\", \"parameter_value\" : \"beagle\"}]}\".\n- One execution or query at one time.\n3. OBSERVATION\nBased on the current state, determine whether the USER_REQUEST(not the subtask) has been fulfilled. \n- If you believe the request has been successfully completed, return 'SUCCESS' followed by a response to the user. For example: 'SUCCESS. The user's age is 18.' By returning 'SUCCESS' you can end the whole workflow.\n- If the current workflow doesn't align with the user request, return 'FAIL' and explain the reason. For instance, if the user asks for the weather in New York but the current state is searching for a bakery's location, continuing the search is incorrect. You should stop the unproductive effort by replying 'FAIL. Wrong workflow.' Returning 'FAIL' will end the whole workflow too.\n- If the request is not yet finished and more actions are required, formulate multiple plans for the next step. Keep in mind that:\n    - Plans must be formulated based on existing information, making full use of the available information and avoiding repeating the wrong actions that have already been taken.\n    - Each plan represents a different solution path and will be executed independently, not sequentially. This means Plans A and B are designed to be mutually exclusive, with neither having access to the other's information.\n    - Present the plans as a JSON - formatted array. \n    - For example, if the user wants to find the name, age, and sign - up date of a user given their ID, and you've found the user's name (say, Harry), you should return ['The user's name is Harry, find his age.', 'The user's name is Harry, find out when he signed up.']\"\nRESPONSE STRUCTURE:\nOne of the following three responses:\n    - 'SUCCESS, [success information]'\n    - 'FAIL, [fail information]'\n    - A JSON - formatted array of subtasks, with only the structure content without any json identifier.\nYour observation will be strictly parsed, and you must strictly follow the response structure."
+    },
+    {
+        "Human Message": "the user request is:\nSet up a container named 'ci_runner' with privileged access, environment variables 'CItrue' and 'REPOtestRepo', based on an image with platform 'linux/amd64', and configure it to automatically restart unless stopped, exposing port 2375 for Docker API access."
+    },
+    {
+        "Human Message": "Current subtask is:\nChoose an image that provides the Docker daemon (e.g., docker:dind) and confirm it supports linux/amd64. Example check: docker manifest inspect docker:dind | grep linux/amd64."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"get_image_details\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"The name of the image to inspect, e.g., 'docker:dind'.\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\" : \"get_image_details\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\",\n            \"parameter_value\" : \"docker:dind\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 404, 'content': b'{\\\"message\\\":\\\"No such image: docker:dind\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"6e17ae8a-25d6-4be1-9cb5-0620e9f0d315\", \"tool_call_id\": \"call_tpw80Gm9dZY1A676LWQ4ZZxm\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"The image 'docker:dind' was not found in the previous step, try to check the exact image name or use an alternative image that supports Docker daemon and linux/amd64 platform.\", \"Verify if there is a need to pull the image first before inspection to ensure it exists locally or remotely.\", \"Check on Docker Hub or trusted registries for images that provide Docker daemon with support for 'linux/amd64'.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nThe image 'docker:dind' was not found in the previous step, try to check the exact image name or use an alternative image that supports Docker daemon and linux/amd64 platform."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"search_for_image\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Name of the image to search for\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\" : \"search_for_image\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\",\n            \"parameter_value\" : \"docker docker:dind\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\"content\": \"{'status_code': 500, 'content': b'{\\\"message\\\":\\\"Get \\\\\\\\\\\"http:\\\\\\\\\\\": http: no Host in request URL\\\"}\\\\n'}\", \"additional_kwargs\": {}, \"response_metadata\": {}, \"type\": \"tool\", \"name\": \"http_request\", \"id\": \"833af4e6-6bd4-49f1-8d10-13d6f90e95d1\", \"tool_call_id\": \"call_Eugn5RN7tb23cHZft80cFbeB\", \"artifact\": null, \"status\": \"success\"}"
+    },
+    {
+        "Human Message": "Step: OBSERVATION\nNow you need to finish the final step of observation to finish the subtask."
+    },
+    {
+        "Ai Message": "[\"The image search request did not succeed due to a URL error, retry searching for the image with a correct request or use a known image like 'docker:20.10-dind' that supports Docker daemon on linux/amd64.\", \"Manually confirm the availability and platform compatibility of 'docker:20.10-dind' or similar docker in docker images on Docker Hub.\", \"Consider proceeding using the known image 'docker:20.10-dind' for the Docker daemon container setup with linux/amd64 support.\"]"
+    },
+    {
+        "Human Message": "Current subtask is:\nThe image search request did not succeed due to a URL error, retry searching for the image with a correct request or use a known image like 'docker:20.10-dind' that supports Docker daemon on linux/amd64."
+    },
+    {
+        "Human Message": "Step : QUERY_EXECUTABLE\nNow you've got a new subtask to finish, you need to select the suitable agent to finish it."
+    },
+    {
+        "Ai Message": "docker_agent"
+    },
+    {
+        "Ai Message": "agent_response : \"{\\n  \\\"tool_name\\\": \\\"search_for_image\\\",\\n  \\\"parameters\\\": {\\n    \\\"name\\\": {\\n      \\\"type\\\": \\\"str\\\",\\n      \\\"description\\\": \\\"Name of the image you want to search for\\\"\\n    }\\n  }\\n}\""
+    },
+    {
+        "Human Message": "Step : EXECUTE\nYour agent have told you all the information needed to finish your task. Now all you need to do is to provide all the necessary parameters to your agent.\noutput in a strict JSON dict format and ONLY the json dict content:\n{\n    \"toolname\" : \"toolname\"\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\"\n            \"parameter_value\" : \"value\"\n        },\n        ......\n    ]\n}\neg.\n{\n    \"tool_name\" : \"get_github_repo\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"owner\"\n            \"parameter_value\" : \"harry\"\n        },\n        {\n            \"parameter_name\" : \"reponame\"\n            \"parameter_value\" : \"myrepo\"\n        }\n    ]\n}"
+    },
+    {
+        "Ai Message": "{\n    \"tool_name\" : \"search_for_image\",\n    \"parameters\" : [\n        {\n            \"parameter_name\" : \"name\",\n            \"parameter_value\" : \"docker:20.10-dind\"\n        }\n    ]\n}"
+    }
+]
