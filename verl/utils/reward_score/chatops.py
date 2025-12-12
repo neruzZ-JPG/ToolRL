@@ -53,7 +53,7 @@ def compute_tool_call_reward(gt, pd, max_possible_reward, min_possible_reward):
                 param_cnt += 0.8
         else:
             param_cnt -= 0.2
-    return min_possible_reward + (param_cnt / (total_param_num + 0.00001)) * (max_possible_reward - min_possible_reward)
+    return min_possible_reward + (max(0, param_cnt) / (total_param_num + 0.00001)) * (max_possible_reward - min_possible_reward)
 
 SUCCESS_FLAG = "SUCCESS, "
 FAILURE_FLAG = "FAIL, "
