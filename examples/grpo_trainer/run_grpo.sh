@@ -4,15 +4,16 @@ nohup python3 -m verl.trainer.main_ppo \
     data.val_files=$DATA_DIR/test.parquet \
     data.train_batch_size=32 \
     data.val_batch_size=64 \
-    data.max_prompt_length=3072 \
+    data.max_prompt_length=2560 \
     data.max_response_length=512 \
     data.filter_overlong_prompts=True \
     actor_rollout_ref.model.path=$BASE_MODEL \
     actor_rollout_ref.model.lora_rank=8 \
-    actor_rollout_ref.model.lora_alpha=32 \
+    actor_rollout_ref.model.lora_alpha=16 \
     actor_rollout_ref.model.use_shm=True \
     actor_rollout_ref.rollout.load_format=safetensors \
     actor_rollout_ref.actor.optim.lr=2e-6 \
+    actor_rollout_ref.actor.optim.lr_warmup_steps_ratio=0.05 \
     actor_rollout_ref.model.use_remove_padding=True \
     actor_rollout_ref.actor.ppo_mini_batch_size=2 \
     actor_rollout_ref.actor.use_dynamic_bsz=True \
@@ -25,7 +26,7 @@ nohup python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.actor.fsdp_config.model_dtype=bfloat16 \
     actor_rollout_ref.rollout.tensor_model_parallel_size=$ROLLOUT_TP_SIZE \
     actor_rollout_ref.rollout.name=vllm \
-    actor_rollout_ref.rollout.gpu_memory_utilization=0.25 \
+    actor_rollout_ref.rollout.gpu_memory_utilization=0.6 \
     actor_rollout_ref.rollout.n=4 \
     actor_rollout_ref.rollout.dtype=bfloat16 \
     actor_rollout_ref.rollout.layered_summon=True \
@@ -38,8 +39,8 @@ nohup python3 -m verl.trainer.main_ppo \
     trainer.experiment_name=$EXPERIMENT_NAME \
     trainer.n_gpus_per_node=$N_GPUS \
     trainer.nnodes=1 \
-    trainer.save_freq=60 \
-    trainer.test_freq=20 \
-    trainer.total_epochs=15 \
+    trainer.save_freq=75 \
+    trainer.test_freq=25 \
+    trainer.total_epochs=5 \
     custom_reward_function.path="./verl/utils/reward_score/chatops.py" \
-    > training_grpo_1.7B.log 2>&1 &
+    > $EXPERIMENT_NAME.log 2>&1 &

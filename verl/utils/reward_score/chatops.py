@@ -16,26 +16,34 @@ def compute_tool_call_reward(gt, pd, max_possible_reward, min_possible_reward):
     """
     # step1 : format check
     format_check_pass = False
+    format_score = (max_possible_reward - min_possible_reward) / 2
     try:
         pd_json = json.loads(pd)
     except:
         print(f"pd is not in json format: {pd}")
         return min_possible_reward
     if not isinstance(pd_json, dict):
-        return min_possible_reward
+        print(f"pd not a dict: {pd}")
+        return min_possible_reward + format_score * 0.2
     if "tool_name" not in pd_json.keys():
-        return min_possible_reward
+        print(f"tool_name not in pd: {pd}")
+        return min_possible_reward + format_score * 0.4
     if "parameters" not in pd_json.keys() or not isinstance(pd_json["parameters"], list):
-        return min_possible_reward
+        print(f"wrong parameter list : {pd}")
+        return min_possible_reward + format_score * 0.6
     for para in pd_json["parameters"]:
         if not isinstance(para, dict):
-            return min_possible_reward
+            print(f"param not a dict: {para}")
+            return min_possible_reward + format_score * 0.7
         if len(para.keys()) != 2:
-            return min_possible_reward
+            print(f"param len != 2: {para}")
+            return min_possible_reward + format_score * 0.8
         if "parameter_name" not in para.keys() or "parameter_value" not in para.keys():
-            return min_possible_reward
+            print(f"wrong param format : {para}")
+            return min_possible_reward + format_score * 0.9
 
     min_possible_reward = (min_possible_reward + max_possible_reward) / 2
+    print(f"pd is :{pd} ,,, gt is {gt}")
     # step2 : check tool calling info
     gt_json = json.loads(gt)
     if pd_json["tool_name"] != gt_json["tool_name"]:
@@ -53,10 +61,11 @@ def compute_tool_call_reward(gt, pd, max_possible_reward, min_possible_reward):
                 param_cnt += 0.8
         else:
             param_cnt -= 0.2
-    return min_possible_reward + (max(0, param_cnt) / (total_param_num + 0.00001)) * (max_possible_reward - min_possible_reward)
+    MINI = 0.00001
+    return min_possible_reward + (max(MINI, param_cnt) / (total_param_num + MINI)) * (max_possible_reward - min_possible_reward)
 
-SUCCESS_FLAG = "SUCCESS, "
-FAILURE_FLAG = "FAIL, "
+SUCCESS_FLAG = "SUCCESS"
+FAILURE_FLAG = "FAIL"
 
 PLANNING_JUDGE_PROMPT = '''
 You're a professional and experienced planner. Your task is to evaluate the quality of a given planning.
@@ -70,7 +79,7 @@ The predicted planning is as follows:
 Your evaluation criteria are as follows:
 1. The planning should be aimed at accomplishing the user request
 2. The planning should not go beyond the user request
-3. The planning should not contain any unnecessary steps. If user request is finished, the planning should begin with "SUCCESS"; If the user request cannot be finished, the planning should begin with "FAIL".
+3. The planning should not contain any unnecessary steps. If user request is finished, the planning should begin with "SUCCESS"; If the user request cannot be finished, the planning should begin with "FAIL".Else, it should contain several steps to be done.
 4. The planning should be as short and concise as possible. And it should not contain any previously-executed steps.
 ##### 
 Your evaluation score should be a float number between 0 and 1. 
@@ -88,17 +97,19 @@ def compute_planning_reward(input_str, gt, pd, max_possible_reward, min_possible
     Returns:
         float: Reward for planning.
     """
-
+    print(f"pd for planning: {pd}")
     # step1 : format check
     format_check_pass = False
-    if gt.startswith(SUCCESS_FLAG) or gt.startswith(FAILURE_FLAG):
+    if pd.startswith(SUCCESS_FLAG) or pd.startswith(FAILURE_FLAG):
         format_check_pass = True
     if not format_check_pass:
         try:
             gt_json = json.loads(gt)
+            if isinstance(gt_json, list):
+                format_check_pass = True
+            else:
+                return min_possible_reward
         except:
-            return min_possible_reward
-        if not isinstance(gt_json, list):
             return min_possible_reward
     if not format_check_pass:
         return min_possible_reward
@@ -107,13 +118,14 @@ def compute_planning_reward(input_str, gt, pd, max_possible_reward, min_possible
     base_url = "https://vip.apiyi.com/v1"
     api_key = "sk-5PYQRpTeWXyM9ibd96B5737aFdCc47B1B89a3937F6447eEe"
     model_name = "gpt-4.1-nano"
-
+    temperature = 1.0
     prompt_template = ChatPromptTemplate.from_template(PLANNING_JUDGE_PROMPT)
     llm = ChatOpenAI(
         base_url=base_url, 
         api_key=api_key, 
         model=model_name,
-        timeout=10.0,
+        temperature = temperature,
+        timeout=15.0,
         max_retries=3,
     )
     messages = prompt_template.format_messages(input_str=input_str, pd=pd)
@@ -121,7 +133,9 @@ def compute_planning_reward(input_str, gt, pd, max_possible_reward, min_possible
         response = llm.invoke(messages)
         score = float(response.content)
     except:
-        return min_possible_reward
+        print("llm juedge issue, return mid score")
+        return (min_possible_reward + max_possible_reward) / 2
+    print(f"llm judge score : {score}")
     if score < 0:
         return min_possible_reward
     if score > 1:
@@ -159,14 +173,18 @@ def compute_score(data_source,
     else:
         raise NotImplementedError(f"Unknown model name: {exp_name}")
     predict_str = remove_thinking_tags(predict_str)
-    print(predict_str)
+    # print(predict_str)
+    score = 0
     type = extra_info.get("type", None)
     if type == 'observation':
         input_str = extra_info.get("input_str", None)
         if input_str is None:
             raise ValueError("input_str is None")
-        return compute_planning_reward(input_str, ground_truth, predict_str, 5, -5)
+        score = compute_planning_reward(input_str, ground_truth, predict_str, 5, -5)
     elif type == 'tool_calling':
-        return compute_tool_call_reward(ground_truth, predict_str, 5, -5)
+        score = compute_tool_call_reward(ground_truth, predict_str, 5, -5)
     else:
+
         raise NotImplementedError
+    print(f"final score: {score}")
+    return score
