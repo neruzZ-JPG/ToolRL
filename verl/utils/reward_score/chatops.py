@@ -3,7 +3,7 @@ import os
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 import re
-def compute_tool_call_reward(gt, pd, max_possible_reward, min_possible_reward):
+def compute_tool_call_reward(gt, pd, max_possible_reward, min_possible_reward, format_ratio):
     """
     Compute the reward for tool call.
     Args:
@@ -16,7 +16,7 @@ def compute_tool_call_reward(gt, pd, max_possible_reward, min_possible_reward):
     """
     # step1 : format check
     format_check_pass = False
-    format_score = (max_possible_reward - min_possible_reward) / 2
+    format_score = (max_possible_reward - min_possible_reward) * format_ratio
     try:
         pd_json = json.loads(pd)
     except:
@@ -42,7 +42,7 @@ def compute_tool_call_reward(gt, pd, max_possible_reward, min_possible_reward):
             print(f"wrong param format : {para}")
             return min_possible_reward + format_score * 0.9
 
-    min_possible_reward = (min_possible_reward + max_possible_reward) / 2
+    min_possible_reward = min_possible_reward + format_score
     print(f"pd is :{pd} ,,, gt is {gt}")
     # step2 : check tool calling info
     gt_json = json.loads(gt)
@@ -81,12 +81,13 @@ Your evaluation criteria are as follows:
 2. The planning should not go beyond the user request
 3. The planning should not contain any unnecessary steps. If user request is finished, the planning should begin with "SUCCESS"; If the user request cannot be finished, the planning should begin with "FAIL".Else, it should contain several steps to be done.
 4. The planning should be as short and concise as possible. And it should not contain any previously-executed steps.
+5. If the user request is not finished yet, and the planning gives a terminating sign eg.SUCCESS, you should give a low score.
 ##### 
 Your evaluation score should be a float number between 0 and 1. 
 Output the number and ONLY the number!
 '''
 
-def compute_planning_reward(input_str, gt, pd, max_possible_reward, min_possible_reward):
+def compute_planning_reward(input_str, gt, pd, max_possible_reward, min_possible_reward, format_ratio):
     """
     Compute the reward for planning.
     Args:
@@ -99,6 +100,7 @@ def compute_planning_reward(input_str, gt, pd, max_possible_reward, min_possible
     """
     print(f"pd for planning: {pd}")
     # step1 : format check
+    format_score = (max_possible_reward - min_possible_reward) * format_ratio
     format_check_pass = False
     if pd.startswith(SUCCESS_FLAG) or pd.startswith(FAILURE_FLAG):
         format_check_pass = True
@@ -113,11 +115,26 @@ def compute_planning_reward(input_str, gt, pd, max_possible_reward, min_possible
             return min_possible_reward
     if not format_check_pass:
         return min_possible_reward
-    min_possible_reward = (min_possible_reward + max_possible_reward) / 2
-    # step2 :  llm judge?
-    base_url = "https://vip.apiyi.com/v1"
-    api_key = "sk-5PYQRpTeWXyM9ibd96B5737aFdCc47B1B89a3937F6447eEe"
-    model_name = "gpt-4.1-nano"
+    min_possible_reward = min_possible_reward + format_score
+    # step2 : gt compare
+    # only compare their first words
+    gt_same = False
+    if gt.startswith(SUCCESS_FLAG) and pd.startswith(SUCCESS_FLAG):
+        gt_same = True
+    if gt.startswith(FAILURE_FLAG) and pd.startswith(FAILURE_FLAG):
+        gt_same = True
+    if gt.strip().startswith("[") and pd.strip().startswith("["):
+        gt_same = True
+    if gt_same:
+        final_ratio = 1
+    else:
+        final_ratio = 0.8
+    # step3 :  llm judge?
+    # base_url = "https://vip.apiyi.com/v1"
+    # api_key = "sk-5PYQRpTeWXyM9ibd96B5737aFdCc47B1B89a3937F6447eEe"
+    base_url = "https://hk.n1n.ai/v1"
+    api_key = "sk-EdZZPRcLsVDAAoyZLHloQC27ejjZKKqnemVvR6tnQUZ9pw5C"
+    model_name = "gpt-5-nano"
     temperature = 1.0
     prompt_template = ChatPromptTemplate.from_template(PLANNING_JUDGE_PROMPT)
     llm = ChatOpenAI(
@@ -134,13 +151,13 @@ def compute_planning_reward(input_str, gt, pd, max_possible_reward, min_possible
         score = float(response.content)
     except:
         print("llm juedge issue, return mid score")
-        return (min_possible_reward + max_possible_reward) / 2
+        return final_ratio * (min_possible_reward + max_possible_reward) / 2
     print(f"llm judge score : {score}")
     if score < 0:
         return min_possible_reward
     if score > 1:
         return max_possible_reward
-    return score * (max_possible_reward - min_possible_reward) + min_possible_reward
+    return (score * (max_possible_reward - min_possible_reward) + min_possible_reward) * final_ratio
 
 def remove_thinking_tags(text):
     """
@@ -180,9 +197,9 @@ def compute_score(data_source,
         input_str = extra_info.get("input_str", None)
         if input_str is None:
             raise ValueError("input_str is None")
-        score = compute_planning_reward(input_str, ground_truth, predict_str, 5, -5)
+        score = compute_planning_reward(input_str, ground_truth, predict_str, 5, -5, 0.3)
     elif type == 'tool_calling':
-        score = compute_tool_call_reward(ground_truth, predict_str, 5, -5)
+        score = compute_tool_call_reward(ground_truth, predict_str, 5, -5, 0.3)
     else:
 
         raise NotImplementedError
