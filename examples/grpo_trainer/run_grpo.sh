@@ -34,7 +34,7 @@ nohup python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.rollout.dtype=bfloat16 \
     actor_rollout_ref.rollout.layered_summon=True \
     actor_rollout_ref.ref.fsdp_config.param_offload=True \
-    algorithm.kl_ctrl.kl_coef=0.02 \
+    algorithm.kl_ctrl.kl_coef=0.1 \
     critic.enable=False \
     trainer.critic_warmup=0 \
     trainer.logger=['console','wandb'] \
