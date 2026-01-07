@@ -14,7 +14,7 @@ mkdir -p $HF_TRANSFORMERS_CACHE
 # ==========================================
 # 请修改为你实际安装新版 CUDA 的路径
 # 如果是按我之前的推荐安装的 runfile，路径应该是：
-export CUDA_HOME="/home/whr/cuda-12.1"
+export CUDA_HOME="/usr/local/cuda/bin/nvcc"
 
 # 强制将新版 CUDA 的 bin 和 lib 放到最前面，覆盖系统的旧版本
 export PATH="$CUDA_HOME/bin:$PATH"
@@ -44,6 +44,7 @@ export SCHEDULELENGTH=0
 export VLLM_USE_V1=1
 export WANDB_API_KEY="ea5ca61fbc3e4fbe1822b941b9e06a38dab60933"
 # 
+export CHECKPOINT_DIR="/chatops_models/checkpoints"
 export DATA_DIR="./dataset/chatops/union"
 export BASE_MODEL="Qwen3-1.7B" # e.g., "Qwen2.5-3b-Instruct"
 export EXPERIMENT_NAME="grpo-qwen3-1.7B" # e.g., "grpo-qwen2.5-3b"

@@ -27,6 +27,6 @@ export VLLM_USE_V1=1
 export WANDB_API_KEY="ea5ca61fbc3e4fbe1822b941b9e06a38dab60933"
 # 
 export DATA_DIR="./dataset/chatops"
-export BASE_MODEL="Qwen3-0.6B" # e.g., "Qwen2.5-3b-Instruct"
-export EXPERIMENT_NAME="grpo-qwen3-0.6B" # e.g., "grpo-qwen2.5-3b"
+export BASE_MODEL="/chatops_models/Qwen3-4B-Instruct-2507" # e.g., "Qwen2.5-3b-Instruct"
+export EXPERIMENT_NAME="grpo-qwen3-1.7B-1_3" # e.g., "grpo-qwen2.5-3b"
 bash ./examples/grpo_trainer/ray_run_grpo.sh
