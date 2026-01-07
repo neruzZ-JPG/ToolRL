@@ -39,7 +39,7 @@ nohup python3 -m verl.trainer.main_ppo \
     trainer.critic_warmup=0 \
     trainer.logger=['console','wandb'] \
     trainer.project_name=TinyZero \
-    trainer.default_local_dir=$CHECKPOINT_DIR/${trainer.project_name}/${trainer.experiment_name} \
+    trainer.default_local_dir=$CHECKPOINT_DIR/TinyZero/$EXPERIMENT_NAME \
     trainer.experiment_name=$EXPERIMENT_NAME \
     trainer.n_gpus_per_node=$N_GPUS \
     trainer.nnodes=1 \
@@ -47,4 +47,4 @@ nohup python3 -m verl.trainer.main_ppo \
     trainer.test_freq=25 \
     trainer.total_epochs=15 \
     custom_reward_function.path="./verl/utils/reward_score/chatops.py" \
-    > $EXPERIMENT_NAME.log 2>&1 &
+    > $CHECKPOINT_DIR/$EXPERIMENT_NAME.log 2>&1 &
