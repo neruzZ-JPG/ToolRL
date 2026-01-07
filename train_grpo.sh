@@ -46,7 +46,7 @@ export WANDB_API_KEY="ea5ca61fbc3e4fbe1822b941b9e06a38dab60933"
 # 
 export CHECKPOINT_DIR="/chatops_models/checkpoints"
 export DATA_DIR="./dataset/chatops/union"
-export BASE_MODEL="Qwen3-1.7B" # e.g., "Qwen2.5-3b-Instruct"
-export EXPERIMENT_NAME="grpo-qwen3-1.7B" # e.g., "grpo-qwen2.5-3b"
+export BASE_MODEL="/chatops_models/Qwen3-4B-Instruct-2507" # e.g., "Qwen2.5-3b-Instruct"
+export EXPERIMENT_NAME="grpo-qwen3-4B-Instruct-1_7" # e.g., "grpo-qwen2.5-3b"
 ray start --head --disable-usage-stats --port=6379
 bash ./examples/grpo_trainer/run_grpo.sh 
