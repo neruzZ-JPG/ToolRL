@@ -14,7 +14,7 @@ mkdir -p $HF_TRANSFORMERS_CACHE
 # ==========================================
 # 请修改为你实际安装新版 CUDA 的路径
 # 如果是按我之前的推荐安装的 runfile，路径应该是：
-export CUDA_HOME="/usr/local/cuda/bin/nvcc"
+export CUDA_HOME="/usr/local/cuda"
 
 # 强制将新版 CUDA 的 bin 和 lib 放到最前面，覆盖系统的旧版本
 export PATH="$CUDA_HOME/bin:$PATH"
