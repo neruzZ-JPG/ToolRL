@@ -2,27 +2,57 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
 PLANNING_JUDGE_PROMPT = '''
-You're a professional and experienced planner. Your task is to evaluate the quality of a given planning.
-#####
-In the context of the following prompt:
+You are a strict QA system for a planning agent. Your goal is to evaluate if the predicted planning (`pd`) strictly follows the format and logic constraints based on the user request (`input_str`).
+
+### 1. The Three Mutually Exclusive Modes
+The `pd` MUST belong to EXACTLY ONE of the following modes. Any mixture is a CRITICAL FORMAT ERROR.
+
+* **Mode A: Working (JSON List)**
+    * Used when the task is NOT finished.
+    * Format: A pure JSON list of next steps.
+    * Example: `["Step 1", "Step 2"]`
+    * *Forbidden:* Cannot contain "SUCCESS" or "FAIL" keywords.
+
+* **Mode B: Success (Text Only)**
+    * Used when the task is fully completed.
+    * Format: Starts with "SUCCESS". Followed by a short summary.
+    * *Forbidden:* CANNOT contain a list of future steps (because it's done!). CANNOT contain JSON syntax.
+
+* **Mode C: Failure (Text Only)**
+    * Used when the task cannot proceed (e.g., missing info, error).
+    * Format: Starts with "FAIL". Followed by the reason.
+    * *Forbidden:* **CANNOT contain "Next steps" or a list of actions.** If the agent knows the next steps, it should have outputted Mode A (Working), OR it should just report the error and stop. A "FAIL" with a "Plan" is a contradiction.
+
+### 2. Scoring Rubric (Strict)
+
+* **Score 0.0 (Format Violation):**
+    * **The "Double-Talk" Error:** The output starts with FAIL/SUCCESS but *also* provides a list of steps (JSON or Text).
+        * *Bad Example:* `FAIL. Missing token. The next steps are: ["Login"]` -> **Score: 0.0**
+    * The output contains both text and JSON (e.g., "Here is the plan: [...]").
+    * The output is not valid JSON when in Mode A.
+
+* **Score 0.1 - 0.9 (Content Quality):**
+    * Format is correct, but the logic is flawed (e.g., unnecessary steps, wrong tool, infinite loop).
+
+* **Score 1.0 (Perfect):**
+    * Format is perfect AND logic efficiently addresses the user request.
+
+### 3. Evaluation Task
+User Request:
 {input_str}
-#####
-The predicted planning is as follows:
+
+Predicted Planning (`pd`):
 {pd}
-#####
-Your evaluation criteria are as follows:
-1. The planning should be aimed at accomplishing the user request
-2. The planning should not go beyond the user request
-3. The planning should not contain any unnecessary steps. If user request is finished, the planning should begin with "SUCCESS"; If the user request cannot be finished, the planning should begin with "FAIL".
-4. The planning should be as short and concise as possible. And it should not contain any previously-executed steps.
-##### 
-Your evaluation score should be a float number between 0 and 1. 
-Output the number and ONLY the number!
+
+### 4. Output
+First, determine the Mode. Then check for "Double-Talk" errors.
+Finally, output the float number score (0.0 to 1.0). 
+Output ONLY the number.
 '''
 
 base_url = "https://vip.apiyi.com/v1"
 api_key = "sk-5PYQRpTeWXyM9ibd96B5737aFdCc47B1B89a3937F6447eEe"
-model_name = "gpt-4.1-nano"
+model_name = "gpt-5-nano"
 temperature = 1.0
 input_str = '''
         {
@@ -86,7 +116,7 @@ input_str = '''
 '''
 
 pd = '''
-SUCCESS, The pod named 'test-pod-123' does not exist in the 'dev' namespace. Cleanup verified successfully.
+SUCCESS. pod does not exist.
 '''
 
 prompt_template = ChatPromptTemplate.from_template(PLANNING_JUDGE_PROMPT)

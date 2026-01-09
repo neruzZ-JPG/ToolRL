@@ -162,8 +162,9 @@ def process_chatops_dataset(dataset, type):
     def process_fn(example, idx, split, type):
         try:
             # 增加保护，防止空数据索引报错
-            system_prompt = example[0]["System Message"]
+            system_prompt = example[0]["System Message"].replace("toolname", "tool_name")
             output = example[-1]["Ai Message"].strip()
+            output = output.replace("toolname", "tool_name")
         except (KeyError, IndexError):
             return None
 
@@ -199,10 +200,10 @@ def process_chatops_dataset(dataset, type):
             message = example[i]
             # 这里也建议用 .get 防止报错
             if "Ai Message" in message:
-                prompt.append({"role": "assistant", "content": message["Ai Message"]})
+                prompt.append({"role": "assistant", "content": message["Ai Message"].replace("toolname", "tool_name")})
             else:
                 try:
-                    prompt.append({"role": "user", "content": message["Human Message"]})
+                    prompt.append({"role": "user", "content": message["Human Message"].replace("toolname", "tool_name")})
                 except:
                     print(message)
 
