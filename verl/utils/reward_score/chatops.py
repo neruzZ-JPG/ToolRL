@@ -89,19 +89,32 @@ The `pd` MUST belong to EXACTLY ONE of the following modes. Any mixture is a CRI
     * Format: Starts with "FAIL". Followed by the reason.
     * *Forbidden:* **CANNOT contain "Next steps" or a list of actions.** If the agent knows the next steps, it should have outputted Mode A (Working), OR it should just report the error and stop. A "FAIL" with a "Plan" is a contradiction.
 
-### 2. Scoring Rubric (Strict)
+### 2. Scoring Rubric (Strict & Granular)
 
-* **Score 0.0 (Format Violation):**
-    * **The "Double-Talk" Error:** The output starts with FAIL/SUCCESS but *also* provides a list of steps (JSON or Text).
-        * *Bad Example:* `FAIL. Missing token. The next steps are: ["Login"]` -> **Score: 0.0**
-    * The output contains both text and JSON (e.g., "Here is the plan: [...]").
-    * The output is not valid JSON when in Mode A.
+#### **Level 1: Format Violation (Score: 0.0)**
+* **The "Double-Talk" Error:** The output starts with FAIL/SUCCESS but *also* provides a list of steps (JSON or Text).
+    * *Example:* `FAIL. Error found. Next: ["Retry"]` -> **0.0**
+* The output contains both text and JSON (e.g., "Here is the plan: [...]").
+* The output is not valid JSON when in Mode A.
 
-* **Score 0.1 - 0.9 (Content Quality):**
-    * Format is correct, but the logic is flawed (e.g., unnecessary steps, wrong tool, infinite loop).
+#### **Level 2: Major Logic Errors (Score: 0.1 - 0.3)**
+* **False Positive (Lying):** Claims `SUCCESS` but the user request is objectively NOT finished (e.g., user asked to start a pod and query its information, but only start step is finished without information query).
+* **False Negative (Laziness):** Claims `FAIL` immediately without trying any obvious recovery steps or alternative tools (e.g., one network timeout -> FAIL, instead of Retry).
 
-* **Score 1.0 (Perfect):**
-    * Format is perfect AND logic efficiently addresses the user request.
+#### **Level 3: Strategic Flaws (Score: 0.4 - 0.6)**
+* **Infinite Loop:** The predicted next step is IDENTICAL to the step that just failed (without changing parameters).
+* **Missing Pre-requisites:** The plan tries to act on an object (e.g., `read_file`) before obtaining it (e.g., `find_file` or `ls`).
+* **Context Ignoring:** The plan ignores explicit error messages from previous turns (e.g., "File not found" -> Agent tries to read it again).
+
+#### **Level 4: Efficiency & Quality Issues (Score: 0.7 - 0.9)**
+* **Redundancy :** The plan includes steps that have *already* been successfully executed in history (Agent should not plan for the past).
+* **Inefficiency :** The plan works, but takes 3 steps to do what could be done in 1 (e.g., `cd dir`, `ls`, `cat file` vs just `cat dir/file`).
+* **Minor Vagueness :** The logic is sound, but the parameters or description are slightly ambiguous.
+
+#### **Level 5: Perfect Execution (Score: 1.0)**
+* Format is perfect.
+* Logic is optimal (shortest path).
+* Successfully handles edge cases or correctly identifies task completion.
 
 ### 3. Evaluation Task
 User Request:
@@ -111,8 +124,9 @@ Predicted Planning (`pd`):
 {pd}
 
 ### 4. Output
-First, determine the Mode. Then check for "Double-Talk" errors.
-Finally, output the float number score (0.0 to 1.0). 
+1. Check Format first. If violation, output 0.0.
+2. If Format is OK, evaluate Logic based on the Rubric Levels.
+3. Output the float number score (0.0 to 1.0).
 Output ONLY the number.
 '''
 
@@ -148,16 +162,17 @@ def compute_planning_reward(input_str, gt, pd, max_possible_reward, min_possible
     # step2 : gt compare
     # only compare their first words
     gt_same = False
+    bias = 0
     if gt.startswith(SUCCESS_FLAG) and pd.startswith(SUCCESS_FLAG):
         gt_same = True
     if gt.startswith(FAILURE_FLAG) and pd.startswith(FAILURE_FLAG):
         gt_same = True
     if gt.strip().startswith("[") and pd.strip().startswith("["):
         gt_same = True
-    if gt_same:
-        final_ratio = 1
-    else:
-        final_ratio = 0.8
+    if gt.strip().startswith("[") and not pd.strip().startswith("["):
+        bias = -5
+    if not gt_same:
+        bias -= 1
     # step3 :  llm judge?
     # base_url = "https://vip.apiyi.com/v1"
     # api_key = "sk-5PYQRpTeWXyM9ibd96B5737aFdCc47B1B89a3937F6447eEe"
@@ -180,13 +195,13 @@ def compute_planning_reward(input_str, gt, pd, max_possible_reward, min_possible
         score = float(response.content)
     except:
         print("llm juedge issue, return mid score")
-        return final_ratio * (min_possible_reward + max_possible_reward) / 2
+        return (min_possible_reward + max_possible_reward) / 2 + bias
     print(f"llm judge score : {score}")
     if score < 0:
         return min_possible_reward
     if score > 1:
         return max_possible_reward
-    return (score * (max_possible_reward - min_possible_reward) + min_possible_reward) * final_ratio
+    return (score * (max_possible_reward - min_possible_reward) + min_possible_reward) + bias
 
 def remove_thinking_tags(text):
     """
