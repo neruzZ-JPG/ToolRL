@@ -203,6 +203,64 @@ def compute_planning_reward(input_str, gt, pd, max_possible_reward, min_possible
         return max_possible_reward
     return (score * (max_possible_reward - min_possible_reward) + min_possible_reward) + bias
 
+
+def compute_planning_reward_for_plan(input_str, gt, pd, max_possible_reward, min_possible_reward, format_ratio):
+    """
+    Compute the reward for planning.
+    Args:
+        gt (str): Ground truth planning.
+        pd (str): Predicted planning.
+        max_possible_reward (float): Maximum possible reward.
+        min_possible_reward (float): Minimum possible reward.
+    Returns:
+        float: Reward for planning.
+    """
+    print(f"pd for planning only: {pd}")
+    # step1 : format check
+    format_score = (max_possible_reward - min_possible_reward) * format_ratio
+    format_check_pass = False
+    if not format_check_pass:
+        try:
+            gt_json = json.loads(gt)
+            if isinstance(gt_json, list):
+                format_check_pass = True
+            else:
+                return min_possible_reward
+        except:
+            return min_possible_reward
+    if not format_check_pass:
+        return min_possible_reward
+    min_possible_reward = min_possible_reward + format_score
+    # step3 :  llm judge?
+    # base_url = "https://vip.apiyi.com/v1"
+    # api_key = "sk-5PYQRpTeWXyM9ibd96B5737aFdCc47B1B89a3937F6447eEe"
+    base_url = "https://hk.n1n.ai/v1"
+    api_key = "sk-EdZZPRcLsVDAAoyZLHloQC27ejjZKKqnemVvR6tnQUZ9pw5C"
+    model_name = "gpt-5-nano"
+    temperature = 1.0
+    prompt_template = ChatPromptTemplate.from_template(PLANNING_JUDGE_PROMPT)
+    llm = ChatOpenAI(
+        base_url=base_url, 
+        api_key=api_key, 
+        model=model_name,
+        temperature = temperature,
+        timeout=15.0,
+        max_retries=3,
+    )
+    messages = prompt_template.format_messages(input_str=input_str, pd=pd)
+    try:
+        response = llm.invoke(messages)
+        score = float(response.content)
+    except:
+        print("llm juedge issue, return mid score")
+        return (min_possible_reward + max_possible_reward) / 2 
+    print(f"llm judge score : {score}")
+    if score < 0:
+        return min_possible_reward
+    if score > 1:
+        return max_possible_reward
+    return (score * (max_possible_reward - min_possible_reward) + min_possible_reward)
+
 def remove_thinking_tags(text):
     """
     移除字符串中的<think>...</think>思考标签及其中间内容
@@ -244,8 +302,12 @@ def compute_score(data_source,
         score = compute_planning_reward(input_str, ground_truth, predict_str, 5, -5, 0.3)
     elif type == 'tool_calling':
         score = compute_tool_call_reward(ground_truth, predict_str, 5, -5, 0.3)
+    if type == 'plan':
+        input_str = extra_info.get("input_str", None)
+        if input_str is None:
+            raise ValueError("input_str is None")
+        score = compute_planning_reward_for_plan(input_str, ground_truth, predict_str, 5, -5, 0.5)
     else:
-
         raise NotImplementedError
-    print(f"final score: {score}")
+    print(f"pd is : {predict_str}, gt is :{ground_truth}, final score: {score}")
     return score
