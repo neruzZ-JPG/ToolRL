@@ -224,6 +224,7 @@ def compute_planning_reward_for_plan(input_str, gt, pd, max_possible_reward, min
         if not isinstance(pd_json, list):
             print("Plan is not a list")
             return min_possible_reward # 格式错直接最低分
+        format_check_pass = True
     except:
         print("Plan is not valid json")
         return min_possible_reward # 格式错直接最低分
