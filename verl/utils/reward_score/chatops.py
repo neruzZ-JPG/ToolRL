@@ -149,7 +149,7 @@ def compute_planning_reward(input_str, gt, pd, max_possible_reward, min_possible
         format_check_pass = True
     if not format_check_pass:
         try:
-            gt_json = json.loads(gt)
+            gt_json = json.loads(pd)
             if isinstance(gt_json, list):
                 format_check_pass = True
             else:
@@ -216,18 +216,17 @@ def compute_planning_reward_for_plan(input_str, gt, pd, max_possible_reward, min
         float: Reward for planning.
     """
     print(f"pd for planning only: {pd}")
-    # step1 : format check
     format_score = (max_possible_reward - min_possible_reward) * format_ratio
+    # step1 : format check
     format_check_pass = False
-    if not format_check_pass:
-        try:
-            gt_json = json.loads(gt)
-            if isinstance(gt_json, list):
-                format_check_pass = True
-            else:
-                return min_possible_reward
-        except:
-            return min_possible_reward
+    try:
+        pd_json = json.loads(pd)
+        if not isinstance(pd_json, list):
+            print("Plan is not a list")
+            return min_possible_reward # 格式错直接最低分
+    except:
+        print("Plan is not valid json")
+        return min_possible_reward # 格式错直接最低分
     if not format_check_pass:
         return min_possible_reward
     min_possible_reward = min_possible_reward + format_score
@@ -302,7 +301,7 @@ def compute_score(data_source,
         score = compute_planning_reward(input_str, ground_truth, predict_str, 5, -5, 0.3)
     elif type == 'tool_calling':
         score = compute_tool_call_reward(ground_truth, predict_str, 5, -5, 0.3)
-    if type == 'plan':
+    elif type == 'plan':
         input_str = extra_info.get("input_str", None)
         if input_str is None:
             raise ValueError("input_str is None")
