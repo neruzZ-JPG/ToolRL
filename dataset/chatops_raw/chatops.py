@@ -141,76 +141,96 @@ def files_to_json(files_dir, output_json):
         json.dump(data, f, indent=4)
 
 
-def process_chatops_dataset(dataset, type):
+def process_chatops_dataset(target_dataset_name, process_type):
+    """
+    target_dataset_name: 输出文件夹的名字 (例如 'plan', 'observation', 'tool_calling')
+    process_type: 处理逻辑类型 ('plan', 'observation', 'tool_calling')
+    """
     data_source = 'chatops'
 
-    raw_dir = f"./dataset/chatops_raw/{dataset}"
-    out_dir = f'./dataset/chatops/{dataset}'
-
-    files_to_json(raw_dir, raw_dir+".json")
-    dataset = json.load(open(raw_dir+".json", "r"))
+    # 【关键修改 1】源文件重定向
+    # 如果我们要生成 'plan' 数据，其实原始数据在于 'observation' 文件夹里
+    raw_source_name = "observation" if target_dataset_name == "plan" else target_dataset_name
     
-    # Shuffle dataset
-    np.random.shuffle(dataset)
+    raw_dir = f"./dataset/chatops_raw/{raw_source_name}"
+    out_dir = f'./dataset/chatops/{target_dataset_name}' # 这里是真正保存的目录
 
-    # Split into train and test sets (2% test data)
+    # 确保源文件存在
+    if not os.path.exists(raw_dir):
+        print(f"Error: Raw directory {raw_dir} does not exist.")
+        return
+
+    # 生成临时 json (如果还没生成过)
+    json_path = raw_dir + ".json"
+    files_to_json(raw_dir, json_path)
+    
+    print(f"Loading raw data from {json_path}...")
+    dataset = json.load(open(json_path, "r"))
+    
+    # Shuffle & Split
+    np.random.shuffle(dataset)
     test_num = int(len(dataset) * 0.1)
     train_dataset = dataset[:-test_num]
     test_dataset = dataset[-test_num:]
 
-    # Function to process each example
-    def process_fn(example, idx, split, type):
+    # 内部处理函数
+    def process_fn(example, idx, split, current_type):
         try:
-            # 增加保护，防止空数据索引报错
+            # 获取 Prompt 和 Output
             system_prompt = example[0]["System Message"].replace("toolname", "tool_name")
             output = example[-1]["Ai Message"].strip()
             output = output.replace("toolname", "tool_name")
         except (KeyError, IndexError):
             return None
 
-        if type == "tool_calling":
-            format_check_pass = True
+        final_output_type = current_data_type = current_type
+        
+        # --- 情况 A: 处理 Plan 类型 ---
+        if current_type == "plan":
+            # 必须是 JSON List 格式，否则丢弃
+            if not (output.startswith("[") and output.endswith("]")):
+                return None
+            try:
+                plan_json = json.loads(output)
+                if not isinstance(plan_json, list):
+                    return None
+            except:
+                return None
+            # 通过筛选，保留数据
+            final_output_type = "plan"
+
+
+        # --- 情况 C: 处理 Tool Calling 类型 ---
+        elif current_type == "tool_calling":
             pd_json = None
             try:
                 pd_json = json.loads(output)
             except:
-                format_check_pass = False
-                # print(f"json parse failed {idx}")
                 return None
             
-            # --- FIX START ---
             if not isinstance(pd_json, dict):
-                format_check_pass = False
-            else:
-                # 只有确认为 dict 后才检查 key
-                if "tool_name" not in pd_json:
-                    format_check_pass = False
-                elif "parameters" not in pd_json or not isinstance(pd_json["parameters"], list):
-                    format_check_pass = False
-            # --- FIX END ---
-
-            if not format_check_pass:
-                print(f"format check not pass {idx}")
                 return None
-                
-        prompt = [
-            {"role": "system", "content": system_prompt},
-        ]
+            if "tool_name" not in pd_json:
+                return None
+            if "parameters" not in pd_json or not isinstance(pd_json["parameters"], list):
+                return None
+            
+            final_output_type = "tool_calling"
+
+        # 构建 Prompt list
+        prompt = [{"role": "system", "content": system_prompt}]
         for i in range(1, len(example)-1):
             message = example[i]
-            # 这里也建议用 .get 防止报错
             if "Ai Message" in message:
                 prompt.append({"role": "assistant", "content": message["Ai Message"].replace("toolname", "tool_name")})
-            else:
-                try:
-                    prompt.append({"role": "user", "content": message["Human Message"].replace("toolname", "tool_name")})
-                except:
-                    print(message)
+            elif "Human Message" in message:
+                prompt.append({"role": "user", "content": message["Human Message"].replace("toolname", "tool_name")})
 
+        # 构建最终数据结构
         data = {
             "data_source": data_source,
             "prompt": prompt,
-            "ability": "math",
+            "ability": "chatops", 
             "reward_model": {
                 "style": "rule",
                 "ground_truth": output
@@ -220,46 +240,55 @@ def process_chatops_dataset(dataset, type):
                 'index': idx,
                 'input_str': json.dumps(prompt, ensure_ascii=False),
                 "output": output,
-                "type": type
+                "type": final_output_type # 记录具体的类型 (plan, SUCCESS, tool_calling)
             }
         }
         return data
 
-    # Process dataset and filter None values
-    print(f"Processing {type} train set...")
-    train_dataset = [res for idx, d in enumerate(train_dataset) if (res := process_fn(d, idx, 'train', type)) is not None]
+    # 执行处理
+    print(f"Processing {target_dataset_name} ({process_type}) train set...")
+    train_output = [res for idx, d in enumerate(train_dataset) if (res := process_fn(d, idx, 'train', process_type)) is not None]
     
-    print(f"Processing {type} test set...")
-    test_dataset = [res for idx, d in enumerate(test_dataset) if (res := process_fn(d, idx, 'test', type)) is not None]
+    print(f"Processing {target_dataset_name} ({process_type}) test set...")
+    test_output = [res for idx, d in enumerate(test_dataset) if (res := process_fn(d, idx, 'test', process_type)) is not None]
 
-    # Convert to Pandas DataFrame
-    train_df = pd.DataFrame(train_dataset)
-    test_df = pd.DataFrame(test_dataset)
-
-    # Save as Parquet
+    # 保存 Parquet
     local_dir = out_dir
     os.makedirs(local_dir, exist_ok=True)
 
-    train_df.to_parquet(os.path.join(local_dir, 'train.parquet'))
-    test_df.to_parquet(os.path.join(local_dir, 'test.parquet'))
+    pd.DataFrame(train_output).to_parquet(os.path.join(local_dir, 'train.parquet'))
+    pd.DataFrame(test_output).to_parquet(os.path.join(local_dir, 'test.parquet'))
 
-    print(f"Saved datasets to {local_dir}. Train size: {len(train_df)}, Test size: {len(test_df)}")
+    print(f"✅ Saved to {local_dir} | Train: {len(train_output)}, Test: {len(test_output)}")
 
 if __name__ == '__main__':
+    # 1. 生成纯净的 Observation 数据 (不含 Plan)
+    # 读取 raw/observation -> 过滤 -> 保存到 dataset/chatops/observation
     process_chatops_dataset('observation', 'observation')
+
+    # 2. 生成纯净的 Plan 数据
+    # 读取 raw/observation -> 过滤 -> 保存到 dataset/chatops/plan
+    process_chatops_dataset('plan', 'plan') 
+
+    # 3. 生成 Tool Calling 数据
+    # 读取 raw/tool_calling -> 过滤 -> 保存到 dataset/chatops/tool_calling
     process_chatops_dataset('tool_calling', 'tool_calling')
+
+    # 4. (可选) 合并一个总的 Union 数据集
     union_dir = './dataset/chatops/union'
     os.makedirs(union_dir, exist_ok=True)
-    union_df = pd.concat([
-        pd.read_parquet(os.path.join('./dataset/chatops/observation', 'train.parquet')),
-        pd.read_parquet(os.path.join('./dataset/chatops/tool_calling', 'train.parquet')),
-    ])
-    union_df.to_parquet(os.path.join(union_dir, 'train.parquet'))
-    union_df = pd.concat([
-        pd.read_parquet(os.path.join('./dataset/chatops/observation', 'test.parquet')),
-        pd.read_parquet(os.path.join('./dataset/chatops/tool_calling', 'test.parquet')),
-    ])
-    union_df.to_parquet(os.path.join(union_dir, 'test.parquet'))
+    
+    # 将三个文件夹的数据合并
+    dfs = []
+    for dtype in ['observation', 'tool_calling']:
+        p = os.path.join(f'./dataset/chatops/{dtype}', 'train.parquet')
+        if os.path.exists(p):
+            dfs.append(pd.read_parquet(p))
+    
+    if dfs:
+        union_df = pd.concat(dfs)
+        union_df.to_parquet(os.path.join(union_dir, 'train.parquet'))
+        print(f"✅ Union dataset created with size: {len(union_df)}")
     
     
 
