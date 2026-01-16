@@ -273,22 +273,68 @@ if __name__ == '__main__':
     # 3. 生成 Tool Calling 数据
     # 读取 raw/tool_calling -> 过滤 -> 保存到 dataset/chatops/tool_calling
     process_chatops_dataset('tool_calling', 'tool_calling')
-
-    # 4. (可选) 合并一个总的 Union 数据集
+    
+    # 将两个文件夹的数据合并
     union_dir = './dataset/chatops/union'
     os.makedirs(union_dir, exist_ok=True)
     
-    # 将三个文件夹的数据合并
-    dfs = []
+    # 合并 Train
+    dfs_train = []
+    dfs_test = [] # <--- 新增 Test 列表
     for dtype in ['observation', 'tool_calling']:
-        p = os.path.join(f'./dataset/chatops/{dtype}', 'train.parquet')
-        if os.path.exists(p):
-            dfs.append(pd.read_parquet(p))
+        # 读取 Train
+        p_train = os.path.join(f'./dataset/chatops/{dtype}', 'train.parquet')
+        if os.path.exists(p_train):
+            dfs_train.append(pd.read_parquet(p_train))
+        
+        # 读取 Test
+        p_test = os.path.join(f'./dataset/chatops/{dtype}', 'test.parquet') # <--- 新增
+        if os.path.exists(p_test):
+            dfs_test.append(pd.read_parquet(p_test))
     
-    if dfs:
-        union_df = pd.concat(dfs)
+    if dfs_train:
+        union_df = pd.concat(dfs_train)
         union_df.to_parquet(os.path.join(union_dir, 'train.parquet'))
-        print(f"✅ Union dataset created with size: {len(union_df)}")
+        print(f"✅ Union Train size: {len(union_df)}")
+
+    # 【新增】合并并保存 Test Parquet
+    if dfs_test:
+        union_test_df = pd.concat(dfs_test)
+        union_test_df.to_parquet(os.path.join(union_dir, 'test.parquet'))
+        print(f"✅ Union Test size: {len(union_test_df)}")
+        
+        
+    # 5. 生成 Union Double Plan 数据集 (Obs + Tool + Plan)
+    union_double_plan_dir = './dataset/chatops/union_double_plan'
+    os.makedirs(union_double_plan_dir, exist_ok=True)
+    
+    dfs_train = []
+    dfs_test = [] # <--- 新增 Test 列表
+    for dtype in ['observation', 'plan', 'tool_calling']:
+        # 读取 Train
+        p_train = os.path.join(f'./dataset/chatops/{dtype}', 'train.parquet')
+        if os.path.exists(p_train):
+            dfs_train.append(pd.read_parquet(p_train))
+            if dtype == 'plan': # Double Plan Logic
+                 dfs_train.append(pd.read_parquet(p_train)) # Copy 1
+                 # dfs_train.append(pd.read_parquet(p_train)) # Copy 2 (Optional)
+
+        # 读取 Test
+        p_test = os.path.join(f'./dataset/chatops/{dtype}', 'test.parquet') # <--- 新增
+        if os.path.exists(p_test):
+            dfs_test.append(pd.read_parquet(p_test))
+            # Test 集通常不需要 Double，保持原始分布即可，当然 Double 也没坏处
+    
+    if dfs_train:
+        union_df = pd.concat(dfs_train)
+        union_df.to_parquet(os.path.join(union_double_plan_dir, 'train.parquet'))
+        print(f"✅ Union Double Plan Train size: {len(union_df)}")
+
+    # 【新增】合并并保存 Test Parquet
+    if dfs_test:
+        union_test_df = pd.concat(dfs_test)
+        union_test_df.to_parquet(os.path.join(union_double_plan_dir, 'test.parquet'))
+        print(f"✅ Union Double Plan Test size: {len(union_test_df)}")
     
     
 
