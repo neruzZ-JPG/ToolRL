@@ -68,58 +68,70 @@ SUCCESS_FLAG = "SUCCESS"
 FAILURE_FLAG = "FAIL"
 
 PLANNING_JUDGE_PROMPT = '''
-You are a strict QA system for a planning agent. Your goal is to evaluate if the predicted planning (`pd`) strictly follows the format and logic constraints based on the user request (`input_str`).
+You are a strict QA system for a planning agent. Your goal is to evaluate if the predicted planning (`pd`) strictly follows the complex branching logic and format constraints based on the user request (`input_str`) and execution history.
 
 ### 1. The Three Mutually Exclusive Modes
-The `pd` MUST belong to EXACTLY ONE of the following modes. Any mixture is a CRITICAL FORMAT ERROR.
+The `pd` MUST belong to EXACTLY ONE of the following modes.
 
-* **Mode A: Working (JSON List)**
-    * Used when the task is NOT finished.
-    * Format: A pure JSON list of next steps.
-    * Example: `["Step 1", "Step 2"]`
-    * *Forbidden:* Cannot contain "SUCCESS" or "FAIL" keywords.
+* **Mode A: Planning (JSON Array of Independent Paths)**
+    * **Condition:** The user request is NOT fully satisfied yet.
+    * **Format:** A raw JSON array containing **at least 2 strings**. NO markdown formatting (no ```json).
+    * **Constraint 1 (Independence):** Each item in the list must be a **distinct, independent solution path** or a **parallel subtask**. Plan B CANNOT depend on the result of Plan A.
+    * **Constraint 2 (Context Awareness):** Plans must carry over known information (e.g., "Known name is Harry, find age") rather than starting from zero.
+    * **Example:** `["Search for the user's age based on name 'Harry'", "Search for the user's signup date based on name 'Harry'"]`
 
-* **Mode B: Success (Text Only)**
-    * Used when the task is fully completed.
-    * Format: Starts with "SUCCESS". Followed by a short summary.
-    * *Forbidden:* CANNOT contain a list of future steps (because it's done!). CANNOT contain JSON syntax.
+* **Mode B: Success (Termination)**
+    * **Condition:** The **ENTIRE** User Request is fulfilled.
+    * **Format:** String starting with "SUCCESS, " followed by the final answer.
+    * **Constraint:** Do NOT return SUCCESS if only a sub-task is done (e.g., found Name but not Age). This is a critical error.
 
-* **Mode C: Failure (Text Only)**
-    * Used when the task cannot proceed (e.g., missing info, error).
-    * Format: Starts with "FAIL". Followed by the reason.
-    * *Forbidden:* **CANNOT contain "Next steps" or a list of actions.** If the agent knows the next steps, it should have outputted Mode A (Working), OR it should just report the error and stop. A "FAIL" with a "Plan" is a contradiction.
+* **Mode C: Failure (Termination)**
+    * **Condition:** The request is proven **UNSOLVABLE** (e.g., API dead, no workaround).
+    * **Format:** String starting with "FAIL, " followed by the reason.
+    * **Constraint:** Do NOT return FAIL if alternative paths exist.
+
+---
 
 ### 2. Scoring Rubric (Strict & Granular)
 
-#### **Level 1: Format Violation (Score: 0.0)**
-* **The "Double-Talk" Error:** The output starts with FAIL/SUCCESS but *also* provides a list of steps (JSON or Text).
-    * *Example:* `FAIL. Error found. Next: ["Retry"]` -> **0.0**
-* The output contains both text and JSON (e.g., "Here is the plan: [...]").
-* The output is not valid JSON when in Mode A.
+#### **Level 1: Critical Format Violation (Score: 0.0)**
+* **The "Markdown" Error:** Output contains markdown code blocks (e.g., ```json ... ```). The requirement is RAW text/JSON.
+* **The "Double-Talk" Error:** Output mixes text and JSON.
+* **Invalid JSON:** Syntax error preventing parsing.
 
 #### **Level 2: Major Logic Errors (Score: 0.1 - 0.3)**
-* **Failure to Stop (Over-Planning):** The User Request is objectively satisfied/completed based on the execution history, but the agent outputs a Mode A (Working) plan with unnecessary or irrelevant additional steps.
-* **Premature Success (False Positive):** Claims `SUCCESS` but the user request is objectively NOT finished (e.g., user asked to start a pod and query its information, but only start step is finished without information query).
-* **Premature Give-up (False Negative):** Claims `FAIL` immediately without trying any obvious recovery steps or alternative tools (e.g., one network timeout -> FAIL, instead of Retry).
+* **Violation of Independence (Sequential Dependency):** [CRITICAL for Mode A]
+    * *Error:* The plans look like steps in a sequence.
+    * *Example:* `["Download file", "Read the downloaded file"]` -> **Score 0.1** (Plan 2 relies on Plan 1. They must be independent).
+* **Quantity Violation:** [CRITICAL for Mode A]
+    * *Error:* The JSON array contains fewer than 2 plans.
+    * *Example:* `["Just one plan"]` -> **Score 0.2** (Instruction requires at least 2).
+* **Premature Success (Partial Completion):**
+    * *Error:* User asked for "Name and Age", Agent found Name and returned SUCCESS. -> **Score 0.1**
+* **Premature Give-up:**
+    * *Error:* Returning FAIL when retries or other tools are available. -> **Score 0.2**
 
-#### **Level 3: Strategic & Reasonable Flaws (Score: 0.4 - 0.6)**
-* **Weak Justification (Vagueness):** The SUCCESS/FAIL reason is grammatically correct but lacks semantic substance.
-    * *Bad Output:* "SUCCESS. Task finished." (Doesn't say *what* finished) -> **0.5**
-    * *Bad Output:* "FAIL. It didn't work." (Doesn't mention the specific error) -> **0.5**
-* **Logical Ordering Error:**
-    * *Bad Output:* `["read file.txt", "create file.txt"]` (Wrong order) -> **0.4**
-* **Infinite Loop:**
-    * *Bad Output:* Repeating the exact same command that just failed without changing flags/options. -> **0.4**
+#### **Level 3: Strategic Flaws (Score: 0.4 - 0.6)**
+* **Context Amnesia:**
+    * *Error:* The plans ignore information already retrieved.
+    * *Context:* Agent already found "ID: 123".
+    * *Bad Plan:* `["Find user ID"]` (Redundant/Wasteful).
+    * *Good Plan:* `["Use ID 123 to find email"]`.
+* **Logical Weakness:**
+    * *Error:* The proposed plans are technically valid but unlikely to work (e.g., brute forcing a password).
+* **Vague Plans:**
+    * *Error:* `["Do something", "Try another way"]` (Too generic).
 
 #### **Level 4: Efficiency & Quality Issues (Score: 0.7 - 0.9)**
-* **Redundancy :** The plan includes steps that have *already* been successfully executed in history (Agent should not plan for the past).
-* **Inefficiency :** The plan works, but takes 3 steps to do what could be done in 1 (e.g., `cd dir`, `ls`, `cat file` vs just `cat dir/file`).
-* **Minor Vagueness :** The logic is sound, but the parameters or description are slightly ambiguous.
+* **Minor Overlap:** The two plans are slightly too similar (lack of diversity in strategy).
+* **Wording Issues:** The formatting is correct, but the English description is slightly awkward.
 
 #### **Level 5: Perfect Execution (Score: 1.0)**
-* Format is perfect.
-* Logic is optimal (shortest path).
-* Successfully handles edge cases or correctly identifies task completion.
+* **Mode A:** Valid JSON array, **count >= 2**, plans are strictly independent, fully utilizes context.
+* **Mode B:** Correctly identifies that ALL parts of the user request are done.
+* **Mode C:** Correctly identifies a true dead end.
+
+---
 
 ### 3. Evaluation Task
 User Request:
@@ -129,10 +141,11 @@ Predicted Planning (`pd`):
 {pd}
 
 ### 4. Output
-1. Check Format first. If violation, output 0.0.
-2. If Format is OK, evaluate Logic based on the Rubric Levels.
+1. Check Format first (Raw JSON? No Markdown?).
+2. Check Logic (Independence? Quantity >= 2? Full completion?).
 3. Output the float number score (0.0 to 1.0).
-Output ONLY the number.
+
+**Output ONLY the float number.**
 '''
 
 def compute_planning_reward(input_str, gt, pd, max_possible_reward, min_possible_reward, format_ratio):
