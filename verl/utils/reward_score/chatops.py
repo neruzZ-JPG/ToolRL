@@ -98,13 +98,18 @@ The `pd` MUST belong to EXACTLY ONE of the following modes. Any mixture is a CRI
 * The output is not valid JSON when in Mode A.
 
 #### **Level 2: Major Logic Errors (Score: 0.1 - 0.3)**
-* **False Positive (Lying):** Claims `SUCCESS` but the user request is objectively NOT finished (e.g., user asked to start a pod and query its information, but only start step is finished without information query).
-* **False Negative (Laziness):** Claims `FAIL` immediately without trying any obvious recovery steps or alternative tools (e.g., one network timeout -> FAIL, instead of Retry).
+* **Failure to Stop (Over-Planning):** The User Request is objectively satisfied/completed based on the execution history, but the agent outputs a Mode A (Working) plan with unnecessary or irrelevant additional steps.
+* **Premature Success (False Positive):** Claims `SUCCESS` but the user request is objectively NOT finished (e.g., user asked to start a pod and query its information, but only start step is finished without information query).
+* **Premature Give-up (False Negative):** Claims `FAIL` immediately without trying any obvious recovery steps or alternative tools (e.g., one network timeout -> FAIL, instead of Retry).
 
-#### **Level 3: Strategic Flaws (Score: 0.4 - 0.6)**
-* **Infinite Loop:** The predicted next step is IDENTICAL to the step that just failed (without changing parameters).
-* **Missing Pre-requisites:** The plan tries to act on an object (e.g., `read_file`) before obtaining it (e.g., `find_file` or `ls`).
-* **Context Ignoring:** The plan ignores explicit error messages from previous turns (e.g., "File not found" -> Agent tries to read it again).
+#### **Level 3: Strategic & Reasonable Flaws (Score: 0.4 - 0.6)**
+* **Weak Justification (Vagueness):** The SUCCESS/FAIL reason is grammatically correct but lacks semantic substance.
+    * *Bad Output:* "SUCCESS. Task finished." (Doesn't say *what* finished) -> **0.5**
+    * *Bad Output:* "FAIL. It didn't work." (Doesn't mention the specific error) -> **0.5**
+* **Logical Ordering Error:**
+    * *Bad Output:* `["read file.txt", "create file.txt"]` (Wrong order) -> **0.4**
+* **Infinite Loop:**
+    * *Bad Output:* Repeating the exact same command that just failed without changing flags/options. -> **0.4**
 
 #### **Level 4: Efficiency & Quality Issues (Score: 0.7 - 0.9)**
 * **Redundancy :** The plan includes steps that have *already* been successfully executed in history (Agent should not plan for the past).
@@ -169,8 +174,6 @@ def compute_planning_reward(input_str, gt, pd, max_possible_reward, min_possible
         gt_same = True
     if gt.strip().startswith("[") and pd.strip().startswith("["):
         gt_same = True
-    if gt.strip().startswith("[") and not pd.strip().startswith("["):
-        bias = -5
     if not gt_same:
         bias -= 1
     # step3 :  llm judge?
